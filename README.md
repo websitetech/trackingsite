@@ -1,69 +1,227 @@
-# React + TypeScript + Vite
+# PackageTracker - Full-Stack Shipping Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application for package tracking, shipping estimates, and customer management built with React, Node.js, Express, and SQLite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Package Tracking**: Track packages using tracking number and zip code
+- **User Authentication**: Register and login with JWT authentication
+- **Shipping Estimates**: Get cost estimates for different service types
+- **Shipment Creation**: Create new shipments with tracking numbers
+- **Customer Management**: Register new customers
+- **Responsive Design**: Works on desktop and mobile devices
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
+- React 19 with TypeScript
+- Vite for build tooling
+- Modern CSS with responsive design
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Backend
+- Node.js with Express
+- SQLite database
+- JWT authentication
+- bcryptjs for password hashing
+- CORS enabled
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js (version 18 or higher)
+- npm (comes with Node.js)
+
+## Installation
+
+1. **Clone or download the project**
+   ```bash
+   # If you have the project files, navigate to the project directory
+   cd trackingsite
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the backend server**
+   ```bash
+   npm run server
+   ```
+   This will start the Express server on port 5000.
+
+4. **Start the frontend development server** (in a new terminal)
+   ```bash
+   npm run dev
+   ```
+   This will start the React development server on port 5173.
+
+5. **Or run both simultaneously**
+   ```bash
+   npm run dev:full
+   ```
+
+## Usage
+
+### 1. Package Tracking
+- Enter a tracking number and zip code
+- Click "Track Package" to see package status and location
+
+### 2. User Registration/Login
+- Click "Register" to create a new account
+- Click "Login" to access your account
+- Once logged in, you can create shipments
+
+### 3. Shipping Estimates
+- Click "Estimate Cost" button
+- Enter origin and destination zip codes, weight, and service type
+- Get instant cost estimates
+
+### 4. Create Shipments
+- Click "Ship Now" button (requires login)
+- Fill in shipment details including recipient information
+- Get a tracking number for your new shipment
+
+### 5. New Customer Registration
+- Click "New Customer" button
+- Fill in customer information form
+- Submit to register a new customer
+
+## API Endpoints
+
+### Authentication
+- `POST /api/register` - Register new user
+- `POST /api/login` - Login user
+
+### Package Operations
+- `POST /api/track` - Track package
+- `POST /api/estimate` - Get shipping estimate
+- `POST /api/ship` - Create new shipment (requires auth)
+- `GET /api/packages` - Get user's packages (requires auth)
+- `GET /api/estimates` - Get shipping estimates history
+
+### Health Check
+- `GET /api/health` - Server health status
+
+## Database Schema
+
+The application uses SQLite with the following tables:
+
+### Users
+- id (PRIMARY KEY)
+- username (UNIQUE)
+- email (UNIQUE)
+- password (hashed)
+- created_at
+
+### Packages
+- id (PRIMARY KEY)
+- tracking_number (UNIQUE)
+- user_id (FOREIGN KEY)
+- status
+- origin_zip
+- destination_zip
+- weight
+- created_at
+
+### Shipping Estimates
+- id (PRIMARY KEY)
+- origin_zip
+- destination_zip
+- weight
+- service_type
+- estimated_cost
+- estimated_days
+- created_at
+
+## Project Structure
+
+```
+trackingsite/
+├── backend/
+│   └── server.js          # Express server
+├── src/
+│   ├── components/
+│   │   ├── Header.tsx
+│   │   ├── TrackingForm.tsx
+│   │   ├── ActionButtons.tsx
+│   │   ├── LoginModal.tsx
+│   │   ├── RegisterModal.tsx
+│   │   ├── EstimateModal.tsx
+│   │   ├── ShipModal.tsx
+│   │   └── NewCustomerModal.tsx
+│   ├── App.tsx
+│   ├── App.css
+│   └── main.tsx
+├── package.json
+└── README.md
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Available Scripts
+- `npm run dev` - Start frontend development server
+- `npm run server` - Start backend server
+- `npm run dev:full` - Start both frontend and backend
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Environment Variables
+Create a `.env` file in the root directory for custom configuration:
 ```
+PORT=5000
+JWT_SECRET=your-secret-key-here
+```
+
+## Features in Detail
+
+### Package Tracking
+- Simulates real-time package tracking
+- Shows status, location, and estimated delivery
+- Displays tracking history
+
+### Shipping Estimates
+- Calculates costs based on distance, weight, and service type
+- Supports Standard, Express, and Overnight services
+- Stores estimate history in database
+
+### User Authentication
+- Secure password hashing with bcryptjs
+- JWT token-based authentication
+- Session persistence with localStorage
+
+### Responsive Design
+- Mobile-first approach
+- Works on all screen sizes
+- Modern UI with smooth animations
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port already in use**
+   - Change the port in the `.env` file or kill the process using the port
+
+2. **Database errors**
+   - The SQLite database is created automatically when the server starts
+   - Check file permissions in the backend directory
+
+3. **CORS errors**
+   - The backend has CORS enabled for development
+   - Ensure the frontend is running on the correct port
+
+4. **Authentication issues**
+   - Clear localStorage and try logging in again
+   - Check that the JWT_SECRET is set
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the MIT License.
