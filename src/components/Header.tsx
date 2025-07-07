@@ -1,5 +1,3 @@
- 
-
 interface User {
   id: number;
   username: string;
@@ -18,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
     <header className="header">
       <div className="header-content">
         <div className="logo">
-          <h2>PackageTracker</h2>
+          <h2>Noble SpeedyTrac. inc</h2>
         </div>
         <nav className="nav">
           {user ? (
@@ -30,10 +28,10 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
             </div>
           ) : (
             <div className="auth-buttons">
-              <button className="btn btn-primary" onClick={onLogin}>
+              <button className="btn btn-login" onClick={onLogin}>
                 Login
               </button>
-              <button className="btn btn-secondary" onClick={onRegister}>
+              <button className="btn btn-register" onClick={onRegister}>
                 Register
               </button>
             </div>

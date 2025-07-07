@@ -127,13 +127,13 @@ function App() {
         <div className="footer-content">
           <div className="footer-left">
             <span className="footer-logo">📦</span>
-            <span className="footer-brand">PackageTracker</span>
+            <span className="footer-brand">Noble SpeedyTrac. inc</span>
           </div>
           <div className="footer-center">
-            &copy; {new Date().getFullYear()} PackageTracker. All rights reserved.
+            &copy; {new Date().getFullYear()} Noble SpeedyTrac. inc. All rights reserved.
           </div>
           <div className="footer-right">
-            <span>Contact: <a href="mailto:info@packagetracker.com">info@packagetracker.com</a></span>
+            <span>Contact: <a href="mailto:info@noblespeedytrac.com">info@noblespeedytrac.com</a></span>
             <span> | </span>
             <span>+1 (555) 123-4567</span>
           </div>
