@@ -34,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
               <button className="btn btn-register" onClick={onRegister}>
                 Register
               </button>
+
             </div>
           )}
         </nav>

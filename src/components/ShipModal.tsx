@@ -78,138 +78,349 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
 
   if (!user) {
     return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h2>Create Shipment</h2>
-            <button className="close-btn" onClick={onClose}>×</button>
-          </div>
-          <div className="modal-content">
-            <p>Please login to create a shipment.</p>
-            <button className="btn btn-primary" onClick={onClose}>
-              Close
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '1rem'
+      }} onClick={onClose}>
+        <div style={{
+          background: 'white',
+          borderRadius: '1.5rem',
+          padding: '2rem',
+          maxWidth: '500px',
+          width: '90%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          position: 'relative',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+        }} onClick={(e) => e.stopPropagation()}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Create Shipment</h2>
+            <button 
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#6b7280',
+                padding: '0.5rem',
+                borderRadius: '0.5rem'
+              }}
+              onClick={onClose}
+            >
+              ×
             </button>
           </div>
+          <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Please login to create a shipment.</p>
+          <button 
+            style={{
+              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={onClose}
+          >
+            Close
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Create New Shipment</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+      padding: '1rem'
+    }} onClick={onClose}>
+      <div style={{
+        background: 'white',
+        borderRadius: '1.5rem',
+        padding: '2rem',
+        maxWidth: '500px',
+        width: '90%',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        position: 'relative',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+      }} onClick={(e) => e.stopPropagation()}>
         
         {!success ? (
-          <form className="modal-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="shipOriginZip">Origin Zip Code</label>
-              <input
-                type="text"
-                id="shipOriginZip"
-                value={originZip}
-                onChange={(e) => setOriginZip(e.target.value)}
-                placeholder="Enter origin zip code"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="shipDestinationZip">Destination Zip Code</label>
-              <input
-                type="text"
-                id="shipDestinationZip"
-                value={destinationZip}
-                onChange={(e) => setDestinationZip(e.target.value)}
-                placeholder="Enter destination zip code"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="shipWeight">Weight (lbs)</label>
-              <input
-                type="number"
-                id="shipWeight"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="Enter weight in pounds"
-                step="0.1"
-                min="0.1"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="shipServiceType">Service Type</label>
-              <select
-                id="shipServiceType"
-                value={serviceType}
-                onChange={(e) => setServiceType(e.target.value)}
-                required
+          <>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Create New Shipment</h2>
+              <button 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  padding: '0.5rem',
+                  borderRadius: '0.5rem'
+                }}
+                onClick={onClose}
               >
-                <option value="standard">Standard (3-5 days)</option>
-                <option value="express">Express (2-3 days)</option>
-                <option value="overnight">Overnight (1 day)</option>
-              </select>
+                ×
+              </button>
             </div>
             
-            <div className="form-group">
-              <label htmlFor="recipientName">Recipient Name</label>
-              <input
-                type="text"
-                id="recipientName"
-                value={recipientName}
-                onChange={(e) => setRecipientName(e.target.value)}
-                placeholder="Enter recipient name"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="recipientAddress">Recipient Address</label>
-              <textarea
-                id="recipientAddress"
-                value={recipientAddress}
-                onChange={(e) => setRecipientAddress(e.target.value)}
-                placeholder="Enter recipient address"
-                rows={3}
-                required
-              />
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create Shipment'}
-            </button>
-          </form>
-        ) : (
-          <div className="shipment-result">
-            <h3>Shipment Created Successfully!</h3>
-            <div className="success-card">
-              <div className="success-row">
-                <span>Tracking Number:</span>
-                <span className="tracking-number">{success.tracking_number}</span>
+            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={handleSubmit}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="shipOriginZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Origin Zip Code</label>
+                <input
+                  type="text"
+                  id="shipOriginZip"
+                  value={originZip}
+                  onChange={(e) => setOriginZip(e.target.value)}
+                  placeholder="Enter origin zip code"
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                />
               </div>
-              <div className="success-row">
-                <span>Package ID:</span>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="shipDestinationZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Destination Zip Code</label>
+                <input
+                  type="text"
+                  id="shipDestinationZip"
+                  value={destinationZip}
+                  onChange={(e) => setDestinationZip(e.target.value)}
+                  placeholder="Enter destination zip code"
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                />
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="shipWeight" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Weight (lbs)</label>
+                <input
+                  type="number"
+                  id="shipWeight"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  placeholder="Enter weight in pounds"
+                  step="0.1"
+                  min="0.1"
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                />
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="shipServiceType" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Service Type</label>
+                <select
+                  id="shipServiceType"
+                  value={serviceType}
+                  onChange={(e) => setServiceType(e.target.value)}
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                >
+                  <option value="standard">Standard (3-5 days)</option>
+                  <option value="express">Express (2-3 days)</option>
+                  <option value="overnight">Overnight (1 day)</option>
+                </select>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="recipientName" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Recipient Name</label>
+                <input
+                  type="text"
+                  id="recipientName"
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  placeholder="Enter recipient name"
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                />
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="recipientAddress" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Recipient Address</label>
+                <textarea
+                  id="recipientAddress"
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  placeholder="Enter recipient address"
+                  rows={3}
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {error && (
+                <div style={{
+                  background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+                  color: '#dc2626',
+                  padding: '1rem 1.25rem',
+                  borderRadius: '12px',
+                  border: '2px solid #fecaca',
+                  fontSize: '0.95rem',
+                  fontWeight: 600
+                }}>
+                  {error}
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                style={{
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                disabled={loading}
+              >
+                {loading ? 'Creating...' : 'Create Shipment'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div style={{ padding: '1rem 0' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Shipment Created Successfully!</h3>
+              <button 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  padding: '0.5rem',
+                  borderRadius: '0.5rem'
+                }}
+                onClick={onClose}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div style={{
+              background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+              padding: '2rem',
+              borderRadius: '20px',
+              margin: '1.5rem 0',
+              border: '2px solid rgba(220, 38, 38, 0.1)',
+              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid rgba(220, 38, 38, 0.1)' }}>
+                <span style={{ fontWeight: 600, color: '#374151' }}>Tracking Number:</span>
+                <span style={{ fontWeight: 800, color: '#dc2626', fontFamily: 'Courier New, monospace', fontSize: '1.2rem' }}>{success.tracking_number}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0' }}>
+                <span style={{ fontWeight: 600, color: '#374151' }}>Package ID:</span>
                 <span>{success.package_id}</span>
               </div>
             </div>
             
-            <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={() => setSuccess(null)}>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button 
+                style={{
+                  background: 'white',
+                  color: '#dc2626',
+                  border: '2px solid #dc2626',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => setSuccess(null)}
+              >
                 Create Another
               </button>
-              <button className="btn btn-primary" onClick={onClose}>
+              <button 
+                style={{
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={onClose}
+              >
                 Close
               </button>
             </div>

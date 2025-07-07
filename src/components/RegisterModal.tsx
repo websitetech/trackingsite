@@ -65,16 +65,56 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Register</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+      padding: '1rem'
+    }} onClick={onClose}>
+      <div style={{
+        background: 'white',
+        borderRadius: '1.5rem',
+        padding: '2rem',
+        maxWidth: '500px',
+        width: '90%',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        position: 'relative',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+      }} onClick={(e) => e.stopPropagation()}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1.5rem'
+        }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Register</h2>
+          <button 
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              color: '#6b7280',
+              padding: '0.5rem',
+              borderRadius: '0.5rem'
+            }}
+            onClick={onClose}
+          >
+            ×
+          </button>
         </div>
         
-        <form className="modal-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="registerUsername">Username</label>
+        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={handleSubmit}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerUsername" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Username</label>
             <input
               type="text"
               id="registerUsername"
@@ -82,11 +122,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
               required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="registerEmail">Email</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerEmail" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Email</label>
             <input
               type="email"
               id="registerEmail"
@@ -94,11 +141,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email"
               required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="registerPassword">Password</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerPassword" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Password</label>
             <input
               type="password"
               id="registerPassword"
@@ -106,11 +160,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="confirmPassword" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
@@ -118,24 +179,64 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
               required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
             />
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+              color: '#dc2626',
+              padding: '1rem 1.25rem',
+              borderRadius: '12px',
+              border: '2px solid #fecaca',
+              fontSize: '0.95rem',
+              fontWeight: 600
+            }}>
+              {error}
+            </div>
+          )}
 
           <button 
             type="submit" 
-            className="btn btn-primary"
+            style={{
+              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '1rem 2rem',
+              borderRadius: '0.75rem',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
             disabled={loading}
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
-        <div className="modal-footer">
-          <p>
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
+          <p style={{ margin: 0, color: '#6b7280', fontSize: '0.95rem' }}>
             Already have an account?{' '}
-            <button className="link-btn" onClick={onSwitchToLogin}>
+            <button 
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#dc2626',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: 'inherit',
+                fontWeight: 500
+              }}
+              onClick={onSwitchToLogin}
+            >
               Login here
             </button>
           </p>

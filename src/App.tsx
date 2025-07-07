@@ -33,10 +33,20 @@ function App() {
     }
   }, []);
 
+
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+  };
+
+  const handleLoginClick = () => {
+    setShowLogin(true);
+  };
+
+  const handleRegisterClick = () => {
+    setShowRegister(true);
   };
 
   const handleLoginSuccess = (userData: User, token: string) => {
@@ -57,8 +67,8 @@ function App() {
     <div className="App">
       <Header 
         user={user}
-        onLogin={() => setShowLogin(true)}
-        onRegister={() => setShowRegister(true)}
+        onLogin={handleLoginClick}
+        onRegister={handleRegisterClick}
         onLogout={handleLogout}
       />
       

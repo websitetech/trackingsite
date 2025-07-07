@@ -122,6 +122,9 @@ body {
   background: #dc2626;
   color: white;
   border: 2px solid #dc2626;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
 }
 
 .btn-login:hover {
@@ -133,6 +136,9 @@ body {
   background: white;
   color: #dc2626;
   border: 2px solid #dc2626;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
 }
 
 .btn-register:hover {
@@ -655,7 +661,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 1rem;
   backdrop-filter: blur(8px);
   animation: fadeIn 0.3s ease-out;
@@ -671,16 +677,16 @@ body {
 }
 
 .modal {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
 @keyframes slideIn {
@@ -695,8 +701,16 @@ body {
 }
 
 .modal-content {
-  width: 100%;
-  height: 100%;
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
 }
 
 .modal-header {
@@ -737,6 +751,19 @@ body {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.modal-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-footer p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
 }
 
 /* Error and success messages */
