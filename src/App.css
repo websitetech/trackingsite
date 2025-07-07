@@ -935,11 +935,11 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   position: relative;
   overflow: hidden;
-  width: 200px;
-  min-width: 180px;
+  width: 160px;
+  min-width: 140px;
   flex-shrink: 0;
-  min-height: 260px;
-  max-height: 260px;
+  min-height: 200px;
+  max-height: 200px;
 }
 
 .action-btn .btn-icon {
@@ -971,8 +971,8 @@ body {
 
 .action-btn .btn-content p {
   color: #6b7280;
-  font-size: 0.98rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 /* Modal styles */
@@ -1317,12 +1317,9 @@ body {
   }
   .action-btn {
     width: 100%;
-    max-width: 100%;
-    padding: 1.2rem;
-    flex-shrink: 0;
-    min-width: auto;
-    min-height: 200px;
-    max-height: 200px;
+    min-width: 0;
+    min-height: 140px;
+    max-height: 140px;
   }
   .special-grid {
     grid-template-columns: 1fr;
