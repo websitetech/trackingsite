@@ -168,6 +168,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
         width: '90%',
         maxHeight: '90vh',
         overflowY: 'auto',
+        overflowX: 'hidden',
         position: 'relative',
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
       }} onClick={(e) => e.stopPropagation()}>
@@ -194,8 +195,8 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
           </button>
         </div>
         
-        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form className="new-customer-form" onSubmit={handleSubmit}>
+          <div className="new-customer-row">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="firstName" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>First Name *</label>
               <input
@@ -215,7 +216,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 }}
               />
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="lastName" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Last Name *</label>
               <input
@@ -236,8 +236,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
           </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="new-customer-row">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="email" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Email *</label>
               <input
@@ -257,7 +256,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 }}
               />
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="phone" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Phone</label>
               <input
@@ -277,7 +275,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label htmlFor="address" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Address</label>
             <textarea
@@ -297,8 +294,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               }}
             />
           </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+          <div className="new-customer-row-3">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="city" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>City</label>
               <input
@@ -317,7 +313,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 }}
               />
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="state" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>State</label>
               <input
@@ -336,7 +331,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 }}
               />
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="zipCode" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Zip Code</label>
               <input
@@ -356,8 +350,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
           </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="new-customer-row">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="company" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Company</label>
               <input
@@ -376,7 +369,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 }}
               />
             </div>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="website" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Website</label>
               <input

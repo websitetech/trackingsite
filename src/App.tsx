@@ -75,6 +75,11 @@ function App() {
       {/* Hero Section with background */}
       <section className="hero-bg">
         <div className="hero-section">
+          <div className="company-quote">
+            At Noble Speedytrac Inc., we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
+            
+            Your trusted logistics partner — driven by precision, powered by innovation.
+          </div>
           <div className="tracking-card">
             <div className="tracking-tab">
               <span className="tracking-tab-icon">📦</span> Tracking Package
@@ -125,7 +130,7 @@ function App() {
             <span className="specialty-icon">🏭</span>
             <span className="specialty-label">General Manufacturing<br />Products</span>
           </div>
-          <div className="specialty-card specialty-card-wide">
+          <div className="specialty-card">
             <span className="specialty-icon">📄</span>
             <span className="specialty-label">Confidential Documents</span>
           </div>
