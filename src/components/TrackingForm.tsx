@@ -1,14 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface TrackingFormProps {
-  onTrackingResult: (result: any) => void;
-}
-
-const TrackingForm: React.FC<TrackingFormProps> = ({ onTrackingResult }) => {
+const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +37,7 @@ const TrackingForm: React.FC<TrackingFormProps> = ({ onTrackingResult }) => {
         throw new Error(data.error || 'Failed to track package');
       }
 
-      onTrackingResult(data);
+      navigate(`/track/${trackingNumber}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

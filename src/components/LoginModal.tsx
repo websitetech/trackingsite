@@ -187,7 +187,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
               }}
               onClick={onSwitchToRegister}
             >
-              Register here
+              New customer? Register here
             </button>
           </p>
         </div>

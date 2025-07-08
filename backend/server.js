@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -40,6 +41,8 @@ function initDatabase() {
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
+      email_verified INTEGER DEFAULT 0,
+      verification_code TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -70,6 +73,17 @@ function initDatabase() {
   });
 }
 
+// Email transporter setup (use your SMTP credentials in .env for production)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || ''
+  }
+});
+
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -90,20 +104,18 @@ const authenticateToken = (req, res, next) => {
 
 // Routes
 
-// Register user
+// Register user with email verification
 app.post('/api/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     db.run(
-      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-      [username, email, hashedPassword],
+      'INSERT INTO users (username, email, password, email_verified, verification_code) VALUES (?, ?, ?, 0, ?)',
+      [username, email, hashedPassword, verificationCode],
       function(err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed')) {
@@ -111,12 +123,23 @@ app.post('/api/register', async (req, res) => {
           }
           return res.status(500).json({ error: 'Database error' });
         }
-
-        const token = jwt.sign({ id: this.lastID, username }, JWT_SECRET, { expiresIn: '24h' });
-        res.status(201).json({ 
-          message: 'User registered successfully',
-          token,
-          user: { id: this.lastID, username, email }
+        // Send verification email
+        const mailOptions = {
+          from: process.env.SMTP_FROM || 'noreply@trackingsite.com',
+          to: email,
+          subject: 'Verify your email address',
+          text: `Your verification code is: ${verificationCode}`,
+          html: `<p>Your verification code is: <b>${verificationCode}</b></p>`
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return res.status(500).json({ error: 'Failed to send verification email' });
+          }
+          res.status(201).json({ 
+            message: 'User registered. Please verify your email.',
+            user: { id: this.lastID, username, email },
+            emailVerification: true
+          });
         });
       }
     );
@@ -125,28 +148,44 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Login user
+// Email verification endpoint
+app.post('/api/verify-email', (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required' });
+  }
+  db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (!user) return res.status(400).json({ error: 'User not found' });
+    if (user.email_verified) return res.status(400).json({ error: 'Email already verified' });
+    if (user.verification_code !== code) return res.status(400).json({ error: 'Invalid verification code' });
+    db.run('UPDATE users SET email_verified = 1, verification_code = NULL WHERE email = ?', [email], function(err2) {
+      if (err2) return res.status(500).json({ error: 'Database error' });
+      res.json({ message: 'Email verified successfully' });
+    });
+  });
+});
+
+// Prevent login if not verified
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
-
   db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
-
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
+    if (!user.email_verified) {
+      return res.status(403).json({ error: 'Please verify your email before logging in.' });
+    }
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
     res.json({ 
       message: 'Login successful',
@@ -269,6 +308,49 @@ app.get('/api/estimates', (req, res) => {
       return res.status(500).json({ error: 'Database error' });
     }
     res.json(estimates);
+  });
+});
+
+// DEV: Insert test packages
+app.post('/api/dev/seed-packages', (req, res) => {
+  const testPackages = [
+    {
+      tracking_number: 'TRK12345678',
+      user_id: 1,
+      status: 'in transit',
+      origin_zip: '10001',
+      destination_zip: '90001',
+      weight: 2.5
+    },
+    {
+      tracking_number: 'TRK87654321',
+      user_id: 1,
+      status: 'delivered',
+      origin_zip: '30301',
+      destination_zip: '60601',
+      weight: 1.2
+    },
+    {
+      tracking_number: 'TRK11223344',
+      user_id: 2,
+      status: 'on the way',
+      origin_zip: '94105',
+      destination_zip: '33101',
+      weight: 3.0
+    }
+  ];
+  let inserted = 0;
+  testPackages.forEach(pkg => {
+    db.run(
+      'INSERT OR IGNORE INTO packages (tracking_number, user_id, status, origin_zip, destination_zip, weight) VALUES (?, ?, ?, ?, ?, ?)',
+      [pkg.tracking_number, pkg.user_id, pkg.status, pkg.origin_zip, pkg.destination_zip, pkg.weight],
+      function(err) {
+        if (!err) inserted++;
+        if (inserted === testPackages.length) {
+          res.json({ message: 'Test packages inserted' });
+        }
+      }
+    );
   });
 });
 
