@@ -3,7 +3,7 @@
 interface ActionButtonsProps {
   onEstimate: () => void;
   onShip: () => void;
-  onNewCustomer: () => void;
+  onNewCustomer: () => void ;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ onEstimate, onShip, onNewCustomer }) => {
