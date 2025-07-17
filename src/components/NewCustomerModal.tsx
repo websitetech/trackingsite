@@ -51,8 +51,6 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setError('');
 
     try {
-      // Simulate API call for new customer registration
-      // await new Promise(resolve => setTimeout(resolve, 1000));
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,13 +65,123 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Registration failed');
-      setSuccess(true);
+      if (data.emailVerification) {
+        setAwaitingVerification(true);
+        setRegisteredEmail(formData.email);
+      } else {
+        setSuccess(true);
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred while registering the customer');
     } finally {
       setLoading(false);
     }
   };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setVerificationError('');
+    try {
+      const response = await fetch('http://localhost:5000/api/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail, code: verificationCode })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Verification failed');
+      setSuccess(true);
+      setAwaitingVerification(false);
+    } catch (err: any) {
+      setVerificationError(err.message || 'Verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (awaitingVerification) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '1rem'
+      }} onClick={onClose}>
+        <div style={{
+          background: 'white',
+          borderRadius: '1.5rem',
+          padding: '2rem',
+          maxWidth: '500px',
+          width: '90%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          position: 'relative',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+        }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Verify Your Email</h2>
+            <button 
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#6b7280',
+                padding: '0.5rem',
+                borderRadius: '0.5rem'
+              }}
+              onClick={onClose}
+            >
+              ×
+            </button>
+          </div>
+          <form onSubmit={handleVerify} style={{ textAlign: 'center' }}>
+            <p style={{ marginBottom: '1rem', color: '#6b7280' }}>A verification code has been sent to <b>{registeredEmail}</b>. Please enter it below to complete your registration.</p>
+            <input
+              type="text"
+              value={verificationCode}
+              onChange={e => setVerificationCode(e.target.value)}
+              placeholder="Enter verification code"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #d1d5db',
+                marginBottom: '1rem',
+                fontSize: '1rem'
+              }}
+              required
+            />
+            {verificationError && <div style={{ color: '#dc2626', marginBottom: '1rem' }}>{verificationError}</div>}
+            <button
+              type="submit"
+              style={{
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                marginBottom: '1rem'
+              }}
+              disabled={loading}
+            >
+              {loading ? 'Verifying...' : 'Verify Email'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
