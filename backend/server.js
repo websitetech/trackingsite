@@ -109,6 +109,7 @@ const authenticateToken = (req, res, next) => {
 
 // Register user with email verification
 app.post('/api/register', async (req, res) => {
+  console.log("first",req)
   try {
     const { username, email, password, phone, stateProvince, postalCode } = req.body;
     if (!username || !email || !password || !phone || !stateProvince || !postalCode) {
@@ -136,6 +137,7 @@ app.post('/api/register', async (req, res) => {
         };
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
+            console.log("first",error)
             return res.status(500).json({ error: 'Failed to send verification email' });
           }
           res.status(201).json({ 
