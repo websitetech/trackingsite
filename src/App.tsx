@@ -9,6 +9,7 @@ import ShipModal from './components/ShipModal';
 import NewCustomerModal from './components/NewCustomerModal';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TrackingPage from './components/TrackingPage';
+import UserPage from './components/UserPage';
 
 interface User {
   id: number;
@@ -64,57 +65,60 @@ function App() {
         />
         <Routes>
           <Route path="/" element={
-            <>
-              {/* Hero Section with background */}
-              <section className="hero-bg">
-                <div className="hero-section">
-                  <div className="company-quote">
-                    At Noble Speedytrac Inc., we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
-                    Your trusted logistics partner — driven by precision, powered by innovation.
-                  </div>
-                  <div className="tracking-card">
-                    <div className="tracking-tab">
-                      <span className="tracking-tab-icon">📦</span> Tracking Package
+            user ? <UserPage user={user} /> : (
+              <>
+                {/* Hero Section with background */}
+                <section className="hero-bg">
+                  <div className="hero-section">
+                    <div className="company-quote">
+                      At Noble Speedytrac Inc., we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
+                      Your trusted logistics partner — driven by precision, powered by innovation.
                     </div>
-                    <span className="tracking-sub">Looking for a shipment update?</span>
-                    <TrackingForm />
+                    <div className="tracking-card">
+                      <div className="tracking-tab">
+                        <span className="tracking-tab-icon">📦</span> Tracking Package
+                      </div>
+                      <span className="tracking-sub">Looking for a shipment update?</span>
+                      <TrackingForm />
+                    </div>
+                    <h1 className="hero-title">FAST. RELIABLE. SECURE.<br />Toronto's go-to delivery service.</h1>
+                    <ActionButtons 
+                      onEstimate={() => setShowEstimate(true)}
+                      onShip={() => setShowShip(true)}
+                      onNewCustomer={() => setShowNewCustomer(true)}
+                    />
                   </div>
-                  <h1 className="hero-title">FAST. RELIABLE. SECURE.<br />Toronto's go-to delivery service.</h1>
-                  <ActionButtons 
-                    onEstimate={() => setShowEstimate(true)}
-                    onShip={() => setShowShip(true)}
-                    onNewCustomer={() => setShowNewCustomer(true)}
-                  />
-                </div>
-              </section>
-              {/* Specialty Delivery Areas */}
-              <section className="specialty-section">
-                <h2 className="specialty-title">Our Specialty Delivery Areas</h2>
-                <div className="specialty-grid">
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🔌</span>
-                    <span className="specialty-label">Technology<br />and Electronics</span>
+                </section>
+                {/* Specialty Delivery Areas */}
+                <section className="specialty-section">
+                  <h2 className="specialty-title">Our Specialty Delivery Areas</h2>
+                  <div className="specialty-grid">
+                    <div className="specialty-card">
+                      <span className="specialty-icon">🔌</span>
+                      <span className="specialty-label">Technology<br />and Electronics</span>
+                    </div>
+                    <div className="specialty-card">
+                      <span className="specialty-icon">🩺</span>
+                      <span className="specialty-label">Medical<br />Supplies</span>
+                    </div>
+                    <div className="specialty-card">
+                      <span className="specialty-icon">🍽️</span>
+                      <span className="specialty-label">Catering<br />Services</span>
+                    </div>
+                    <div className="specialty-card">
+                      <span className="specialty-icon">🏭</span>
+                      <span className="specialty-label">General Manufacturing<br />Products</span>
+                    </div>
+                    <div className="specialty-card">
+                      <span className="specialty-icon">📄</span>
+                      <span className="specialty-label">Confidential Documents</span>
+                    </div>
                   </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🩺</span>
-                    <span className="specialty-label">Medical<br />Supplies</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🍽️</span>
-                    <span className="specialty-label">Catering<br />Services</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🏭</span>
-                    <span className="specialty-label">General Manufacturing<br />Products</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">📄</span>
-                    <span className="specialty-label">Confidential Documents</span>
-                  </div>
-                </div>
-              </section>
-            </>
+                </section>
+              </>
+            )
           } />
+          <Route path="/user" element={user ? <UserPage user={user} /> : <div>Please log in to view your dashboard.</div>} />
           <Route path="/track/:trackingNumber" element={<TrackingPage />} />
         </Routes>
         {/* Footer / Bottom Banner */}

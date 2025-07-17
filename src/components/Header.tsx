@@ -21,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
         <nav className="nav">
           {user ? (
             <div className="user-section">
+              <span style={{ fontSize: '1.7rem', marginRight: '0.5rem', verticalAlign: 'middle' }} title="Profile">👤</span>
               <span className="welcome">Welcome, {user.username}!</span>
               <button className="btn btn-secondary" onClick={onLogout}>
                 Logout
