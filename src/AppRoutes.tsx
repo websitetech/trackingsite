@@ -38,7 +38,8 @@ function AppRoutes() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    navigate('/');
+    navigate('/'); // Redirect to landing page
+    window.location.href = '/'; // Fallback: force reload to landing page
   };
 
   const handleLoginClick = () => {

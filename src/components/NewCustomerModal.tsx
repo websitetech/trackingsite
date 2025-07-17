@@ -15,7 +15,9 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     stateProvince: '', // rename from state
     postalCode: '', // rename from zipCode
     company: '',
-    website: ''
+    website: '',
+    password: '',
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,13 +33,14 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       ...prev,
       [name]: value
     }));
+    if (name === 'password' || name === 'confirmPassword') setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.stateProvince || !formData.postalCode) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.stateProvince || !formData.postalCode || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all required fields');
       return;
     }
@@ -47,17 +50,26 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
     setError('');
-
+    const username = (formData.firstName + formData.lastName).replace(/\s+/g, '').toLowerCase();
     try {
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: formData.email, // using email as username for simplicity
+          username,
           email: formData.email,
-          password: formData.firstName + formData.lastName + '123', // temp password for demo
+          password: formData.password,
           phone: formData.phone,
           stateProvince: formData.stateProvince,
           postalCode: formData.postalCode
@@ -65,8 +77,12 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Registration failed');
-      setRegisteredEmail(formData.email);
-      setAwaitingVerification(true);
+      if (data.emailVerification) {
+        setRegisteredEmail(formData.email);
+        setAwaitingVerification(true);
+      } else {
+        setSuccess(true);
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred while registering the customer');
     } finally {
@@ -94,6 +110,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     }
   };
   if (success) {
+    const username = (formData.firstName + formData.lastName).replace(/\s+/g, '').toLowerCase();
     return (
       <div style={{
         position: 'fixed',
@@ -153,7 +170,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               border: '2px solid #bae6fd',
               boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
             }}>
-              <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
+              <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Username:</strong> {username}</p>
               <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Email:</strong> {formData.email}</p>
               {formData.phone && <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Phone:</strong> {formData.phone}</p>}
             </div>
@@ -440,6 +457,46 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 value={formData.website}
                 onChange={handleChange}
                 placeholder="Enter website URL"
+                style={{
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.75rem',
+                  fontSize: '0.95rem',
+                  background: '#fff'
+                }}
+              />
+            </div>
+          </div>
+          <div className="new-customer-row">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="password" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Password *</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+                required
+                style={{
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '0.75rem',
+                  fontSize: '0.95rem',
+                  background: '#fff'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="confirmPassword" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Confirm Password *</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm password"
+                required
                 style={{
                   padding: '0.75rem',
                   border: '2px solid #e5e7eb',

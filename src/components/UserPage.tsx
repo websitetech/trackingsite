@@ -92,62 +92,86 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
     <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
       <section className="hero-bg">
         <div className="hero-section">
-          <div className="company-quote">
-            Welcome back, <b>{user.username}</b>! Ready to create a new shipment?
+          <div className="company-quote" style={{ color: '#111' }}>
+            Welcome back, <b>{user.username}</b>!
           </div>
-          <div className="tracking-card" style={{ marginTop: 24, animation: anim ? 'pulse 0.7s' : 'none' }}>
-            <div className="tracking-tab">
-              <span className="tracking-tab-icon">🚚</span> New Shipment
-            </div>
+          {/* Tracking form at the top */}
+          <div style={{
+            background: 'white',
+            color: 'black',
+            borderRadius: '1.5rem',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+            padding: '2rem',
+            margin: '32px auto 24px auto',
+            maxWidth: 600,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+            <h2 style={{ color: '#111', fontWeight: 700, fontSize: '1.4rem', marginBottom: 16 }}>Track Your Package</h2>
+            {/* Tracking form fields */}
+            <form style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 0 }}>
+              <input type="text" placeholder="Enter Tracking Number" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
+              <input type="text" placeholder="Enter Zip Code" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
+              <button type="button" style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', marginTop: 8 }}>Track</button>
+            </form>
+          </div>
+          {/* Only one box for Create New Shipment */}
+          <div style={{
+            background: 'white',
+            color: 'black',
+            borderRadius: '1.5rem',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+            padding: '2rem',
+            margin: '0 auto',
+            maxWidth: 600,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 32,
+          }}>
+            <div style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: 16 }}>Create New Shipment</div>
             {!submitted ? (
-              <form className="tracking-form" onSubmit={handleSubmit} style={{ transition: 'all 0.4s cubic-bezier(.22,1,.36,1)' }}>
+              <form className="tracking-form" onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div className="form-group">
-                  <label>Customer *</label>
-                  <select name="customer" value={form.customer} onChange={handleChange} required>
+                  <label style={{ color: '#111', fontWeight: 600 }}>Customer *</label>
+                  <select name="customer" value={form.customer} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
                     <option value="">Select customer</option>
                     {TARIFFS.map(t => <option key={t.customer} value={t.customer}>{t.customer}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Service Type *</label>
-                  <select name="serviceType" value={form.serviceType} onChange={handleChange} required>
+                  <label style={{ color: '#111', fontWeight: 600 }}>Service Type *</label>
+                  <select name="serviceType" value={form.serviceType} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
                     <option value="">Select service type</option>
                     {SERVICE_TYPES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Recipient Name *</label>
-                  <input name="recipientName" value={form.recipientName} onChange={handleChange} required placeholder="Enter recipient name" />
+                  <label style={{ color: '#111', fontWeight: 600 }}>Recipient Name *</label>
+                  <input name="recipientName" value={form.recipientName} onChange={handleChange} required placeholder="Enter recipient name" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
                 </div>
                 <div className="form-group">
-                  <label>Recipient Address *</label>
-                  <input name="recipientAddress" value={form.recipientAddress} onChange={handleChange} required placeholder="Enter recipient address" />
+                  <label style={{ color: '#111', fontWeight: 600 }}>Recipient Address *</label>
+                  <input name="recipientAddress" value={form.recipientAddress} onChange={handleChange} required placeholder="Enter recipient address" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
                 </div>
                 <div className="form-group">
-                  <label>Calculated Price</label>
+                  <label style={{ color: '#111', fontWeight: 600 }}>Calculated Price</label>
                   <div className="cost" style={{ fontSize: '1.3rem', color: '#dc2626', fontWeight: 700 }}>{getPrice()}</div>
                 </div>
-                {error && <div className="error-message" style={{ marginBottom: 8 }}>{error}</div>}
-                <button type="submit" className="btn btn-primary track-btn" style={{ marginTop: 8 }}>Create Shipment</button>
+                {error && <div className="error-message" style={{ marginBottom: 8, color: '#dc2626' }}>{error}</div>}
+                <button type="submit" className="btn btn-primary track-btn" style={{ marginTop: 8, background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Create Shipment</button>
               </form>
             ) : (
-              <div className="success-message" style={{ animation: 'fadeInUp 0.7s' }}>
+              <div className="success-message" style={{ animation: 'fadeInUp 0.7s', color: '#111' }}>
                 <h3>Shipment Created!</h3>
                 <p>Your shipment for <b>{form.customer}</b> has been created.</p>
-                <button className="btn btn-secondary" onClick={() => setSubmitted(false)}>Create Another</button>
+                <button className="btn btn-secondary" onClick={() => setSubmitted(false)} style={{ background: '#fff', color: '#dc2626', border: '2px solid #dc2626', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Create Another</button>
               </div>
             )}
           </div>
-        </div>
-      </section>
-      <section className="specialty-section">
-        <h2 className="specialty-title">Our Specialty Delivery Areas</h2>
-        <div className="specialty-grid">
-          <div className="specialty-card"><span className="specialty-icon">🔌</span><span className="specialty-label">Technology<br />and Electronics</span></div>
-          <div className="specialty-card"><span className="specialty-icon">🩺</span><span className="specialty-label">Medical<br />Supplies</span></div>
-          <div className="specialty-card"><span className="specialty-icon">🍽️</span><span className="specialty-label">Catering<br />Services</span></div>
-          <div className="specialty-card"><span className="specialty-icon">🏭</span><span className="specialty-label">General Manufacturing<br />Products</span></div>
-          <div className="specialty-card"><span className="specialty-icon">📄</span><span className="specialty-label">Confidential Documents</span></div>
         </div>
       </section>
     </div>
