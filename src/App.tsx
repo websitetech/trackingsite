@@ -4,11 +4,10 @@ import Header from './components/Header';
 import TrackingForm from './components/TrackingForm';
 import ActionButtons from './components/ActionButtons';
 import LoginModal from './components/LoginModal';
-import RegisterModal from './components/RegisterModal';
 import EstimateModal from './components/EstimateModal';
 import ShipModal from './components/ShipModal';
 import NewCustomerModal from './components/NewCustomerModal';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TrackingPage from './components/TrackingPage';
 
 interface User {
@@ -23,7 +22,6 @@ function App() {
   const [showEstimate, setShowEstimate] = useState(false);
   const [showShip, setShowShip] = useState(false);
   const [showNewCustomer, setShowNewCustomer] = useState(false);
-  const [trackingResult, setTrackingResult] = useState<any>(null);
 
   useEffect(() => {
     // Check if user is logged in from localStorage
@@ -53,13 +51,6 @@ function App() {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     setShowLogin(false);
-  };
-
-  const handleRegisterSuccess = (userData: User, token: string) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    setShowNewCustomer(false);
   };
 
   return (
