@@ -12,8 +12,8 @@ interface ShipModalProps {
 }
 
 const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
-  const [originZip, setOriginZip] = useState('');
-  const [destinationZip, setDestinationZip] = useState('');
+  const [originPostal, setOriginPostal] = useState('');
+  const [destinationPostal, setDestinationPostal] = useState('');
   const [weight, setWeight] = useState('');
   const [serviceType, setServiceType] = useState('standard');
   const [recipientName, setRecipientName] = useState('');
@@ -30,7 +30,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
       return;
     }
 
-    if (!originZip || !destinationZip || !weight || !recipientName || !recipientAddress) {
+    if (!originPostal || !destinationPostal || !weight || !recipientName || !recipientAddress) {
       setError('Please fill in all fields');
       return;
     }
@@ -53,8 +53,8 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          origin_zip: originZip,
-          destination_zip: destinationZip,
+          origin_postal: originPostal,
+          destination_postal: destinationPostal,
           weight: weightNum,
           service_type: serviceType,
           recipient_name: recipientName,
@@ -198,13 +198,13 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
             
             <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={handleSubmit}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label htmlFor="shipOriginZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Origin Zip Code</label>
+                <label htmlFor="shipOriginPostal" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Origin Postal Code</label>
                 <input
                   type="text"
-                  id="shipOriginZip"
-                  value={originZip}
-                  onChange={(e) => setOriginZip(e.target.value)}
-                  placeholder="Enter origin zip code"
+                  id="shipOriginPostal"
+                  value={originPostal}
+                  onChange={(e) => setOriginPostal(e.target.value)}
+                  placeholder="Enter origin postal code"
                   required
                   style={{
                     padding: '0.75rem',
@@ -217,13 +217,13 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label htmlFor="shipDestinationZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Destination Zip Code</label>
+                <label htmlFor="shipDestinationPostal" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Destination Postal Code</label>
                 <input
                   type="text"
-                  id="shipDestinationZip"
-                  value={destinationZip}
-                  onChange={(e) => setDestinationZip(e.target.value)}
-                  placeholder="Enter destination zip code"
+                  id="shipDestinationPostal"
+                  value={destinationPostal}
+                  onChange={(e) => setDestinationPostal(e.target.value)}
+                  placeholder="Enter destination postal code"
                   required
                   style={{
                     padding: '0.75rem',

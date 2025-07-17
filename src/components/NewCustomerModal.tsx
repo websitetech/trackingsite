@@ -12,8 +12,8 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     phone: '',
     address: '',
     city: '',
-    state: '',
-    zipCode: '',
+    stateProvince: '', // rename from state
+    postalCode: '', // rename from zipCode
     company: '',
     website: ''
   });
@@ -37,7 +37,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.firstName || !formData.lastName || !formData.email) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.stateProvince || !formData.postalCode) {
       setError('Please fill in all required fields');
       return;
     }
@@ -60,6 +60,9 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
           username: formData.email, // using email as username for simplicity
           email: formData.email,
           password: formData.firstName + formData.lastName + '123', // temp password for demo
+          phone: formData.phone,
+          stateProvince: formData.stateProvince,
+          postalCode: formData.postalCode
         })
       });
       const data = await response.json();
@@ -319,7 +322,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="phone" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Phone</label>
+              <label htmlFor="phone" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Phone Number *</label>
               <input
                 type="tel"
                 id="phone"
@@ -327,6 +330,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Enter phone number"
+                required
                 style={{
                   padding: '0.75rem',
                   border: '2px solid #e5e7eb',
@@ -376,14 +380,15 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="state" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>State</label>
+              <label htmlFor="stateProvince" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>State/Province</label>
               <input
                 type="text"
-                id="state"
-                name="state"
-                value={formData.state}
+                id="stateProvince"
+                name="stateProvince"
+                value={formData.stateProvince}
                 onChange={handleChange}
-                placeholder="Enter state"
+                placeholder="Enter state or province"
+                required
                 style={{
                   padding: '0.75rem',
                   border: '2px solid #e5e7eb',
@@ -394,14 +399,15 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="zipCode" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Zip Code</label>
+              <label htmlFor="postalCode" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Postal Code</label>
               <input
                 type="text"
-                id="zipCode"
-                name="zipCode"
-                value={formData.zipCode}
+                id="postalCode"
+                name="postalCode"
+                value={formData.postalCode}
                 onChange={handleChange}
-                placeholder="Enter zip code"
+                placeholder="Enter postal code"
+                required
                 style={{
                   padding: '0.75rem',
                   border: '2px solid #e5e7eb',

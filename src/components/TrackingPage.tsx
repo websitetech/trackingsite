@@ -12,7 +12,7 @@ interface TrackingData {
 const TrackingPage = () => {
   const { trackingNumber } = useParams<{ trackingNumber: string }>();
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
-  const [zipCode, setZipCode] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ const TrackingPage = () => {
       const response = await fetch('http://localhost:5000/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tracking_number: trackingNumber, zip_code: zipCode })
+        body: JSON.stringify({ tracking_number: trackingNumber, postal_code: postalCode })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to track package');
@@ -43,13 +43,13 @@ const TrackingPage = () => {
       <h3>Tracking Information</h3>
       <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
         <div className="form-group">
-          <label htmlFor="zipCode">Enter Zip Code for Tracking</label>
+          <label htmlFor="postalCode">Enter Postal Code for Tracking</label>
           <input
             type="text"
-            id="zipCode"
-            value={zipCode}
-            onChange={e => setZipCode(e.target.value)}
-            placeholder="Enter zip code"
+            id="postalCode"
+            value={postalCode}
+            onChange={e => setPostalCode(e.target.value)}
+            placeholder="Enter postal code"
             required
             className="input"
           />

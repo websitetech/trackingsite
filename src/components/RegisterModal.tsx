@@ -19,11 +19,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
+  const [phone, setPhone] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword || !postalCode || !stateProvince || !phone) {
       setError('Please fill in all fields');
       return;
     }
@@ -47,7 +50,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, postalCode, stateProvince, phone }),
       });
 
       const data = await response.json();
@@ -178,6 +181,63 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
+              required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerPhone" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Phone Number</label>
+            <input
+              type="tel"
+              id="registerPhone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter phone number"
+              required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerPostalCode" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Postal Code</label>
+            <input
+              type="text"
+              id="registerPostalCode"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              placeholder="Enter postal code"
+              required
+              style={{
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '0.75rem',
+                fontSize: '0.95rem',
+                background: '#fff'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="registerStateProvince" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>State/Province</label>
+            <input
+              type="text"
+              id="registerStateProvince"
+              value={stateProvince}
+              onChange={(e) => setStateProvince(e.target.value)}
+              placeholder="Enter state or province"
               required
               style={{
                 padding: '0.75rem',

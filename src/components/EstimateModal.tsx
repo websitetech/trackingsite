@@ -5,8 +5,8 @@ interface EstimateModalProps {
 }
 
 const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
-  const [originZip, setOriginZip] = useState('');
-  const [destinationZip, setDestinationZip] = useState('');
+  const [originPostal, setOriginPostal] = useState('');
+  const [destinationPostal, setDestinationPostal] = useState('');
   const [weight, setWeight] = useState('');
   const [serviceType, setServiceType] = useState('standard');
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!originZip || !destinationZip || !weight) {
+    if (!originPostal || !destinationPostal || !weight) {
       setError('Please fill in all fields');
       return;
     }
@@ -37,8 +37,8 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          origin_zip: originZip,
-          destination_zip: destinationZip,
+          origin_postal: originPostal,
+          destination_postal: destinationPostal,
           weight: weightNum,
           service_type: serviceType,
         }),
@@ -111,13 +111,13 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
             
             <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} onSubmit={handleSubmit}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label htmlFor="originZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Origin Zip Code</label>
+                <label htmlFor="originPostal" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Origin Postal Code</label>
                 <input
                   type="text"
-                  id="originZip"
-                  value={originZip}
-                  onChange={(e) => setOriginZip(e.target.value)}
-                  placeholder="Enter origin zip code"
+                  id="originPostal"
+                  value={originPostal}
+                  onChange={(e) => setOriginPostal(e.target.value)}
+                  placeholder="Enter origin postal code"
                   required
                   style={{
                     padding: '0.75rem',
@@ -130,13 +130,13 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label htmlFor="destinationZip" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Destination Zip Code</label>
+                <label htmlFor="destinationPostal" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Destination Postal Code</label>
                 <input
                   type="text"
-                  id="destinationZip"
-                  value={destinationZip}
-                  onChange={(e) => setDestinationZip(e.target.value)}
-                  placeholder="Enter destination zip code"
+                  id="destinationPostal"
+                  value={destinationPostal}
+                  onChange={(e) => setDestinationPostal(e.target.value)}
+                  placeholder="Enter destination postal code"
                   required
                   style={{
                     padding: '0.75rem',
@@ -270,11 +270,11 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ onClose }) => {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid rgba(220, 38, 38, 0.1)' }}>
                 <span style={{ fontWeight: 600, color: '#374151' }}>Origin:</span>
-                <span>{estimate.origin_zip}</span>
+                <span>{estimate.origin_postal}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid rgba(220, 38, 38, 0.1)' }}>
                 <span style={{ fontWeight: 600, color: '#374151' }}>Destination:</span>
-                <span>{estimate.destination_zip}</span>
+                <span>{estimate.destination_postal}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0' }}>
                 <span style={{ fontWeight: 600, color: '#374151' }}>Weight:</span>

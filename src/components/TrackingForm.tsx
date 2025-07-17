@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const TrackingForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!trackingNumber || !zipCode) {
+    if (!trackingNumber || !postalCode) {
       setError('Please fill in all fields');
       return;
     }
@@ -27,7 +27,7 @@ const TrackingForm: React.FC = () => {
         },
         body: JSON.stringify({
           tracking_number: trackingNumber,
-          zip_code: zipCode,
+          postal_code: postalCode,
         }),
       });
 
@@ -61,13 +61,13 @@ const TrackingForm: React.FC = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="zipCode">Zip Code</label>
+          <label htmlFor="postalCode">Postal Code</label>
           <input
             type="text"
-            id="zipCode"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            placeholder="Enter zip code"
+            id="postalCode"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            placeholder="Enter postal code"
             required
           />
         </div>

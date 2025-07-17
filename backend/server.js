@@ -43,6 +43,9 @@ function initDatabase() {
       password TEXT NOT NULL,
       email_verified INTEGER DEFAULT 0,
       verification_code TEXT,
+      phone TEXT,
+      state_province TEXT,
+      postal_code TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
@@ -107,15 +110,15 @@ const authenticateToken = (req, res, next) => {
 // Register user with email verification
 app.post('/api/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    const { username, email, password, phone, stateProvince, postalCode } = req.body;
+    if (!username || !email || !password || !phone || !stateProvince || !postalCode) {
       return res.status(400).json({ error: 'All fields are required' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     db.run(
-      'INSERT INTO users (username, email, password, email_verified, verification_code) VALUES (?, ?, ?, 0, ?)',
-      [username, email, hashedPassword, verificationCode],
+      'INSERT INTO users (username, email, password, email_verified, verification_code, phone, state_province, postal_code) VALUES (?, ?, ?, 0, ?, ?, ?, ?)',
+      [username, email, hashedPassword, verificationCode, phone, stateProvince, postalCode],
       function(err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed')) {
@@ -137,7 +140,7 @@ app.post('/api/register', async (req, res) => {
           }
           res.status(201).json({ 
             message: 'User registered. Please verify your email.',
-            user: { id: this.lastID, username, email },
+            user: { id: this.lastID, username, email, phone, stateProvince, postalCode },
             emailVerification: true
           });
         });
