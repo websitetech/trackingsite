@@ -58,7 +58,6 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const [anim, setAnim] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -75,8 +74,6 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setAnim(true);
-    setTimeout(() => setAnim(false), 800);
     for (let field of REQUIRED_FIELDS) {
       if (!form[field]) {
         setError('Please fill in all required fields.');
