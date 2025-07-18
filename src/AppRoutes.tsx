@@ -10,6 +10,7 @@ import NewCustomerModal from './components/NewCustomerModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import TrackingPage from './components/TrackingPage';
 import UserPage from './components/UserPage';
+// @ts-ignore
 import ShipmentPage from './pages/ShipmentPage.jsx';
 
 interface User {
