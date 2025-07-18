@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import '../App.css';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -58,6 +59,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -161,13 +163,14 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
                 {error && <div className="error-message" style={{ marginBottom: 8, color: '#dc2626' }}>{error}</div>}
                 <button type="submit" className="btn btn-primary track-btn" style={{ marginTop: 8, background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Create Shipment</button>
               </form>
-            ) : (
-              <div className="success-message" style={{ animation: 'fadeInUp 0.7s', color: '#111' }}>
+            ) :
+              <div className="success-message" style={{ animation: 'fadeInUp 0.7s', color: '#111', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <h3>Shipment Created!</h3>
                 <p>Your shipment for <b>{form.customer}</b> has been created.</p>
-                <button className="btn btn-secondary" onClick={() => setSubmitted(false)} style={{ background: '#fff', color: '#dc2626', border: '2px solid #dc2626', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Create Another</button>
+                <button className="btn btn-secondary" onClick={() => setSubmitted(false)} style={{ background: '#fff', color: '#dc2626', border: '2px solid #dc2626', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', marginBottom: 12 }}>Create Another</button>
+                <button className="btn btn-primary" onClick={() => navigate('/shipment', { state: { estimatedValue: Number(getPrice().replace(/[^\d.]/g, '')) } })} style={{ background: 'linear-gradient(135deg, #facc15 0%, #fde047 100%)', color: '#1a1a1a', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', marginTop: 8, boxShadow: '0 2px 8px rgba(185,28,28,0.08)' }}>Proceed to Payment</button>
               </div>
-            )}
+            }
           </div>
         </div>
       </section>
