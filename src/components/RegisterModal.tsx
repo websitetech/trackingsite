@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import EmailVerificationModal from './EmailVerificationModal';
 
 interface User {
   id: number;
@@ -22,6 +23,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
   const [postalCode, setPostalCode] = useState('');
   const [stateProvince, setStateProvince] = useState('');
   const [phone, setPhone] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationData, setVerificationData] = useState<{
+    user: User;
+    email: string;
+    verificationCode?: string;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,13 +66,47 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
         throw new Error(data.error || 'Registration failed');
       }
 
-      onSuccess(data.user, data.token);
+      // Check if email verification is required
+      if (data.emailVerification) {
+        setVerificationData({
+          user: data.user,
+          email: data.user.email,
+          verificationCode: data.verificationCode
+        });
+        setShowVerification(true);
+      } else {
+        onSuccess(data.user, data.token);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
+
+  const handleVerificationSuccess = () => {
+    if (verificationData) {
+      onSuccess(verificationData.user, '');
+    }
+    setShowVerification(false);
+    setVerificationData(null);
+  };
+
+  const handleVerificationClose = () => {
+    setShowVerification(false);
+    setVerificationData(null);
+  };
+
+  if (showVerification && verificationData) {
+    return (
+      <EmailVerificationModal
+        onClose={handleVerificationClose}
+        onSuccess={handleVerificationSuccess}
+        email={verificationData.email}
+        verificationCode={verificationData.verificationCode}
+      />
+    );
+  }
 
   return (
     <div style={{
