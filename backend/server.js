@@ -22,16 +22,21 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 app.use(cors());
 app.use(express.json());
 
-// Email transporter setup
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || ''
-  }
-});
+// Email transporter setup - with fallback for development
+let transporter;
+if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+} else {
+  console.log('⚠️  Email configuration not found. Using development mode without email verification.');
+}
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
@@ -78,22 +83,39 @@ app.post('/api/register', async (req, res) => {
 
     const newUser = await dbHelpers.createUser(userData);
 
-    // Send verification email
-    const mailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@trackingsite.com',
-      to: email,
-      subject: 'Verify your email address',
-      text: `Your verification code is: ${verificationCode}`,
-      html: `<p>Your verification code is: <b>${verificationCode}</b></p>`
-    };
+    // Send verification email if transporter is configured
+    if (transporter) {
+      const mailOptions = {
+        from: process.env.SMTP_FROM || 'noreply@trackingsite.com',
+        to: email,
+        subject: 'Verify your email address',
+        text: `Your verification code is: ${verificationCode}`,
+        html: `<p>Your verification code is: <b>${verificationCode}</b></p>`
+      };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Email error:', error);
-        return res.status(500).json({ error: 'Failed to send verification email' });
-      }
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Email error:', error);
+          return res.status(500).json({ error: 'Failed to send verification email' });
+        }
+        res.status(201).json({ 
+          message: 'User registered. Please verify your email.',
+          user: { 
+            id: newUser.id, 
+            username, 
+            email, 
+            phone, 
+            stateProvince, 
+            postalCode 
+          },
+          emailVerification: true,
+          verificationCode: verificationCode // Include code for development
+        });
+      });
+    } else {
+      // Development mode - return verification code in response
       res.status(201).json({ 
-        message: 'User registered. Please verify your email.',
+        message: 'User registered successfully. Email verification is disabled in development mode.',
         user: { 
           id: newUser.id, 
           username, 
@@ -102,9 +124,11 @@ app.post('/api/register', async (req, res) => {
           stateProvince, 
           postalCode 
         },
-        emailVerification: true
+        emailVerification: false,
+        verificationCode: verificationCode, // Include code for development
+        note: 'Copy this verification code to verify your email manually'
       });
-    });
+    }
 
   } catch (error) {
     console.error('Registration error:', error);
@@ -312,6 +336,24 @@ app.get('/api/estimates', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// Development endpoint to auto-verify users (for testing)
+if (process.env.NODE_ENV === 'development') {
+  app.post('/api/dev/auto-verify', async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      
+      await dbHelpers.updateUserVerification(email, true);
+      res.json({ message: 'User auto-verified for development' });
+    } catch (error) {
+      console.error('Auto-verify error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
