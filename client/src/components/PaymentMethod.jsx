@@ -58,7 +58,7 @@ export default function PaymentMethod({ estimatedValue = 293 }) {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('http://localhost:5000/api/create-payment-intent', {
+        const res = await fetch('https://trackingsite.onrender.com/api/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: estimatedValue, currency: 'usd' }),

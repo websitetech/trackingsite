@@ -52,7 +52,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('https://trackingsite.onrender.com/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

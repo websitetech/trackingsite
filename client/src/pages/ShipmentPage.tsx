@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import PaymentMethod from '../components/PaymentMethod';
 
-export default function ShipmentPage() {
+const ShipmentPage: React.FC = () => {
   const location = useLocation();
   const estimatedValue = location.state?.estimatedValue || 293; // fallback to 293 if not provided
   return (
@@ -37,3 +37,5 @@ export default function ShipmentPage() {
     </div>
   );
 }
+
+export default ShipmentPage;

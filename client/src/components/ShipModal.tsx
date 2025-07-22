@@ -46,7 +46,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/ship', {
+      const response = await fetch('https://trackingsite.onrender.com/api/ship', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

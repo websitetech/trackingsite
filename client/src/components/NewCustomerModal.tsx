@@ -63,7 +63,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setError('');
     const username = (formData.firstName + formData.lastName).replace(/\s+/g, '').toLowerCase();
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('https://trackingsite.onrender.com/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +94,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setLoading(true);
     setVerificationError('');
     try {
-      const response = await fetch('http://localhost:5000/api/verify-email', {
+      const response = await fetch('https://trackingsite.onrender.com/api/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: registeredEmail, code: verificationCode })
