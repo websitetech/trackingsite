@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-console.log(stripe,process.env.STRIPE_SECRET_KEY,);
+// console.log(stripe,process.env.STRIPE_SECRET_KEY,);
 // Middleware
 app.use(cors());
 app.use(express.json());

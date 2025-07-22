@@ -1563,3 +1563,143 @@ textarea {
   cursor: pointer !important;
   pointer-events: auto !important;
 }
+
+/* Shipment Page Custom Styles */
+.shipment-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fff1f1 0%, #f7f8fa 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.shipment-header {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.shipment-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.shipment-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #dc2626;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 8px rgba(220,38,38,0.04);
+}
+
+.shipment-title-icon {
+  font-size: 2rem;
+}
+
+.shipment-subtitle {
+  color: #6b7280;
+  text-align: center;
+  max-width: 420px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.shipment-steps {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.shipment-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shipment-step-circle {
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #b91c1c;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.08);
+  margin-bottom: 0.2rem;
+  border: 2px solid #e5e7eb;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+.shipment-step-active {
+  background: #dc2626;
+  color: #fff;
+  border: 2px solid #dc2626;
+}
+
+.shipment-step-label {
+  font-size: 0.85rem;
+  color: #b91c1c;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.shipment-step-label-active {
+  color: #dc2626;
+  opacity: 1;
+}
+
+.shipment-step-bar {
+  width: 2.5rem;
+  height: 0.3rem;
+  background: #fca5a5;
+  border-radius: 0.5rem;
+}
+
+.shipment-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(220,38,38,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2.5rem 2rem;
+  border: 2px solid #fee2e2;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeIn 0.7s cubic-bezier(.22,1,.36,1);
+}
+
+@media (max-width: 600px) {
+  .shipment-bg {
+    padding: 1.5rem 0.5rem;
+  }
+  .shipment-title {
+    font-size: 1.3rem;
+  }
+  .shipment-title-icon {
+    font-size: 1.3rem;
+  }
+  .shipment-card {
+    padding: 1.2rem 0.5rem;
+    max-width: 99vw;
+  }
+  .shipment-header {
+    margin-bottom: 1.2rem;
+  }
+  .shipment-steps {
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+}
