@@ -10,8 +10,6 @@ import NewCustomerModal from './components/NewCustomerModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import TrackingPage from './components/TrackingPage';
 import UserPage from './components/UserPage';
-// @ts-ignore
-import ShipmentPage from './pages/ShipmentPage.jsx';
 
 interface User {
   id: number;
@@ -124,7 +122,6 @@ function AppRoutes() {
           )
         } />
         <Route path="/user" element={user ? <UserPage user={user} /> : <div>Please log in to view your dashboard.</div>} />
-        <Route path="/shipment" element={user ? <ShipmentPage /> : <div>Please log in to create a shipment.</div>} />
         <Route path="/track/:trackingNumber" element={<TrackingPage />} />
       </Routes>
       {/* Footer / Bottom Banner */}
