@@ -8,6 +8,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import { dbHelpers } from './supabase.js';
+import Stripe from 'stripe';
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+console.log(stripe,process.env.STRIPE_SECRET_KEY,);
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -334,6 +336,25 @@ app.get('/api/estimates', async (req, res) => {
   } catch (error) {
     console.error('Get estimates error:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Stripe PaymentIntent endpoint
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency = 'usd' } = req.body;
+    if (!amount) {
+      return res.status(400).json({ error: 'Amount is required' });
+    }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Stripe expects amount in cents
+      currency,
+      automatic_payment_methods: { enabled: true },
+    });
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('Stripe PaymentIntent error:', error);
+    res.status(500).json({ error: 'Failed to create payment intent' });
   }
 });
 
