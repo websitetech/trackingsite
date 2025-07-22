@@ -5,7 +5,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 
 const stripePromise = loadStripe('pk_test_51RmVWcI6ptZDqevNhSL1cOkv17IoYm5on5h04IjeWMYUAHk7HPf3TOjEJ2iHmPXO8T03xhvyn8VUBl2A8Tc8Etyt008ngbrspU');
 
-function StripePaymentElementForm({  estimatedValue = 293 }) {
+function StripePaymentElementForm({  estimatedValue = 293 }:any) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ function StripePaymentElementForm({  estimatedValue = 293 }) {
 }
 
 export default function PaymentMethod({ estimatedValue = 293 }:any) {
-  const [clientSecret, setClientSecret] = useState<any>(null);
+  const [clientSecret, setClientSecret] = useState<any>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
