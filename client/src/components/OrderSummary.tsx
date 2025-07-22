@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function OrderSummary({ onPay, estimatedValue = 293 }:any) {
   return (

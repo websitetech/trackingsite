@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
+
 const stripePromise = loadStripe('pk_test_51RmVWcI6ptZDqevNhSL1cOkv17IoYm5on5h04IjeWMYUAHk7HPf3TOjEJ2iHmPXO8T03xhvyn8VUBl2A8Tc8Etyt008ngbrspU');
 
-function StripePaymentElementForm({ clientSecret, estimatedValue = 293 }) {
+function StripePaymentElementForm({  estimatedValue = 293 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handlePay = async (e) => {
+  const handlePay = async (e:any) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -19,7 +20,7 @@ function StripePaymentElementForm({ clientSecret, estimatedValue = 293 }) {
       setLoading(false);
       return;
     }
-    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+    const { error: stripeError, paymentIntent }:any = await stripe.confirmPayment({
       elements,
       confirmParams: {},
       redirect: 'if_required',
@@ -49,7 +50,7 @@ function StripePaymentElementForm({ clientSecret, estimatedValue = 293 }) {
 }
 
 export default function PaymentMethod({ estimatedValue = 293 }:any) {
-  const [clientSecret, setClientSecret] = useState(null);
+  const [clientSecret, setClientSecret] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -66,7 +67,7 @@ export default function PaymentMethod({ estimatedValue = 293 }:any) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create payment intent');
         setClientSecret(data.clientSecret);
-      } catch (err) {
+      } catch (err:any) {
         setError(err.message || 'Failed to load payment form');
       } finally {
         setLoading(false);
