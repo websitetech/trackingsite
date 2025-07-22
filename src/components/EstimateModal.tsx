@@ -63,7 +63,7 @@ const EstimateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       overflow: 'auto',
     }}>
       <div className="modal" style={{
-        maxWidth: 640,
+        maxWidth: 550,
         width: '100%',
         margin: '0 auto',
         background: 'white',
@@ -71,12 +71,16 @@ const EstimateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         padding: 48,
         boxShadow: '0 12px 40px rgba(0,0,0,0.13)',
         animation: 'slideDown 0.5s',
-        maxHeight: '95vh',
+        // maxHeight: '95vh',
         overflowY: 'auto',
         position: 'relative',
         marginTop: 0,
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height:"max-content"
       }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '2rem', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', width: '100%' }}>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1a1a1a', margin: 0, marginRight: 12 }}>Get Shipping Estimate</h2>
           <button
             style={{
