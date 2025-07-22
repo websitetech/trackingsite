@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function OrderSummary({ onPay, estimatedValue = 293 }) {
+export default function OrderSummary({ onPay, estimatedValue = 293 }:any) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow p-6 w-full md:w-80 animate-fade-in">
       <div className="mb-4">

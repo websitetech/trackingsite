@@ -1,4 +1,4 @@
-import React from 'react';
+
 import PaymentMethod from '../components/PaymentMethod';
 
 export default function PaymentPage() {

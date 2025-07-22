@@ -48,7 +48,7 @@ function StripePaymentElementForm({ clientSecret, estimatedValue = 293 }) {
   );
 }
 
-export default function PaymentMethod({ estimatedValue = 293 }) {
+export default function PaymentMethod({ estimatedValue = 293 }:any) {
   const [clientSecret, setClientSecret] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
