@@ -1,12 +1,17 @@
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { trackingAPI } from '../services/api';
 
 interface TrackingData {
   tracking_number: string;
   status: string;
   location: string;
   estimated_delivery: string;
-  history?: Array<{ date: string; status: string; location: string }>;
+  history: Array<{
+    date: string;
+    status: string;
+    location: string;
+  }>;
 }
 
 const TrackingPage = () => {
@@ -22,16 +27,13 @@ const TrackingPage = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tracking_number: trackingNumber, postal_code: postalCode })
+      const data = await trackingAPI.trackPackage({ 
+        tracking_number: trackingNumber!, 
+        zip_code: postalCode 
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to track package');
       setTrackingData(data);
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || 'Failed to track package');
       setTrackingData(null);
     } finally {
       setLoading(false);

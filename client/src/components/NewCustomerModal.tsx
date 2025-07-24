@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { authAPI } from '../services/api';
 
 interface NewCustomerModalProps {
   onClose: () => void;
@@ -63,20 +64,15 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setError('');
     const username = (formData.firstName + formData.lastName).replace(/\s+/g, '').toLowerCase();
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-          stateProvince: formData.stateProvince,
-          postalCode: formData.postalCode
-        })
+      const data = await authAPI.register({
+        username,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        stateProvince: formData.stateProvince,
+        postalCode: formData.postalCode
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Registration failed');
+      
       if (data.emailVerification) {
         setRegisteredEmail(formData.email);
         setAwaitingVerification(true);
@@ -89,18 +85,13 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       setLoading(false);
     }
   };
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setVerificationError('');
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/verify-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: registeredEmail, code: verificationCode })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Verification failed');
+      await authAPI.verifyEmail({ email: registeredEmail, code: verificationCode });
       setSuccess(true);
       setAwaitingVerification(false);
     } catch (err: any) {

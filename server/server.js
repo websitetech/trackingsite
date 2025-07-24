@@ -213,26 +213,43 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Track package
-app.post('/api/track', (req, res) => {
-  const { tracking_number, zip_code } = req.body;
+app.post('/api/track', async (req, res) => {
+  try {
+    const { tracking_number, zip_code } = req.body;
 
-  if (!tracking_number || !zip_code) {
-    return res.status(400).json({ error: 'Tracking number and zip code are required' });
+    if (!tracking_number || !zip_code) {
+      return res.status(400).json({ error: 'Tracking number and zip code are required' });
+    }
+
+    // Get package from database
+    const packageData = await dbHelpers.getPackageByTrackingNumber(tracking_number);
+    
+    if (!packageData) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+
+    // Get tracking history for the package
+    const trackingHistory = await dbHelpers.getPackageTrackingHistory(packageData.id);
+
+    // Format tracking data
+    const trackingData = {
+      tracking_number: packageData.tracking_number,
+      status: packageData.status,
+      location: trackingHistory.length > 0 ? trackingHistory[0].location : 'Origin',
+      estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // Mock delivery date
+      history: trackingHistory.map(entry => ({
+        date: entry.timestamp,
+        status: entry.status,
+        location: entry.location,
+        description: entry.description
+      }))
+    };
+
+    res.json(trackingData);
+  } catch (error) {
+    console.error('Tracking error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
-
-  // Simulate package tracking with mock data
-  const mockTrackingData = {
-    tracking_number,
-    status: 'In Transit',
-    location: 'Distribution Center',
-    estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    history: [
-      { date: new Date().toISOString(), status: 'Package picked up', location: 'Origin' },
-      { date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), status: 'In transit', location: 'Distribution Center' }
-    ]
-  };
-
-  res.json(mockTrackingData);
 });
 
 // Get shipping estimate
@@ -283,33 +300,77 @@ app.post('/api/estimate', async (req, res) => {
 // Create new shipment
 app.post('/api/ship', authenticateToken, async (req, res) => {
   try {
-    const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address, contact_number } = req.body;
+    const { 
+      customer, 
+      service_type, 
+      service_type_label, 
+      recipient_name, 
+      recipient_address, 
+      contact_number,
+      origin_postal,
+      destination_postal,
+      weight,
+      price 
+    } = req.body;
     const user_id = req.user.id;
 
-    if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address || !contact_number) {
-      return res.status(400).json({ error: 'All fields are required' });
+    if (!customer || !service_type || !recipient_name || !recipient_address || !contact_number || !price) {
+      return res.status(400).json({ error: 'All required fields are missing' });
     }
 
-    // Generate tracking number
-    const tracking_number = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+    // Generate shipment number
+    const shipment_number = dbHelpers.generateShipmentNumber();
 
-    const packageData = {
-      tracking_number,
+    const shipmentData = {
       user_id,
-      origin_zip,
-      destination_zip,
-      weight: parseFloat(weight),
+      shipment_number,
+      customer,
+      service_type,
+      service_type_label,
       recipient_name,
       recipient_address,
       contact_number,
-      status: 'pending'
+      price: parseFloat(price),
+      origin_postal,
+      destination_postal,
+      weight: weight ? parseFloat(weight) : null,
+      status: 'pending',
+      payment_status: 'pending'
+    };
+
+    const newShipment = await dbHelpers.createShipment(shipmentData);
+
+    // Create package record linked to the shipment
+    const tracking_number = dbHelpers.generateTrackingNumber();
+    const packageData = {
+      user_id,
+      shipment_id: newShipment.id,
+      tracking_number,
+      origin_zip: origin_postal,
+      destination_zip: destination_postal,
+      weight: weight ? parseFloat(weight) : null,
+      status: 'pending',
+      recipient_name,
+      recipient_address,
+      contact_number
     };
 
     const newPackage = await dbHelpers.createPackage(packageData);
 
+    // Add initial tracking history entry
+    const initialTrackingData = {
+      status: 'Shipment Created',
+      location: 'Origin',
+      description: `Shipment ${shipment_number} created and package ${tracking_number} assigned`
+    };
+
+    await dbHelpers.addTrackingHistory(newPackage.id, initialTrackingData);
+
     res.status(201).json({
-      message: 'Shipment created successfully',
-      tracking_number,
+      message: 'Shipment and package created successfully',
+      shipment_number: newShipment.shipment_number,
+      shipment_id: newShipment.id,
+      tracking_number: newPackage.tracking_number,
       package_id: newPackage.id
     });
 
@@ -332,41 +393,232 @@ app.post('/api/ship/bulk', authenticateToken, async (req, res) => {
     const createdShipments = [];
 
     for (const shipment of shipments) {
-      const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address, contact_number } = shipment;
+      const { 
+        customer, 
+        service_type, 
+        service_type_label, 
+        recipient_name, 
+        recipient_address, 
+        contact_number,
+        origin_postal,
+        destination_postal,
+        weight,
+        price 
+      } = shipment;
 
-      if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address || !contact_number) {
-        return res.status(400).json({ error: 'All fields are required for each shipment' });
+      if (!customer || !service_type || !recipient_name || !recipient_address || !contact_number || !price) {
+        return res.status(400).json({ error: 'All required fields are missing for each shipment' });
       }
 
-      // Generate tracking number
-      const tracking_number = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+      // Generate shipment number
+      const shipment_number = dbHelpers.generateShipmentNumber();
 
-      const packageData = {
-        tracking_number,
+      const shipmentData = {
         user_id,
-        origin_zip,
-        destination_zip,
-        weight: parseFloat(weight),
+        shipment_number,
+        customer,
+        service_type,
+        service_type_label,
         recipient_name,
         recipient_address,
         contact_number,
-        status: 'pending'
+        price: parseFloat(price),
+        origin_postal,
+        destination_postal,
+        weight: weight ? parseFloat(weight) : null,
+        status: 'pending',
+        payment_status: 'pending'
+      };
+
+      const newShipment = await dbHelpers.createShipment(shipmentData);
+
+      // Create package record linked to the shipment
+      const tracking_number = dbHelpers.generateTrackingNumber();
+      const packageData = {
+        user_id,
+        shipment_id: newShipment.id,
+        tracking_number,
+        origin_zip: origin_postal,
+        destination_zip: destination_postal,
+        weight: weight ? parseFloat(weight) : null,
+        status: 'pending',
+        recipient_name,
+        recipient_address,
+        contact_number
       };
 
       const newPackage = await dbHelpers.createPackage(packageData);
+
+      // Add initial tracking history entry
+      const initialTrackingData = {
+        status: 'Shipment Created',
+        location: 'Origin',
+        description: `Shipment ${shipment_number} created and package ${tracking_number} assigned`
+      };
+
+      await dbHelpers.addTrackingHistory(newPackage.id, initialTrackingData);
+
       createdShipments.push({
+        shipment_number: newShipment.shipment_number,
+        shipment_id: newShipment.id,
         tracking_number: newPackage.tracking_number,
         package_id: newPackage.id
       });
     }
 
     res.status(201).json({
-      message: `${createdShipments.length} shipments created successfully`,
+      message: `${createdShipments.length} shipments and packages created successfully`,
       shipments: createdShipments
     });
 
   } catch (error) {
     console.error('Bulk shipment creation error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Cart management endpoints
+app.post('/api/cart/add', authenticateToken, async (req, res) => {
+  try {
+    const cartItem = {
+      user_id: req.user.id,
+      ...req.body
+    };
+
+    const newCartItem = await dbHelpers.addToCart(cartItem);
+    res.status(201).json(newCartItem);
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/cart', authenticateToken, async (req, res) => {
+  try {
+    const cartItems = await dbHelpers.getCartByUserId(req.user.id);
+    res.json(cartItems);
+  } catch (error) {
+    console.error('Get cart error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/cart/:itemId', authenticateToken, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    await dbHelpers.removeFromCart(itemId, req.user.id);
+    res.json({ message: 'Item removed from cart' });
+  } catch (error) {
+    console.error('Remove from cart error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/cart', authenticateToken, async (req, res) => {
+  try {
+    await dbHelpers.clearCart(req.user.id);
+    res.json({ message: 'Cart cleared' });
+  } catch (error) {
+    console.error('Clear cart error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get customer tariffs
+app.get('/api/tariffs', async (req, res) => {
+  try {
+    const tariffs = await dbHelpers.getCustomerTariffs();
+    res.json(tariffs);
+  } catch (error) {
+    console.error('Get tariffs error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get user's shipments
+app.get('/api/shipments', authenticateToken, async (req, res) => {
+  try {
+    const shipments = await dbHelpers.getShipmentsByUserId(req.user.id);
+    res.json(shipments);
+  } catch (error) {
+    console.error('Get shipments error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get payment transactions
+app.get('/api/payments', authenticateToken, async (req, res) => {
+  try {
+    const transactions = await dbHelpers.getPaymentTransactionsByUserId(req.user.id);
+    res.json(transactions);
+  } catch (error) {
+    console.error('Get payments error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Create payment transaction
+app.post('/api/payments', authenticateToken, async (req, res) => {
+  try {
+    const { 
+      shipment_id, 
+      amount, 
+      payment_method, 
+      stripe_payment_intent_id,
+      stripe_charge_id,
+      billing_address 
+    } = req.body;
+
+    const transactionData = {
+      user_id: req.user.id,
+      shipment_id,
+      transaction_id: dbHelpers.generateTransactionId(),
+      amount: parseFloat(amount),
+      payment_method,
+      payment_status: 'pending',
+      stripe_payment_intent_id,
+      stripe_charge_id,
+      billing_address
+    };
+
+    const newTransaction = await dbHelpers.createPaymentTransaction(transactionData);
+    res.status(201).json(newTransaction);
+  } catch (error) {
+    console.error('Create payment error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update payment status
+app.patch('/api/payments/:transactionId/status', authenticateToken, async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const { status } = req.body;
+
+    const updatedTransaction = await dbHelpers.updatePaymentStatus(transactionId, status);
+    res.json(updatedTransaction);
+  } catch (error) {
+    console.error('Update payment status error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add tracking history
+app.post('/api/packages/:packageId/tracking', authenticateToken, async (req, res) => {
+  try {
+    const { packageId } = req.params;
+    const { status, location, description } = req.body;
+
+    const trackingData = {
+      status,
+      location,
+      description
+    };
+
+    const newTrackingEntry = await dbHelpers.addTrackingHistory(packageId, trackingData);
+    res.status(201).json(newTrackingEntry);
+  } catch (error) {
+    console.error('Add tracking history error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

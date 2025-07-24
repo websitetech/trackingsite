@@ -70,7 +70,88 @@ export const dbHelpers = {
     return data;
   },
 
-  // Package operations
+  // Cart operations
+  async addToCart(cartItem) {
+    const { data, error } = await supabase
+      .from('cart')
+      .insert([cartItem])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getCartByUserId(userId) {
+    const { data, error } = await supabase
+      .from('cart')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async removeFromCart(itemId, userId) {
+    const { data, error } = await supabase
+      .from('cart')
+      .delete()
+      .eq('item_id', itemId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async clearCart(userId) {
+    const { error } = await supabase
+      .from('cart')
+      .delete()
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    return { success: true };
+  },
+
+  // Shipment operations
+  async createShipment(shipmentData) {
+    const { data, error } = await supabase
+      .from('shipments')
+      .insert([shipmentData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getShipmentsByUserId(userId) {
+    const { data, error } = await supabase
+      .from('shipments')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateShipmentStatus(shipmentId, status) {
+    const { data, error } = await supabase
+      .from('shipments')
+      .update({ status })
+      .eq('id', shipmentId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Package operations (enhanced)
   async createPackage(packageData) {
     const { data, error } = await supabase
       .from('packages')
@@ -85,7 +166,17 @@ export const dbHelpers = {
   async getPackagesByUserId(userId) {
     const { data, error } = await supabase
       .from('packages')
-      .select('*')
+      .select(`
+        *,
+        shipments (
+          shipment_number,
+          customer,
+          service_type,
+          service_type_label,
+          status,
+          payment_status
+        )
+      `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     
@@ -96,8 +187,115 @@ export const dbHelpers = {
   async getPackageByTrackingNumber(trackingNumber) {
     const { data, error } = await supabase
       .from('packages')
-      .select('*')
+      .select(`
+        *,
+        shipments (
+          shipment_number,
+          customer,
+          service_type,
+          service_type_label,
+          status,
+          payment_status
+        ),
+        package_tracking_history (
+          status,
+          location,
+          description,
+          timestamp
+        )
+      `)
       .eq('tracking_number', trackingNumber)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async addTrackingHistory(packageId, trackingData) {
+    const { data, error } = await supabase
+      .from('package_tracking_history')
+      .insert([{
+        package_id: packageId,
+        ...trackingData
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getPackageTrackingHistory(packageId) {
+    const { data, error } = await supabase
+      .from('package_tracking_history')
+      .select('*')
+      .eq('package_id', packageId)
+      .order('timestamp', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Payment transaction operations
+  async createPaymentTransaction(transactionData) {
+    const { data, error } = await supabase
+      .from('payment_transactions')
+      .insert([transactionData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getPaymentTransactionsByUserId(userId) {
+    const { data, error } = await supabase
+      .from('payment_transactions')
+      .select(`
+        *,
+        shipments (
+          shipment_number,
+          customer,
+          service_type_label
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updatePaymentStatus(transactionId, status) {
+    const { data, error } = await supabase
+      .from('payment_transactions')
+      .update({ payment_status: status })
+      .eq('transaction_id', transactionId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Customer tariffs operations
+  async getCustomerTariffs() {
+    const { data, error } = await supabase
+      .from('customer_tariffs')
+      .select('*')
+      .eq('is_active', true)
+      .order('customer_name');
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getCustomerTariff(customerName) {
+    const { data, error } = await supabase
+      .from('customer_tariffs')
+      .select('*')
+      .eq('customer_name', customerName)
+      .eq('is_active', true)
       .single();
     
     if (error && error.code !== 'PGRST116') throw error;
@@ -125,6 +323,19 @@ export const dbHelpers = {
     
     if (error) throw error;
     return data;
+  },
+
+  // Utility functions
+  generateTrackingNumber() {
+    return 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+  },
+
+  generateShipmentNumber() {
+    return 'SHP' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+  },
+
+  generateTransactionId() {
+    return 'TXN' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
   }
 };
 

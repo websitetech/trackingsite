@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackingAPI } from '../services/api';
 
 const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
@@ -20,22 +21,10 @@ const TrackingForm: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/track', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tracking_number: trackingNumber,
-          postal_code: postalCode,
-        }),
+      await trackingAPI.trackPackage({
+        tracking_number: trackingNumber,
+        zip_code: postalCode,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to track package');
-      }
 
       navigate(`/track/${trackingNumber}`);
     } catch (err) {

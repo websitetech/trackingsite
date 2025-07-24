@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useCart } from '../contexts/CartContext';
 
@@ -19,18 +19,42 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { state: cartState } = useCart();
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    console.log('Logo clicked! Navigating to home page...');
+    navigate('/');
+  };
+
+  const handleLogoClick2 = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/');
+  };
 
   return (
-    <header className="header">
-      <div className="header-content">
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} tabIndex={0}>
-          {/* <img src={logo} alt="Noble SpeedyTrac. inc logo" style={{ height: 48, width: 'auto', marginRight: 0 }} /> */}
-          lhjh
-        </Link>
-        <Link to="/">
-          <button style={{ marginLeft: '1rem', padding: '0.5rem 1rem', background: '#b91c1c', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
-            Test Home Link
-          </button>
+    <header className="header" style={{ pointerEvents: 'auto', zIndex: 9999 }}>
+      <div className="header-content" style={{ pointerEvents: 'auto' }}>
+        <Link 
+          to="/"
+          className="logo" 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            cursor: 'pointer', 
+            pointerEvents: 'auto',
+            textDecoration: 'none',
+            color: 'inherit',
+            position: 'relative',
+            zIndex: 10000
+          }}
+          onClick={handleLogoClick2}
+          title="Click to go to home page"
+        >
+          <img 
+            src={logo} 
+            alt="Noble SpeedyTrac. inc logo" 
+            style={{ height: 48, width: 'auto', marginRight: 0, cursor: 'pointer', pointerEvents: 'auto' }}
+          />
         </Link>
         <nav className="nav">
           {user ? (

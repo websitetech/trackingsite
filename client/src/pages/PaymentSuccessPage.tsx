@@ -8,6 +8,8 @@ const PaymentSuccessPage: React.FC = () => {
   const fromCart = location.state?.fromCart || false;
   const shipmentCount = location.state?.shipmentCount || 1;
   const totalAmount = location.state?.totalAmount || 0;
+  const shipmentNumber = location.state?.shipmentNumber;
+  const trackingNumber = location.state?.trackingNumber;
 
   const handleGoToUser = () => {
     navigate('/user');
@@ -50,6 +52,25 @@ const PaymentSuccessPage: React.FC = () => {
             <p style={{ color: '#666', marginBottom: '2rem' }}>
               Your shipment has been created and is being processed.
             </p>
+            {shipmentNumber && (
+              <div style={{
+                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                padding: '1.5rem',
+                borderRadius: '16px',
+                margin: '1.5rem 0',
+                textAlign: 'left',
+                border: '2px solid #bae6fd',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+              }}>
+                <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Shipment Number:</strong> {shipmentNumber}</p>
+                {trackingNumber && (
+                  <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Tracking Number:</strong> {trackingNumber}</p>
+                )}
+                <p style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: '#666' }}>
+                  You can use the tracking number to track your package status.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

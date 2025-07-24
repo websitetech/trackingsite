@@ -3,10 +3,11 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { shipmentAPI, paymentAPI } from '../services/api';
 
 const stripePromise = loadStripe('pk_test_51RmVWcI6ptZDqevNhSL1cOkv17IoYm5on5h04IjeWMYUAHk7HPf3TOjEJ2iHmPXO8T03xhvyn8VUBl2A8Tc8Etyt008ngbrspU');
 
-function StripePaymentElementForm({ estimatedValue = 293, fromCart = false }: any) {
+function StripePaymentElementForm({ estimatedValue = 293, fromCart = false, singleShipmentData = null }: any) {
   const stripe = useStripe();
   const elements = useElements();
   const { state: cartState, clearCart } = useCart();
@@ -18,45 +19,26 @@ function StripePaymentElementForm({ estimatedValue = 293, fromCart = false }: an
   const createShipments = async () => {
     if (!fromCart || cartState.items.length === 0) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Authentication required');
-      return;
-    }
-
     try {
       // Prepare shipments data for bulk creation
       const shipmentsData = cartState.items.map(item => ({
-        origin_postal: item.originPostal || '',
-        destination_postal: item.destinationPostal || '',
-        weight: item.weight || 1,
+        customer: item.customer,
         service_type: item.serviceType,
+        service_type_label: item.serviceTypeLabel || '',
         recipient_name: item.recipientName,
         recipient_address: item.recipientAddress,
         contact_number: item.contactNumber,
+        origin_postal: item.originPostal || '',
+        destination_postal: item.destinationPostal || '',
+        weight: item.weight || 1,
+        price: item.price
       }));
 
-      // Create all shipments in bulk
-      const response = await fetch('https://trackingsite.onrender.com/api/ship/bulk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          shipments: shipmentsData
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to create shipments');
-      }
-
-      const result = await response.json();
+      // Create all shipments in bulk using the new API
+      await shipmentAPI.createBulkShipments(shipmentsData);
       
       // Clear cart after successful creation
-      clearCart();
+      await clearCart();
       
       // Navigate to success page
       navigate('/payment-success', { 
@@ -68,6 +50,28 @@ function StripePaymentElementForm({ estimatedValue = 293, fromCart = false }: an
       });
     } catch (err: any) {
       setError(err.message || 'Failed to create shipments');
+    }
+  };
+
+  const createSingleShipment = async () => {
+    if (!singleShipmentData) return;
+
+    try {
+      // Create single shipment using the API
+      const shipmentResult = await shipmentAPI.createShipment(singleShipmentData);
+      
+      // Navigate to success page with shipment details
+      navigate('/payment-success', { 
+        state: { 
+          fromCart: false, 
+          shipmentCount: 1,
+          totalAmount: estimatedValue,
+          shipmentNumber: shipmentResult.shipment_number,
+          trackingNumber: shipmentResult.tracking_number
+        } 
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to create shipment');
     }
   };
 
@@ -92,8 +96,11 @@ function StripePaymentElementForm({ estimatedValue = 293, fromCart = false }: an
       // If payment is successful and it's from cart, create shipments
       if (fromCart) {
         await createShipments();
+      } else if (singleShipmentData) {
+        // For single shipment, create the shipment
+        await createSingleShipment();
       } else {
-        // For single shipment, navigate to success page
+        // For single shipment without data, navigate to success page
         navigate('/payment-success', { 
           state: { 
             fromCart: false, 
@@ -134,7 +141,7 @@ function StripePaymentElementForm({ estimatedValue = 293, fromCart = false }: an
   );
 }
 
-export default function PaymentMethod({ estimatedValue = 293, fromCart = false }: any) {
+export default function PaymentMethod({ estimatedValue = 293, fromCart = false, singleShipmentData = null }: any) {
   const [clientSecret, setClientSecret] = useState<any>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -144,13 +151,7 @@ export default function PaymentMethod({ estimatedValue = 293, fromCart = false }
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('https://trackingsite.onrender.com/api/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: estimatedValue, currency: 'usd' }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to create payment intent');
+        const data = await paymentAPI.createPaymentIntent(estimatedValue, 'usd');
         setClientSecret(data.clientSecret);
       } catch (err: any) {
         setError(err.message || 'Failed to load payment form');
@@ -167,7 +168,12 @@ export default function PaymentMethod({ estimatedValue = 293, fromCart = false }
 
   return (
     <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <StripePaymentElementForm clientSecret={clientSecret} estimatedValue={estimatedValue} fromCart={fromCart} />
+      <StripePaymentElementForm 
+        clientSecret={clientSecret} 
+        estimatedValue={estimatedValue} 
+        fromCart={fromCart} 
+        singleShipmentData={singleShipmentData}
+      />
     </Elements>
   );
 } 
