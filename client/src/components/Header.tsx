@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useCart } from '../contexts/CartContext';
 
 interface User {
   id: number;
@@ -16,16 +18,60 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { state: cartState } = useCart();
 
   return (
     <header className="header">
       <div className="header-content">
-        <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
-          <img src={logo} alt="Noble SpeedyTrac. inc logo" style={{ height: 48, width: 'auto', marginRight: 0 }} />
-        </div>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} tabIndex={0}>
+          {/* <img src={logo} alt="Noble SpeedyTrac. inc logo" style={{ height: 48, width: 'auto', marginRight: 0 }} /> */}
+          lhjh
+        </Link>
+        <Link to="/">
+          <button style={{ marginLeft: '1rem', padding: '0.5rem 1rem', background: '#b91c1c', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
+            Test Home Link
+          </button>
+        </Link>
         <nav className="nav">
           {user ? (
-            <div className="user-section" style={{ position: 'relative' }}>
+            <div className="user-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {/* Cart Icon */}
+              <Link to="/cart" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    color: '#b91c1c',
+                    padding: '0.5rem',
+                    borderRadius: '0.5rem',
+                    position: 'relative'
+                  }}
+                >
+                  🛒
+                  {cartState.items.length > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-5px',
+                      right: '-5px',
+                      background: '#dc2626',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      fontSize: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold'
+                    }}>
+                      {cartState.items.length}
+                    </span>
+                  )}
+                </button>
+              </Link>
+              
               {/* Burger icon after logo */}
               <button
                 className="burger-menu"

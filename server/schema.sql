@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS packages (
   origin_zip TEXT,
   destination_zip TEXT,
   weight DECIMAL(10,2),
+  recipient_name TEXT,
+  recipient_address TEXT,
+  contact_number TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

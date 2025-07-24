@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useCart } from '../contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -18,9 +20,28 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
   const [serviceType, setServiceType] = useState('standard');
   const [recipientName, setRecipientName] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState<any>(null);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const navigate = useNavigate();
+  const { addItem, state: cartState } = useCart();
+
+  const calculatePrice = () => {
+    const weightNum = parseFloat(weight) || 0;
+    const baseCost = 15.99;
+    const weightMultiplier = weightNum * 2.5;
+    const distanceMultiplier = Math.abs(parseInt(destinationPostal) - parseInt(originPostal)) / 1000;
+    
+    let serviceMultiplier = 1;
+    switch (serviceType) {
+      case 'express': serviceMultiplier = 2.5; break;
+      case 'overnight': serviceMultiplier = 4; break;
+      default: serviceMultiplier = 1;
+    }
+
+    return (baseCost + weightMultiplier + distanceMultiplier) * serviceMultiplier;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +51,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
       return;
     }
 
-    if (!originPostal || !destinationPostal || !weight || !recipientName || !recipientAddress) {
+    if (!originPostal || !destinationPostal || !weight || !recipientName || !recipientAddress || !contactNumber) {
       setError('Please fill in all fields');
       return;
     }
@@ -45,35 +66,51 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://trackingsite.onrender.com/api/ship', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          origin_postal: originPostal,
-          destination_postal: destinationPostal,
-          weight: weightNum,
-          service_type: serviceType,
-          recipient_name: recipientName,
-          recipient_address: recipientAddress,
-        }),
-      });
+      const price = calculatePrice();
+      const serviceTypeLabel = serviceType === 'standard' ? 'Standard (3-5 days)' : 
+                              serviceType === 'express' ? 'Express (2-3 days)' : 'Overnight (1 day)';
 
-      const data = await response.json();
+      const cartItem = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        customer: 'Custom Shipment',
+        serviceType,
+        serviceTypeLabel,
+        recipientName,
+        recipientAddress,
+        contactNumber,
+        price,
+        originPostal,
+        destinationPostal,
+        weight: weightNum,
+      };
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create shipment');
-      }
-
-      setSuccess(data);
+      addItem(cartItem);
+      setAddedToCart(true);
+      
+      // Reset form
+      setOriginPostal('');
+      setDestinationPostal('');
+      setWeight('');
+      setServiceType('standard');
+      setRecipientName('');
+      setRecipientAddress('');
+      setContactNumber('');
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewCart = () => {
+    onClose();
+    navigate('/cart');
+  };
+
+  const handleProceedToPayment = () => {
+    onClose();
+    navigate('/payment', { state: { fromCart: true } });
   };
 
   if (!user) {
@@ -171,7 +208,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
       }} onClick={(e) => e.stopPropagation()}>
         
-        {!success ? (
+        {!addedToCart ? (
           <>
             <div style={{
               display: 'flex',
@@ -315,6 +352,42 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
                   }}
                 />
               </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label htmlFor="contactNumber" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Contact Number</label>
+                <input
+                  type="tel"
+                  id="contactNumber"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  placeholder="Enter contact number"
+                  required
+                  style={{
+                    padding: '0.75rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.95rem',
+                    background: '#fff'
+                  }}
+                />
+              </div>
+
+              {/* Price Display */}
+              {originPostal && destinationPostal && weight && (
+                <div style={{ 
+                  background: '#f8fafc', 
+                  padding: '1rem', 
+                  borderRadius: '0.75rem', 
+                  border: '1px solid #e2e8f0' 
+                }}>
+                  <div style={{ fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+                    Estimated Price:
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#dc2626' }}>
+                    ${calculatePrice().toFixed(2)}
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div style={{
@@ -345,70 +418,36 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
                 }}
                 disabled={loading}
               >
-                {loading ? 'Creating...' : 'Create Shipment'}
+                {loading ? 'Adding...' : 'Add to Cart'}
               </button>
             </form>
           </>
         ) : (
-          <div style={{ padding: '1rem 0' }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem'
-            }}>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Shipment Created Successfully!</h3>
-              <button 
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  color: '#6b7280',
-                  padding: '0.5rem',
-                  borderRadius: '0.5rem'
-                }}
-                onClick={onClose}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div style={{
-              background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-              padding: '2rem',
-              borderRadius: '20px',
-              margin: '1.5rem 0',
-              border: '2px solid rgba(220, 38, 38, 0.1)',
-              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid rgba(220, 38, 38, 0.1)' }}>
-                <span style={{ fontWeight: 600, color: '#374151' }}>Tracking Number:</span>
-                <span style={{ fontWeight: 800, color: '#dc2626', fontFamily: 'Courier New, monospace', fontSize: '1.2rem' }}>{success.tracking_number}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0' }}>
-                <span style={{ fontWeight: 600, color: '#374151' }}>Package ID:</span>
-                <span>{success.package_id}</span>
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-              <button 
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '1rem' }}>
+              Added to Cart!
+            </h3>
+            <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+              Your shipment has been added to your cart successfully.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button
+                onClick={() => setAddedToCart(false)}
                 style={{
                   background: 'white',
-                  color: '#dc2626',
                   border: '2px solid #dc2626',
+                  color: '#dc2626',
                   padding: '0.75rem 1.5rem',
                   borderRadius: '0.75rem',
                   fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  cursor: 'pointer'
                 }}
-                onClick={() => setSuccess(null)}
               >
-                Create Another
+                Add Another
               </button>
-              <button 
+              <button
+                onClick={handleViewCart}
                 style={{
                   background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
                   color: 'white',
@@ -416,12 +455,10 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
                   padding: '0.75rem 1.5rem',
                   borderRadius: '0.75rem',
                   fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
+                  cursor: 'pointer'
                 }}
-                onClick={onClose}
               >
-                Close
+                View Cart
               </button>
             </div>
           </div>

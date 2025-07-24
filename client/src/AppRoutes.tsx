@@ -11,6 +11,9 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import TrackingPage from './components/TrackingPage';
 import UserPage from './components/UserPage';
 import ShipmentPage from './pages/ShipmentPage';
+import CartPage from './pages/CartPage';
+import PaymentPage from './pages/PaymentPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 
 interface User {
@@ -126,6 +129,9 @@ function AppRoutes() {
         <Route path="/user" element={user ? <UserPage user={user} /> : <div>Please log in to view your dashboard.</div>} />
         <Route path="/track/:trackingNumber" element={<TrackingPage />} />
         <Route path="/shipment" element={user ? <ShipmentPage /> : <div>Please log in to create a shipment.</div>} />
+        <Route path="/cart" element={user ? <CartPage /> : <div>Please log in to view your cart.</div>} />
+        <Route path="/payment" element={user ? <PaymentPage /> : <div>Please log in to make a payment.</div>} />
+        <Route path="/payment-success" element={user ? <PaymentSuccessPage /> : <div>Please log in to view payment success.</div>} />
       </Routes>
       {/* Footer / Bottom Banner */}
       <footer className="footer-banner">

@@ -283,10 +283,10 @@ app.post('/api/estimate', async (req, res) => {
 // Create new shipment
 app.post('/api/ship', authenticateToken, async (req, res) => {
   try {
-    const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address } = req.body;
+    const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address, contact_number } = req.body;
     const user_id = req.user.id;
 
-    if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address) {
+    if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address || !contact_number) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -299,6 +299,9 @@ app.post('/api/ship', authenticateToken, async (req, res) => {
       origin_zip,
       destination_zip,
       weight: parseFloat(weight),
+      recipient_name,
+      recipient_address,
+      contact_number,
       status: 'pending'
     };
 
@@ -312,6 +315,58 @@ app.post('/api/ship', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error('Shipment creation error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Create multiple shipments from cart
+app.post('/api/ship/bulk', authenticateToken, async (req, res) => {
+  try {
+    const { shipments } = req.body;
+    const user_id = req.user.id;
+
+    if (!shipments || !Array.isArray(shipments) || shipments.length === 0) {
+      return res.status(400).json({ error: 'Shipments array is required' });
+    }
+
+    const createdShipments = [];
+
+    for (const shipment of shipments) {
+      const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address, contact_number } = shipment;
+
+      if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address || !contact_number) {
+        return res.status(400).json({ error: 'All fields are required for each shipment' });
+      }
+
+      // Generate tracking number
+      const tracking_number = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+
+      const packageData = {
+        tracking_number,
+        user_id,
+        origin_zip,
+        destination_zip,
+        weight: parseFloat(weight),
+        recipient_name,
+        recipient_address,
+        contact_number,
+        status: 'pending'
+      };
+
+      const newPackage = await dbHelpers.createPackage(packageData);
+      createdShipments.push({
+        tracking_number: newPackage.tracking_number,
+        package_id: newPackage.id
+      });
+    }
+
+    res.status(201).json({
+      message: `${createdShipments.length} shipments created successfully`,
+      shipments: createdShipments
+    });
+
+  } catch (error) {
+    console.error('Bulk shipment creation error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
