@@ -21,10 +21,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
   const { state: cartState } = useCart();
   const navigate = useNavigate();
 
-  const handleLogoClick = () => {
-    console.log('Logo clicked! Navigating to home page...');
-    navigate('/');
-  };
+
 
   const handleLogoClick2 = (e: React.MouseEvent) => {
     e.preventDefault();

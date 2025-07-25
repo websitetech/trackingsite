@@ -25,7 +25,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
   const [error, setError] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
   const navigate = useNavigate();
-  const { addItem, state: cartState } = useCart();
+  const { addItem } = useCart();
 
   const calculatePrice = () => {
     const weightNum = parseFloat(weight) || 0;
@@ -108,10 +108,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
     navigate('/cart');
   };
 
-  const handleProceedToPayment = () => {
-    onClose();
-    navigate('/payment', { state: { fromCart: true } });
-  };
+
 
   if (!user) {
     return (
