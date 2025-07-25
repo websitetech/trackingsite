@@ -14,6 +14,9 @@ import ShipmentPage from './pages/ShipmentPage';
 import CartPage from './pages/CartPage';
 import PaymentPage from './pages/PaymentPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import ProfilePage from './pages/ProfilePage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import FAQPage from './pages/FAQPage';
 
 
 interface User {
@@ -127,11 +130,14 @@ function AppRoutes() {
           )
         } />
         <Route path="/user" element={user ? <UserPage user={user} /> : <div>Please log in to view your dashboard.</div>} />
+        <Route path="/profile" element={user ? <ProfilePage /> : <div>Please log in to view your profile.</div>} />
         <Route path="/track/:trackingNumber" element={<TrackingPage />} />
         <Route path="/shipment" element={user ? <ShipmentPage /> : <div>Please log in to create a shipment.</div>} />
         <Route path="/cart" element={user ? <CartPage /> : <div>Please log in to view your cart.</div>} />
         <Route path="/payment" element={user ? <PaymentPage /> : <div>Please log in to make a payment.</div>} />
         <Route path="/payment-success" element={user ? <PaymentSuccessPage /> : <div>Please log in to view payment success.</div>} />
+        <Route path="/orders" element={user ? <OrderHistoryPage /> : <div>Please log in to view your orders.</div>} />
+        <Route path="/faq" element={<FAQPage />} />
       </Routes>
       {/* Footer / Bottom Banner */}
       <footer className="footer-banner">

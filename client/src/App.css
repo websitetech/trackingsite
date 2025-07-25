@@ -286,6 +286,48 @@ body {
   overflow-x: hidden;
 }
 
+body.dark {
+  background: #18181b !important;
+  color: #f3f4f6 !important;
+}
+.dark .header,
+.dark .header-content,
+.dark .nav,
+.dark .user-section,
+.dark .modal,
+.dark .modal-overlay,
+.dark .tracking-result,
+.dark .result-card,
+.dark .specialty-section,
+.dark .specialty-card,
+.dark .footer-banner,
+.dark .footer-content,
+.dark .order-history-card,
+.dark .profile-card {
+  background: #23232a !important;
+  color: #f3f4f6 !important;
+  border-color: #27272a !important;
+}
+.dark input,
+.dark textarea,
+.dark select {
+  background: #18181b !important;
+  color: #f3f4f6 !important;
+  border: 1.5px solid #b91c1c !important;
+}
+.dark table {
+  background: #23232a !important;
+  color: #f3f4f6 !important;
+}
+.dark th, .dark td {
+  border-color: #27272a !important;
+}
+.dark .dropdown-menu {
+  background: #23232a !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 8px 32px rgba(185,28,28,0.22) !important;
+}
+
 .App {
   min-height: 100vh;
   display: flex;
