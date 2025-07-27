@@ -69,23 +69,10 @@ export const authAPI = {
 
   // Login user
   login: async (credentials: { username: string; password: string }) => {
-    // Mock login for testing user-specific data
-    const mockUsers = {
-      'john_doe': { id: 1, username: 'john_doe', email: 'john@example.com', role: 'user' },
-      'jane_smith': { id: 2, username: 'jane_smith', email: 'jane@example.com', role: 'user' },
-      'admin': { id: 3, username: 'admin', email: 'admin@example.com', role: 'admin' },
-    };
-
-    const user = mockUsers[credentials.username as keyof typeof mockUsers];
-    
-    if (user && credentials.password === 'password') {
-      return {
-        user,
-        token: 'mock-token-' + user.id
-      };
-    }
-    
-    throw new Error('Invalid credentials');
+    return publicRequest('/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
   },
 
   // Verify email
