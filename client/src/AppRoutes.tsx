@@ -17,12 +17,14 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import ProfilePage from './pages/ProfilePage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import FAQPage from './pages/FAQPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 
 interface User {
   id: number;
   username: string;
   email: string;
+  role?: string;
 }
 
 function AppRoutes() {
@@ -136,8 +138,9 @@ function AppRoutes() {
         <Route path="/cart" element={user ? <CartPage /> : <div>Please log in to view your cart.</div>} />
         <Route path="/payment" element={user ? <PaymentPage /> : <div>Please log in to make a payment.</div>} />
         <Route path="/payment-success" element={user ? <PaymentSuccessPage /> : <div>Please log in to view payment success.</div>} />
-        <Route path="/orders" element={user ? <OrderHistoryPage /> : <div>Please log in to view your orders.</div>} />
+        <Route path="/orders" element={user ? <OrderHistoryPage user={user} /> : <div>Please log in to view your orders.</div>} />
         <Route path="/faq" element={<FAQPage />} />
+        <Route path="/admin" element={user ? <AdminDashboard /> : <div>Please log in to access admin dashboard.</div>} />
       </Routes>
       {/* Footer / Bottom Banner */}
       <footer className="footer-banner">

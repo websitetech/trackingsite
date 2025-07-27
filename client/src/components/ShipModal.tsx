@@ -24,6 +24,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
   const navigate = useNavigate();
   const { addItem } = useCart();
 
@@ -70,8 +71,46 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
       const serviceTypeLabel = serviceType === 'standard' ? 'Standard (3-5 days)' : 
                               serviceType === 'express' ? 'Express (2-3 days)' : 'Overnight (1 day)';
 
-      const cartItem = {
+      // Generate tracking number
+      const trackingNumber = 'TRK' + Date.now().toString().slice(-9);
+      
+      // Create shipment object
+      const shipment = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        trackingNumber,
+        status: 'Pending',
+        date: new Date().toISOString().split('T')[0],
+        recipient: recipientName,
+        address: recipientAddress,
+        serviceType: serviceTypeLabel,
+        price,
+        history: [
+          { 
+            date: new Date().toISOString().split('T')[0], 
+            status: 'Order Created', 
+            location: 'Toronto Hub' 
+          },
+        ],
+        // Additional shipment details
+        originPostal,
+        destinationPostal,
+        weight: weightNum,
+        contactNumber,
+      };
+
+      // Save shipment to localStorage for this user
+      const existingShipments = localStorage.getItem(`newShipments_${user.username}`);
+      const shipments = existingShipments ? JSON.parse(existingShipments) : [];
+      shipments.push(shipment);
+      localStorage.setItem(`newShipments_${user.username}`, JSON.stringify(shipments));
+      
+      console.log('Shipment saved for user:', user.username);
+      console.log('Shipment data:', shipment);
+      console.log('Total shipments for user:', shipments.length);
+
+      // Also add to cart
+      const cartItem = {
+        id: shipment.id,
         customer: 'Custom Shipment',
         serviceType,
         serviceTypeLabel,
@@ -85,6 +124,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
       };
 
       addItem(cartItem);
+      setTrackingNumber(trackingNumber);
       setAddedToCart(true);
       
       // Reset form
@@ -423,12 +463,26 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '1rem' }}>
-              Added to Cart!
+              Shipment Created!
             </h3>
-            <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-              Your shipment has been added to your cart successfully.
+            <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+              Your shipment has been created and added to your cart successfully.
             </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <div style={{ 
+              background: '#f8fafc', 
+              padding: '1rem', 
+              borderRadius: '0.75rem', 
+              border: '1px solid #e2e8f0',
+              marginBottom: '2rem'
+            }}>
+              <div style={{ fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+                Tracking Number:
+              </div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#dc2626', fontFamily: 'monospace' }}>
+                {trackingNumber}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setAddedToCart(false)}
                 style={{
@@ -456,6 +510,23 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
                 }}
               >
                 View Cart
+              </button>
+              <button
+                onClick={() => {
+                  onClose();
+                  navigate('/orders');
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                View Orders
               </button>
             </div>
           </div>

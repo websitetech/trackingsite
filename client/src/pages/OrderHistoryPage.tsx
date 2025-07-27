@@ -1,45 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const mockOrders = [
-  {
-    id: '1',
-    trackingNumber: 'TRK123456789',
-    status: 'Delivered',
-    date: '2024-06-01',
-    recipient: 'Jane Smith',
-    address: '123 Main St, Toronto, ON',
-    serviceType: 'Express',
-    price: 49.99,
-    history: [
-      { date: '2024-05-30', status: 'Shipped', location: 'Toronto Hub' },
-      { date: '2024-05-31', status: 'In Transit', location: 'Mississauga' },
-      { date: '2024-06-01', status: 'Delivered', location: 'Toronto' },
-    ],
-  },
-  {
-    id: '2',
-    trackingNumber: 'TRK987654321',
-    status: 'In Transit',
-    date: '2024-06-03',
-    recipient: 'Bob Lee',
-    address: '456 King St, Toronto, ON',
-    serviceType: 'Standard',
-    price: 29.99,
-    history: [
-      { date: '2024-06-02', status: 'Shipped', location: 'Toronto Hub' },
-      { date: '2024-06-03', status: 'In Transit', location: 'Scarborough' },
-    ],
-  },
-];
+// User-specific mock data
+const userOrdersData = {
+  'john_doe': [
+    {
+      id: '1',
+      trackingNumber: 'TRK123456789',
+      status: 'Delivered',
+      date: '2024-06-01',
+      recipient: 'John Doe',
+      address: '123 Main St, Toronto, ON',
+      serviceType: 'Express',
+      price: 49.99,
+      history: [
+        { date: '2024-05-30', status: 'Shipped', location: 'Toronto Hub' },
+        { date: '2024-05-31', status: 'In Transit', location: 'Mississauga' },
+        { date: '2024-06-01', status: 'Delivered', location: 'Toronto' },
+      ],
+    },
+    {
+      id: '2',
+      trackingNumber: 'TRK987654321',
+      status: 'In Transit',
+      date: '2024-06-03',
+      recipient: 'John Doe',
+      address: '456 King St, Toronto, ON',
+      serviceType: 'Standard',
+      price: 29.99,
+      history: [
+        { date: '2024-06-02', status: 'Shipped', location: 'Toronto Hub' },
+        { date: '2024-06-03', status: 'In Transit', location: 'Scarborough' },
+      ],
+    },
+  ],
+  'jane_smith': [
+    {
+      id: '3',
+      trackingNumber: 'TRK555666777',
+      status: 'Delivered',
+      date: '2024-05-28',
+      recipient: 'Jane Smith',
+      address: '789 Queen St, Toronto, ON',
+      serviceType: 'Premium',
+      price: 79.99,
+      history: [
+        { date: '2024-05-25', status: 'Shipped', location: 'Toronto Hub' },
+        { date: '2024-05-26', status: 'In Transit', location: 'Vancouver' },
+        { date: '2024-05-28', status: 'Delivered', location: 'Toronto' },
+      ],
+    },
+  ],
+  'admin': [
+    {
+      id: '4',
+      trackingNumber: 'TRK111222333',
+      status: 'Pending',
+      date: '2024-06-05',
+      recipient: 'Admin User',
+      address: '321 Admin Ave, Toronto, ON',
+      serviceType: 'Express',
+      price: 59.99,
+      history: [
+        { date: '2024-06-05', status: 'Order Created', location: 'Toronto Hub' },
+      ],
+    },
+  ],
+};
+
+// Default empty orders for new users
+const defaultOrders: typeof userOrdersData['john_doe'] = [];
+
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role?: string;
+}
 
 interface OrderHistoryPageProps {
+  user: User | null;
   showToast?: (msg: string) => void;
 }
 
-const OrderHistoryPage: React.FC = () => {
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
+  // Get user-specific orders or default to empty array
+  const baseUserOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
+  
+  // Get newly created shipments from localStorage
+  const getNewShipments = () => {
+    if (!user) return [];
+    const newShipments = localStorage.getItem(`newShipments_${user.username}`);
+    return newShipments ? JSON.parse(newShipments) : [];
+  };
+
+  const [userOrders, setUserOrders] = useState([...baseUserOrders, ...getNewShipments()]);
+  const [selectedOrder, setSelectedOrder] = useState<typeof userOrders[0] | null>(null);
   const navigate = useNavigate();
+
+  // Update orders when user changes or component mounts
+  useEffect(() => {
+    const baseOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
+    const newShipments = getNewShipments();
+    console.log('User:', user?.username);
+    console.log('Base orders:', baseOrders.length);
+    console.log('New shipments:', newShipments.length);
+    console.log('Total orders:', baseOrders.length + newShipments.length);
+    setUserOrders([...baseOrders, ...newShipments]);
+  }, [user]);
+
+  // Add a refresh function that can be called manually
+  const refreshOrders = () => {
+    const baseOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
+    const newShipments = getNewShipments();
+    setUserOrders([...baseOrders, ...newShipments]);
+  };
 
   return (
     <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '2rem 0' }}>
@@ -72,6 +147,28 @@ const OrderHistoryPage: React.FC = () => {
             </button>
             <h2 style={{ color: '#b91c1c', fontWeight: 700, margin: 0 }}>Order History</h2>
           </div>
+          <button
+            onClick={refreshOrders}
+            style={{
+              background: '#b91c1c',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              padding: '0.5rem 1rem',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.background = '#dc2626';
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.background = '#b91c1c';
+            }}
+          >
+            🔄 Refresh
+          </button>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24 }}>
           <thead>
@@ -83,7 +180,7 @@ const OrderHistoryPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {mockOrders.map(order => (
+            {userOrders.map((order: any) => (
               <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                 <td style={{ padding: '0.75rem', color: '#1a1a1a' }}>{order.trackingNumber}</td>
                 <td style={{ padding: '0.75rem' }}>
@@ -102,7 +199,7 @@ const OrderHistoryPage: React.FC = () => {
             ))}
           </tbody>
         </table>
-        {mockOrders.length === 0 && <div style={{ color: '#b91c1c', textAlign: 'center' }}>No orders found.</div>}
+        {userOrders.length === 0 && <div style={{ color: '#b91c1c', textAlign: 'center' }}>No orders found.</div>}
       </div>
       {/* Details Modal */}
       {selectedOrder && (
@@ -127,7 +224,7 @@ const OrderHistoryPage: React.FC = () => {
             <div style={{ marginTop: 16 }}>
               <strong>History:</strong>
               <ul style={{ marginTop: 8, paddingLeft: 18 }}>
-                {selectedOrder.history.map((h, i) => (
+                {selectedOrder.history.map((h: any, i: number) => (
                   <li key={i} style={{ color: '#374151', marginBottom: 2 }}>
                     <span>{h.date} - {h.status} at {h.location}</span>
                   </li>
