@@ -71,8 +71,6 @@ const AdminDashboard: React.FC = () => {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Load data based on active tab
   useEffect(() => {
@@ -100,17 +98,14 @@ const AdminDashboard: React.FC = () => {
         case 'users':
           const usersData = await api.admin.getAllUsers();
           setUsers(usersData);
-          setTotalItems(usersData.length);
           break;
         case 'shipments':
           const shipmentsData = await api.admin.getAllShipments();
           setShipments(shipmentsData);
-          setTotalItems(shipmentsData.length);
           break;
         case 'packages':
           const packagesData = await api.admin.getAllPackages();
           setPackages(packagesData);
-          setTotalItems(packagesData.length);
           break;
         case 'tracking':
           // For tracking tab, we'll load packages data as well
