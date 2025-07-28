@@ -203,11 +203,7 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   if (loading && !stats && !users.length && !shipments.length && !packages.length) {
     return (
