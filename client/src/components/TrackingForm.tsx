@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { trackingAPI } from '../services/api';
-import SkeletonLoader from './SkeletonLoader';
 
 const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');

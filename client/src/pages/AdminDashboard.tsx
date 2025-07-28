@@ -66,8 +66,6 @@ const AdminDashboard: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editingShipment, setEditingShipment] = useState<Shipment | null>(null);
-  const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -205,88 +203,10 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
-  // Pagination helpers
-  const getCurrentItems = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    
-    switch (activeTab) {
-      case 'users':
-        return users.slice(startIndex, endIndex);
-      case 'shipments':
-        return shipments.slice(startIndex, endIndex);
-      case 'packages':
-        return packages.slice(startIndex, endIndex);
-      default:
-        return [];
-    }
-  };
-
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const Pagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    // Previous button
-    pages.push(
-      <button
-        key="prev"
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="pagination-btn"
-      >
-        ← Previous
-      </button>
-    );
-
-    // Page numbers
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`pagination-btn ${currentPage === i ? 'active' : ''}`}
-        >
-          {i}
-        </button>
-      );
-    }
-
-    // Next button
-    pages.push(
-      <button
-        key="next"
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="pagination-btn"
-      >
-        Next →
-      </button>
-    );
-
-    return (
-      <div className="pagination">
-        <div className="pagination-info">
-          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} items
-        </div>
-        <div className="pagination-controls">
-          {pages}
-        </div>
-      </div>
-    );
   };
 
   if (loading && !stats && !users.length && !shipments.length && !packages.length) {
@@ -646,7 +566,6 @@ const AdminDashboard: React.FC = () => {
                         <td style={{ padding: '1rem', color: '#374151' }}>{formatDate(shipment.created_at)}</td>
                         <td style={{ padding: '1rem' }}>
                           <button
-                            onClick={() => setEditingShipment(shipment)}
                             style={{
                               background: '#b91c1c',
                               color: 'white',
@@ -723,7 +642,6 @@ const AdminDashboard: React.FC = () => {
                         <td style={{ padding: '1rem', color: '#374151' }}>{formatDate(pkg.created_at)}</td>
                         <td style={{ padding: '1rem' }}>
                           <button
-                            onClick={() => setEditingPackage(pkg)}
                             style={{
                               background: '#b91c1c',
                               color: 'white',
@@ -903,7 +821,6 @@ const AdminDashboard: React.FC = () => {
                         <td style={{ padding: '1rem' }}>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button
-                              onClick={() => setEditingPackage(pkg)}
                               style={{
                                 background: '#b91c1c',
                                 color: 'white',

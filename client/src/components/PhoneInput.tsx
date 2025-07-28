@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   countryCodes, 
   validateAndFormatPhoneNumber,
-  detectCountryFromPhoneNumber,
-  findCountryByCode
+  detectCountryFromPhoneNumber
 } from '../utils/phoneValidation';
 import type { CountryCode } from '../utils/phoneValidation';
 
