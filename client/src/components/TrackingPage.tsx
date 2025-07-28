@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { trackingAPI } from '../services/api';
 
@@ -17,49 +17,43 @@ interface TrackingData {
 const TrackingPage = () => {
   const { trackingNumber } = useParams<{ trackingNumber: string }>();
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
-  const [postalCode, setPostalCode] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Optionally, allow entering zip code for security
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const data = await trackingAPI.trackPackage({ 
-        tracking_number: trackingNumber!, 
-        zip_code: postalCode 
-      });
-      setTrackingData(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to track package');
-      setTrackingData(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Load tracking data automatically when component mounts
+  useEffect(() => {
+    const loadTrackingData = async () => {
+      if (!trackingNumber) return;
+      
+      setLoading(true);
+      setError('');
+      try {
+        const data = await trackingAPI.trackPackage({ 
+          tracking_number: trackingNumber
+        });
+        setTrackingData(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to track package');
+        setTrackingData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrackingData();
+  }, [trackingNumber]);
+
+  if (loading) {
+    return (
+      <div className="tracking-result" style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 0', textAlign: 'center' }}>
+        <h3>Loading tracking information...</h3>
+      </div>
+    );
+  }
 
   return (
     <div className="tracking-result" style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 0' }}>
       <h3>Tracking Information</h3>
-      <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-        <div className="form-group">
-          <label htmlFor="postalCode">Enter Postal Code for Tracking</label>
-          <input
-            type="text"
-            id="postalCode"
-            value={postalCode}
-            onChange={e => setPostalCode(e.target.value)}
-            placeholder="Enter postal code"
-            required
-            className="input"
-          />
-        </div>
-        <button type="submit" className="btn btn-primary" style={{ marginLeft: 0 }} disabled={loading}>
-          {loading ? 'Loading...' : 'Track'}
-        </button>
-      </form>
       {error && <div className="error-message">{error}</div>}
       {trackingData && (
         <div className="result-card">

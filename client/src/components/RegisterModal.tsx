@@ -127,7 +127,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -141,7 +141,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -155,7 +155,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -169,7 +169,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="stateProvince"
               value={stateProvince}
               onChange={(e) => setStateProvince(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -183,7 +183,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="postalCode"
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -197,7 +197,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
@@ -211,19 +211,19 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               required
             />
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 px-3 py-2 rounded-md text-sm">{error}</div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
@@ -233,7 +233,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ onClose, onSuccess, onSwi
           <span className="text-gray-600">Already have an account? </span>
           <button
             onClick={onSwitchToLogin}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-amber-600 hover:text-amber-800 font-medium transition-colors duration-200"
           >
             Login here
           </button>

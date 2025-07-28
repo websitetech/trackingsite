@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { trackingAPI } from '../services/api';
+import SkeletonLoader from './SkeletonLoader';
 
 const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
-  const [postalCode, setPostalCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -12,8 +12,8 @@ const TrackingForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!trackingNumber || !postalCode) {
-      setError('Please fill in all fields');
+    if (!trackingNumber) {
+      setError('Please enter a tracking number');
       return;
     }
 
@@ -23,7 +23,6 @@ const TrackingForm: React.FC = () => {
     try {
       await trackingAPI.trackPackage({
         tracking_number: trackingNumber,
-        zip_code: postalCode,
       });
 
       navigate(`/track/${trackingNumber}`);
@@ -48,18 +47,6 @@ const TrackingForm: React.FC = () => {
             required
           />
         </div>
-        
-        <div className="form-group">
-          <label htmlFor="postalCode">Postal Code</label>
-          <input
-            type="text"
-            id="postalCode"
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-            placeholder="Enter postal code"
-            required
-          />
-        </div>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -68,7 +55,14 @@ const TrackingForm: React.FC = () => {
           className="btn btn-primary track-btn"
           disabled={loading}
         >
-          {loading ? 'Tracking...' : 'Track Package'}
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="loading-spinner" style={{ width: '16px', height: '16px', border: '2px solid transparent', borderTop: '2px solid white', borderRadius: '50%' }}></div>
+              Tracking...
+            </div>
+          ) : (
+            'Track Package'
+          )}
         </button>
       </form>
     </div>

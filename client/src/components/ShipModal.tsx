@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
+import PhoneInput from './PhoneInput';
+import type { CountryCode } from '../utils/phoneValidation';
 
 interface User {
   id: number;
@@ -21,6 +23,8 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
   const [recipientName, setRecipientName] = useState('');
   const [recipientAddress, setRecipientAddress] = useState('');
   const [contactNumber, setContactNumber] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode | null>(null);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
@@ -54,6 +58,11 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
 
     if (!originPostal || !destinationPostal || !weight || !recipientName || !recipientAddress || !contactNumber) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    if (!isPhoneValid) {
+      setError('Please enter a valid phone number');
       return;
     }
 
@@ -95,7 +104,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
         originPostal,
         destinationPostal,
         weight: weightNum,
-        contactNumber,
+        contactNumber: phoneCountry ? `${phoneCountry.dialCode} ${contactNumber}` : contactNumber,
       };
 
       // Save shipment to localStorage for this user
@@ -116,7 +125,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
         serviceTypeLabel,
         recipientName,
         recipientAddress,
-        contactNumber,
+        contactNumber: phoneCountry ? `${phoneCountry.dialCode} ${contactNumber}` : contactNumber,
         price,
         originPostal,
         destinationPostal,
@@ -141,6 +150,12 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhoneChange = (value: string, country: CountryCode, isValid: boolean) => {
+    setContactNumber(value);
+    setPhoneCountry(country);
+    setIsPhoneValid(isValid);
   };
 
   const handleViewCart = () => {
@@ -392,20 +407,11 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <label htmlFor="contactNumber" style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>Contact Number</label>
-                <input
-                  type="tel"
-                  id="contactNumber"
+                <PhoneInput
                   value={contactNumber}
-                  onChange={(e) => setContactNumber(e.target.value)}
+                  onChange={handlePhoneChange}
                   placeholder="Enter contact number"
-                  required
-                  style={{
-                    padding: '0.75rem',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '0.75rem',
-                    fontSize: '0.95rem',
-                    background: '#fff'
-                  }}
+                  required={true}
                 />
               </div>
 

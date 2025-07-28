@@ -3,11 +3,14 @@ import type { ChangeEvent, FormEvent } from 'react';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import PhoneInput from './PhoneInput';
+import type { CountryCode } from '../utils/phoneValidation';
 
 interface User {
   id: number;
   username: string;
   email: string;
+  role?: string;
 }
 
 interface Tariff {
@@ -62,11 +65,21 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   });
   const [addedToCart, setAddedToCart] = useState(false);
   const [error, setError] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode | null>(null);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
   const navigate = useNavigate();
   const { addItem, state: cartState } = useCart();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
+    setAddedToCart(false);
+  };
+
+  const handlePhoneChange = (value: string, country: CountryCode, isValid: boolean) => {
+    setForm({ ...form, contactNumber: value });
+    setPhoneCountry(country);
+    setIsPhoneValid(isValid);
     setError('');
     setAddedToCart(false);
   };
@@ -88,6 +101,11 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
       }
     }
 
+    if (!isPhoneValid) {
+      setError('Please enter a valid phone number.');
+      return;
+    }
+
     const price = getPrice();
     if (!price) {
       setError('Please select a valid customer and service type.');
@@ -96,17 +114,18 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
 
     const serviceTypeLabel = SERVICE_TYPES.find(s => s.key === form.serviceType)?.label || form.serviceType;
     const priceValue = parseFloat(price.replace('$', ''));
+    const fullPhoneNumber = phoneCountry ? `${phoneCountry.dialCode} ${form.contactNumber}` : form.contactNumber;
 
-    const cartItem = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      customer: form.customer,
-      serviceType: form.serviceType,
-      serviceTypeLabel,
-      recipientName: form.recipientName,
-      recipientAddress: form.recipientAddress,
-      contactNumber: form.contactNumber,
-      price: priceValue,
-    };
+          const cartItem = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        customer: form.customer,
+        serviceType: form.serviceType,
+        serviceTypeLabel,
+        recipientName: form.recipientName,
+        recipientAddress: form.recipientAddress,
+        contactNumber: fullPhoneNumber,
+        price: priceValue,
+      };
 
     addItem(cartItem);
     setAddedToCart(true);
@@ -136,6 +155,130 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
           <div className="company-quote" style={{ color: '#111' }}>
             Welcome back, <b>{user.username}</b>!
           </div>
+
+          {/* Admin Quick Actions - Only for admin users */}
+          {user.role === 'admin' && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
+              borderRadius: '2rem',
+              boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
+              padding: '2.5rem',
+              margin: '2rem auto',
+              maxWidth: 800,
+              width: '100%',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(220,38,38,0.1)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
+              <h2 style={{ color: '#b91c1c', fontWeight: 700, fontSize: '1.4rem', marginBottom: '1.5rem', textAlign: 'center' }}>Admin Dashboard</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                <button
+                  onClick={() => window.location.href = '/admin'}
+                  style={{
+                    background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '1rem',
+                    padding: '1.2rem',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35), 0 6px 16px rgba(220,38,38,0.25)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)';
+                  }}
+                >
+                  <span style={{ fontSize: '2rem' }}>📊</span>
+                  <span>Admin Dashboard</span>
+                </button>
+                
+                <button
+                  onClick={() => window.location.href = '/admin?tab=users'}
+                  style={{
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <span style={{ fontSize: '2rem' }}>👥</span>
+                  <span>User Management</span>
+                </button>
+                
+                <button
+                  onClick={() => window.location.href = '/admin?tab=shipments'}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <span style={{ fontSize: '2rem' }}>📦</span>
+                  <span>Shipment Management</span>
+                </button>
+                
+                <button
+                  onClick={() => window.location.href = '/admin?tab=tracking'}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <span style={{ fontSize: '2rem' }}>🚚</span>
+                  <span>Tracking Management</span>
+                </button>
+              </div>
+            </div>
+          )}
           
           {/* Cart Summary Banner */}
           {cartState.items.length > 0 && (
@@ -195,89 +338,139 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
 
           {/* Tracking form at the top */}
           <div style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
             color: 'black',
-            borderRadius: '1.5rem',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-            padding: '2rem',
+            borderRadius: '2rem',
+            boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
+            padding: '2.5rem',
             margin: '32px auto 24px auto',
             maxWidth: 600,
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(220,38,38,0.1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }}>
             <h2 style={{ color: '#111', fontWeight: 700, fontSize: '1.4rem', marginBottom: 16 }}>Track Your Package</h2>
             {/* Tracking form fields */}
-            <form style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 0 }}>
-              <input type="text" placeholder="Enter Tracking Number" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
-              <input type="text" placeholder="Enter Zip Code" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
-              <button type="button" style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', marginTop: 8 }}>Track</button>
+            <form style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 0 }}>
+              <input 
+                type="text" 
+                placeholder="Enter Tracking Number" 
+                style={{ 
+                  padding: '1rem 1.2rem', 
+                  borderRadius: '1rem', 
+                  border: '1px solid rgba(220,38,38,0.15)', 
+                  fontSize: '1rem', 
+                  color: '#111', 
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }} 
+              />
+              <button 
+                type="button" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', 
+                  color: 'white', 
+                  border: 'none', 
+                  padding: '1.2rem 2rem', 
+                  borderRadius: '1rem', 
+                  fontWeight: 600, 
+                  fontSize: '1rem', 
+                  cursor: 'pointer', 
+                  marginTop: 8,
+                  boxShadow: '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35), 0 6px 16px rgba(220,38,38,0.25)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)';
+                }}
+              >
+                Track
+              </button>
             </form>
           </div>
           
-          {/* Create New Shipment */}
-          <div style={{
-            background: 'white',
-            color: 'black',
-            borderRadius: '1.5rem',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-            padding: '2rem',
-            margin: '0 auto',
-            maxWidth: 600,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: 32,
-          }}>
-            <div style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: 16 }}>Create New Shipment</div>
-            {!addedToCart ? (
-              <form className="tracking-form" onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Customer *</label>
-                  <select name="customer" value={form.customer} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
-                    <option value="">Select customer</option>
-                    {TARIFFS.map(t => <option key={t.customer} value={t.customer}>{t.customer}</option>)}
-                  </select>
+          {/* Create New Shipment - Only for non-admin users */}
+          {user.role !== 'admin' && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
+              color: 'black',
+              borderRadius: '2rem',
+              boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
+              padding: '2.5rem',
+              margin: '0 auto',
+              maxWidth: 600,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginBottom: 32,
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(220,38,38,0.1)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
+              <div style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: 16 }}>Create New Shipment</div>
+              {!addedToCart ? (
+                <form className="tracking-form" onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className="form-group">
+                    <label style={{ color: '#111', fontWeight: 600 }}>Customer *</label>
+                    <select name="customer" value={form.customer} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
+                      <option value="">Select customer</option>
+                      {TARIFFS.map(t => <option key={t.customer} value={t.customer}>{t.customer}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label style={{ color: '#111', fontWeight: 600 }}>Service Type *</label>
+                    <select name="serviceType" value={form.serviceType} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
+                      <option value="">Select service type</option>
+                      {SERVICE_TYPES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label style={{ color: '#111', fontWeight: 600 }}>Recipient Name *</label>
+                    <input name="recipientName" value={form.recipientName} onChange={handleChange} required placeholder="Enter recipient name" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ color: '#111', fontWeight: 600 }}>Recipient Address *</label>
+                    <input name="recipientAddress" value={form.recipientAddress} onChange={handleChange} required placeholder="Enter recipient address" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
+                  </div>
+                  <div className="form-group">
+                                      <label style={{ color: '#111', fontWeight: 600 }}>Contact Number *</label>
+                  <PhoneInput
+                    value={form.contactNumber}
+                    onChange={handlePhoneChange}
+                    placeholder="Enter contact number"
+                    required={true}
+                  />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ color: '#111', fontWeight: 600 }}>Calculated Price</label>
+                    <div className="cost" style={{ fontSize: '1.3rem', color: '#dc2626', fontWeight: 700 }}>{getPrice()}</div>
+                  </div>
+                  {error && <div className="error-message" style={{ marginBottom: 8, color: '#dc2626' }}>{error}</div>}
+                  <button type="submit" className="btn btn-primary track-btn" style={{ marginTop: 8, background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Add to Cart</button>
+                </form>
+              ) : (
+                <div className="success-message" style={{ animation: 'fadeInUp 0.7s', color: '#111', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <h3>Added to Cart!</h3>
+                  <p>Your shipment for <b>{form.customer}</b> has been added to your cart.</p>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button className="btn btn-secondary" onClick={() => setAddedToCart(false)} style={{ background: '#fff', color: '#dc2626', border: '2px solid #dc2626', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Add Another</button>
+                    <button className="btn btn-primary" onClick={handleViewCart} style={{ background: 'linear-gradient(135deg, #facc15 0%, #fde047 100%)', color: '#1a1a1a', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 2px 8px rgba(185,28,28,0.08)' }}>View Cart</button>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Service Type *</label>
-                  <select name="serviceType" value={form.serviceType} onChange={handleChange} required style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }}>
-                    <option value="">Select service type</option>
-                    {SERVICE_TYPES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Recipient Name *</label>
-                  <input name="recipientName" value={form.recipientName} onChange={handleChange} required placeholder="Enter recipient name" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
-                </div>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Recipient Address *</label>
-                  <input name="recipientAddress" value={form.recipientAddress} onChange={handleChange} required placeholder="Enter recipient address" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
-                </div>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Contact Number *</label>
-                  <input name="contactNumber" value={form.contactNumber} onChange={handleChange} required placeholder="Enter contact number" style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #e5e7eb', fontSize: '1rem', color: '#111', background: '#fff' }} />
-                </div>
-                <div className="form-group">
-                  <label style={{ color: '#111', fontWeight: 600 }}>Calculated Price</label>
-                  <div className="cost" style={{ fontSize: '1.3rem', color: '#dc2626', fontWeight: 700 }}>{getPrice()}</div>
-                </div>
-                {error && <div className="error-message" style={{ marginBottom: 8, color: '#dc2626' }}>{error}</div>}
-                <button type="submit" className="btn btn-primary track-btn" style={{ marginTop: 8, background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Add to Cart</button>
-              </form>
-            ) : (
-              <div className="success-message" style={{ animation: 'fadeInUp 0.7s', color: '#111', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h3>Added to Cart!</h3>
-                <p>Your shipment for <b>{form.customer}</b> has been added to your cart.</p>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button className="btn btn-secondary" onClick={() => setAddedToCart(false)} style={{ background: '#fff', color: '#dc2626', border: '2px solid #dc2626', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>Add Another</button>
-                  <button className="btn btn-primary" onClick={handleViewCart} style={{ background: 'linear-gradient(135deg, #facc15 0%, #fde047 100%)', color: '#1a1a1a', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 2px 8px rgba(185,28,28,0.08)' }}>View Cart</button>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -5,6 +5,7 @@ interface User {
   id: number;
   username: string;
   email: string;
+  role?: string;
 }
 
 interface LoginModalProps {
@@ -16,6 +17,7 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [userType, setUserType] = useState<'client' | 'admin'>('client');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,6 +34,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
 
     try {
       const data = await authAPI.login({ username, password });
+      
+      // Check if user type matches the logged-in user's role
+      if (userType === 'admin' && data.user.role !== 'admin') {
+        setError('Access denied. Admin privileges required.');
+        setLoading(false);
+        return;
+      }
+      
+      if (userType === 'client' && data.user.role === 'admin') {
+        setError('Please select "Admin" user type for admin login.');
+        setLoading(false);
+        return;
+      }
+      
       onSuccess(data.user, data.token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -83,7 +99,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
               border: 'none',
               fontSize: 28,
               cursor: 'pointer',
-              color: '#dc2626',
+              color: '#d97706',
               padding: '0.2rem 0.7rem',
               borderRadius: '0.5rem',
               fontWeight: 700,
@@ -93,145 +109,167 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
             onClick={onClose}
             aria-label="Close"
             onMouseOver={e => {
-              e.currentTarget.style.background = '#fef2f2';
-              e.currentTarget.style.color = '#b91c1c';
+              e.currentTarget.style.background = '#fef3c7';
+              e.currentTarget.style.color = '#b45309';
             }}
             onMouseOut={e => {
               e.currentTarget.style.background = 'none';
-              e.currentTarget.style.color = '#dc2626';
+              e.currentTarget.style.color = '#d97706';
             }}
           >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <label htmlFor="username" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+          {/* User Type Selection */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: 600, fontSize: '0.875rem' }}>
+              Login as:
+            </label>
+            <select
+              value={userType}
+              onChange={(e) => setUserType(e.target.value as 'client' | 'admin')}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                background: 'white',
+                color: '#374151',
+                fontSize: '1rem',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="client">Client</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          {/* Username Field */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: 600, fontSize: '0.875rem' }}>
               Username
             </label>
             <input
               type="text"
-              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.75rem 1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                background: 'white',
+                color: '#374151',
                 fontSize: '1rem',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-                outline: 'none',
-                backgroundColor: 'white',
-                color: '#1a1a1a'
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#dc2626';
-                e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.boxShadow = 'none';
-              }}
-              required
+              placeholder="Enter your username"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>
+          {/* Password Field */}
+          <div style={{ marginBottom: '2rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: 600, fontSize: '0.875rem' }}>
               Password
             </label>
             <input
               type="password"
-              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.75rem 1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '0.75rem',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                background: 'white',
+                color: '#374151',
                 fontSize: '1rem',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-                outline: 'none',
-                backgroundColor: 'white',
-                color: '#1a1a1a'
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#dc2626';
-                e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e5e7eb';
-                e.target.style.boxShadow = 'none';
-              }}
-              required
+              placeholder="Enter your password"
             />
           </div>
 
+          {/* Error Message */}
           {error && (
-            <div style={{ color: '#dc2626', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>
+            <div style={{
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              color: '#d97706',
+              padding: '0.75rem',
+              borderRadius: '0.5rem',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+            }}>
+              {error}
+            </div>
           )}
 
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
             style={{
               width: '100%',
-              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+              background: loading ? '#9ca3af' : '#d97706',
               color: 'white',
               border: 'none',
-              padding: '0.875rem 1.5rem',
-              borderRadius: '0.75rem',
+              borderRadius: '0.5rem',
+              padding: '0.75rem',
               fontSize: '1rem',
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1,
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 6px rgba(220, 38, 38, 0.2)'
+              marginBottom: '1rem',
+              boxShadow: '0 4px 12px rgba(217, 119, 6, 0.2)',
             }}
-            onMouseOver={e => {
+            onMouseEnter={(e) => {
               if (!loading) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(220, 38, 38, 0.3)';
+                e.currentTarget.style.background = '#b45309';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(217, 119, 6, 0.3)';
               }
             }}
-            onMouseOut={e => {
+            onMouseLeave={(e) => {
               if (!loading) {
+                e.currentTarget.style.background = '#d97706';
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px rgba(220, 38, 38, 0.2)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(217, 119, 6, 0.2)';
               }
             }}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
-        </form>
 
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Don't have an account? </span>
-          <button
-            onClick={onSwitchToRegister}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#dc2626',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              transition: 'color 0.2s'
-            }}
-            onMouseOver={e => {
-              e.currentTarget.style.color = '#b91c1c';
-            }}
-            onMouseOut={e => {
-              e.currentTarget.style.color = '#dc2626';
-            }}
-          >
-            Register here
-          </button>
-        </div>
+          {/* Register Link */}
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+              Don't have an account?{' '}
+            </span>
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#d97706',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#b45309';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#d97706';
+              }}
+            >
+              Register here
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

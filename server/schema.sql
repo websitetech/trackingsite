@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   postal_code TEXT,
   company TEXT,
   website TEXT,
+  role TEXT DEFAULT 'user',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -278,3 +279,29 @@ BEGIN
   RETURN 'SHP' || to_char(now(), 'YYYYMMDD') || lpad(floor(random() * 10000)::text, 4, '0') || upper(substring(md5(random()::text) from 1 for 4));
 END;
 $$ LANGUAGE plpgsql; 
+
+-- Create admin user if it doesn't exist
+INSERT INTO users (
+  username, 
+  email, 
+  password, 
+  email_verified, 
+  phone, 
+  state_province, 
+  postal_code, 
+  role
+) VALUES (
+  'admin',
+  'admin@noblespeedytrac.com',
+  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- password: 'password'
+  true,
+  '+1-555-123-4567',
+  'Ontario',
+  'M5V 3A8',
+  'admin'
+) ON CONFLICT (username) DO UPDATE SET role = 'admin'; 
+
+-- Check if admin user exists with correct role
+SELECT id, username, email, role, email_verified 
+FROM users 
+WHERE username = 'admin' OR email = 'admin@noblespeedytrac.com'; 

@@ -336,6 +336,127 @@ export const dbHelpers = {
 
   generateTransactionId() {
     return 'TXN' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+  },
+
+  // Admin operations
+  async getUserById(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async getAllUsers() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateUser(userId, updateData) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getAllShipments() {
+    const { data, error } = await supabase
+      .from('shipments')
+      .select(`
+        *,
+        users!inner(username, email)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateShipment(shipmentId, updateData) {
+    const { data, error } = await supabase
+      .from('shipments')
+      .update(updateData)
+      .eq('id', shipmentId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getAllPackages() {
+    const { data, error } = await supabase
+      .from('packages')
+      .select(`
+        *,
+        shipments!inner(shipment_number, customer),
+        users!inner(username, email)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updatePackage(packageId, updateData) {
+    const { data, error } = await supabase
+      .from('packages')
+      .update(updateData)
+      .eq('id', packageId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getAdminStats() {
+    // Get counts for different entities
+    const [usersResult, shipmentsResult, packagesResult, paymentsResult] = await Promise.all([
+      supabase.from('users').select('*', { count: 'exact', head: true }),
+      supabase.from('shipments').select('*', { count: 'exact', head: true }),
+      supabase.from('packages').select('*', { count: 'exact', head: true }),
+      supabase.from('payment_transactions').select('*', { count: 'exact', head: true })
+    ]);
+
+    // Get recent activity
+    const recentShipments = await supabase
+      .from('shipments')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    const recentPackages = await supabase
+      .from('packages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    return {
+      counts: {
+        users: usersResult.count || 0,
+        shipments: shipmentsResult.count || 0,
+        packages: packagesResult.count || 0,
+        payments: paymentsResult.count || 0
+      },
+      recentActivity: {
+        shipments: recentShipments.data || [],
+        packages: recentPackages.data || []
+      }
+    };
   }
 };
 

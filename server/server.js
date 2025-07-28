@@ -58,6 +58,22 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Admin middleware
+const requireAdmin = async (req, res, next) => {
+  try {
+    // Get user from database to check role
+    const user = await dbHelpers.getUserById(req.user.id);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    req.adminUser = user;
+    next();
+  } catch (error) {
+    console.error('Admin middleware error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Routes
 
 // Register user with email verification
@@ -203,7 +219,7 @@ app.post('/api/login', async (req, res) => {
     res.json({ 
       message: 'Login successful',
       token,
-      user: { id: user.id, username: user.username, email: user.email }
+      user: { id: user.id, username: user.username, email: user.email, role: user.role }
     });
 
   } catch (error) {
@@ -215,10 +231,10 @@ app.post('/api/login', async (req, res) => {
 // Track package
 app.post('/api/track', async (req, res) => {
   try {
-    const { tracking_number, zip_code } = req.body;
+    const { tracking_number } = req.body;
 
-    if (!tracking_number || !zip_code) {
-      return res.status(400).json({ error: 'Tracking number and zip code are required' });
+    if (!tracking_number) {
+      return res.status(400).json({ error: 'Tracking number is required' });
     }
 
     // Get package from database
@@ -681,7 +697,123 @@ if (process.env.NODE_ENV === 'development') {
       res.status(500).json({ error: 'Server error' });
     }
   });
+
+  // Debug endpoint to check admin user
+  app.get('/api/dev/check-admin', async (req, res) => {
+    try {
+      const adminUser = await dbHelpers.getUserByUsername('admin');
+      res.json({ 
+        adminUser,
+        exists: !!adminUser,
+        hasRole: adminUser ? !!adminUser.role : false,
+        role: adminUser ? adminUser.role : null
+      });
+    } catch (error) {
+      console.error('Check admin error:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
 }
+
+// Admin endpoints
+// Get all users (admin only)
+app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const users = await dbHelpers.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update user (admin only)
+app.put('/api/admin/users/:userId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { username, email, role, status } = req.body;
+    
+    const updateData = { username, email, role };
+    if (status !== undefined) {
+      updateData.email_verified = status === 'active';
+    }
+    
+    const updatedUser = await dbHelpers.updateUser(userId, updateData);
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get all shipments (admin only)
+app.get('/api/admin/shipments', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const shipments = await dbHelpers.getAllShipments();
+    res.json(shipments);
+  } catch (error) {
+    console.error('Get all shipments error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update shipment status (admin only)
+app.put('/api/admin/shipments/:shipmentId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { shipmentId } = req.params;
+    const { status, driver, notes } = req.body;
+    
+    const updateData = { status };
+    if (driver !== undefined) updateData.driver = driver;
+    if (notes !== undefined) updateData.notes = notes;
+    
+    const updatedShipment = await dbHelpers.updateShipment(shipmentId, updateData);
+    res.json(updatedShipment);
+  } catch (error) {
+    console.error('Update shipment error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get all packages (admin only)
+app.get('/api/admin/packages', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const packages = await dbHelpers.getAllPackages();
+    res.json(packages);
+  } catch (error) {
+    console.error('Get all packages error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update package status (admin only)
+app.put('/api/admin/packages/:packageId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { packageId } = req.params;
+    const { status, current_location, delivery_notes } = req.body;
+    
+    const updateData = { status };
+    if (current_location !== undefined) updateData.current_location = current_location;
+    if (delivery_notes !== undefined) updateData.delivery_notes = delivery_notes;
+    
+    const updatedPackage = await dbHelpers.updatePackage(packageId, updateData);
+    res.json(updatedPackage);
+  } catch (error) {
+    console.error('Update package error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get admin dashboard stats
+app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const stats = await dbHelpers.getAdminStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Get admin stats error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

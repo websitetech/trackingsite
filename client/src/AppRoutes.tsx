@@ -140,7 +140,23 @@ function AppRoutes() {
         <Route path="/payment-success" element={user ? <PaymentSuccessPage /> : <div>Please log in to view payment success.</div>} />
         <Route path="/orders" element={user ? <OrderHistoryPage user={user} /> : <div>Please log in to view your orders.</div>} />
         <Route path="/faq" element={<FAQPage />} />
-        <Route path="/admin" element={user ? <AdminDashboard /> : <div>Please log in to access admin dashboard.</div>} />
+        <Route path="/admin" element={
+          user && user.role === 'admin' ? 
+            <AdminDashboard /> : 
+            <div style={{ 
+              minHeight: '100vh', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              background: '#f3f4f6',
+              color: '#dc2626',
+              fontSize: '1.25rem',
+              textAlign: 'center',
+              padding: '2rem'
+            }}>
+              {user ? 'Access denied. Admin privileges required.' : 'Please log in to access admin dashboard.'}
+            </div>
+        } />
       </Routes>
       {/* Footer / Bottom Banner */}
       <footer className="footer-banner">

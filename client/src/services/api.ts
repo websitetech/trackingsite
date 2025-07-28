@@ -273,7 +273,7 @@ export const trackingAPI = {
   // Track package
   trackPackage: async (trackingData: {
     tracking_number: string;
-    zip_code: string;
+    zip_code?: string;
   }) => {
     return publicRequest('/track', {
       method: 'POST',
@@ -290,6 +290,66 @@ export const healthAPI = {
   },
 };
 
+// Admin API
+export const adminAPI = {
+  // Get all users
+  getAllUsers: async () => {
+    return authenticatedRequest('/admin/users');
+  },
+
+  // Update user
+  updateUser: async (userId: number, userData: {
+    username?: string;
+    email?: string;
+    role?: string;
+    status?: string;
+  }) => {
+    return authenticatedRequest(`/admin/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  },
+
+  // Get all shipments
+  getAllShipments: async () => {
+    return authenticatedRequest('/admin/shipments');
+  },
+
+  // Update shipment
+  updateShipment: async (shipmentId: number, shipmentData: {
+    status?: string;
+    driver?: string;
+    notes?: string;
+  }) => {
+    return authenticatedRequest(`/admin/shipments/${shipmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(shipmentData),
+    });
+  },
+
+  // Get all packages
+  getAllPackages: async () => {
+    return authenticatedRequest('/admin/packages');
+  },
+
+  // Update package
+  updatePackage: async (packageId: number, packageData: {
+    status?: string;
+    current_location?: string;
+    delivery_notes?: string;
+  }) => {
+    return authenticatedRequest(`/admin/packages/${packageId}`, {
+      method: 'PUT',
+      body: JSON.stringify(packageData),
+    });
+  },
+
+  // Get admin dashboard stats
+  getStats: async () => {
+    return authenticatedRequest('/admin/stats');
+  },
+};
+
 // Export all APIs
 export const api = {
   auth: authAPI,
@@ -301,6 +361,7 @@ export const api = {
   estimates: estimatesAPI,
   tracking: trackingAPI,
   health: healthAPI,
+  admin: adminAPI,
 };
 
 export default api; 
