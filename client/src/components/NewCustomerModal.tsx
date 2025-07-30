@@ -168,7 +168,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
           </div>
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <h3 style={{ color: '#059669', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 700 }}>Customer Registered Successfully!</h3>
-            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Thank you for registering with Noble SpeedyTrac. inc. We'll be in touch soon!</p>
+            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Thank you for registering with NobleSpeedytrac. We'll be in touch soon!</p>
             <div style={{
               background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
               padding: '1.5rem',

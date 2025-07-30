@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import PhoneInput from './PhoneInput';
+import { shipmentAPI } from '../services/api';
 import type { CountryCode } from '../utils/phoneValidation';
 
 interface User {
@@ -107,15 +108,38 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
         contactNumber: phoneCountry ? `${phoneCountry.dialCode} ${contactNumber}` : contactNumber,
       };
 
-      // Save shipment to localStorage for this user
-      const existingShipments = localStorage.getItem(`newShipments_${user.username}`);
-      const shipments = existingShipments ? JSON.parse(existingShipments) : [];
-      shipments.push(shipment);
-      localStorage.setItem(`newShipments_${user.username}`, JSON.stringify(shipments));
-      
-      console.log('Shipment saved for user:', user.username);
-      console.log('Shipment data:', shipment);
-      console.log('Total shipments for user:', shipments.length);
+      // Create shipment via API
+      try {
+        const shipmentData = {
+          customer: 'Custom Shipment',
+          service_type: serviceType,
+          service_type_label: serviceTypeLabel,
+          recipient_name: recipientName,
+          recipient_address: recipientAddress,
+          contact_number: phoneCountry ? `${phoneCountry.dialCode} ${contactNumber}` : contactNumber,
+          origin_postal: originPostal,
+          destination_postal: destinationPostal,
+          weight: weightNum,
+          price: price
+        };
+
+        const response = await shipmentAPI.createShipment(shipmentData);
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Shipment created successfully:', result);
+          
+          // Update shipment object with real tracking number from API if available
+          if (result.trackingNumber) {
+            shipment.trackingNumber = result.trackingNumber;
+            setTrackingNumber(result.trackingNumber);
+          }
+        } else {
+          console.error('Failed to create shipment via API');
+        }
+      } catch (apiError) {
+        console.error('Error creating shipment via API:', apiError);
+        // Continue with local storage as fallback - the shipment will still be added to cart
+      }
 
       // Also add to cart
       const cartItem = {

@@ -22,15 +22,15 @@ const userNotifications = {
   'john_doe': [
     { id: 1, message: 'Your shipment TRK123456789 has been delivered.', read: false, date: '2024-06-01' },
     { id: 2, message: 'Shipment TRK987654321 is now in transit.', read: false, date: '2024-06-03' },
-    { id: 3, message: 'Welcome to Noble SpeedyTrac!', read: true, date: '2024-05-30' },
+    { id: 3, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-05-30' },
   ],
   'jane_smith': [
     { id: 4, message: 'Your shipment TRK555666777 has been delivered.', read: false, date: '2024-05-28' },
-    { id: 5, message: 'Welcome to Noble SpeedyTrac!', read: true, date: '2024-05-25' },
+    { id: 5, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-05-25' },
   ],
   'admin': [
     { id: 6, message: 'New shipment TRK111222333 has been created.', read: false, date: '2024-06-05' },
-    { id: 7, message: 'Welcome to Noble SpeedyTrac!', read: true, date: '2024-06-01' },
+    { id: 7, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-06-01' },
   ],
 };
 
@@ -80,8 +80,15 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
         >
           <img 
             src={logo} 
-            alt="Noble SpeedyTrac. inc logo" 
-            style={{ height: 48, width: 'auto', marginRight: 0, cursor: 'pointer', pointerEvents: 'auto' }}
+            alt="NobleSpeedytrac logo" 
+            style={{ 
+              height: 80, 
+              width: 'auto', 
+              marginRight: 0, 
+              cursor: 'pointer', 
+              pointerEvents: 'auto',
+              filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
+            }}
           />
         </Link>
 

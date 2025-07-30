@@ -131,12 +131,20 @@ export const dbHelpers = {
   async getShipmentsByUserId(userId) {
     const { data, error } = await supabase
       .from('shipments')
-      .select('*')
+      .select(`
+        *,
+        packages(tracking_number)
+      `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data;
+    
+    // Flatten the data to include tracking_number at the root level
+    return data.map(shipment => ({
+      ...shipment,
+      tracking_number: shipment.packages?.[0]?.tracking_number || shipment.shipment_number
+    }));
   },
 
   async updateShipmentStatus(shipmentId, status) {

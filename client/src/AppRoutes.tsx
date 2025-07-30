@@ -84,7 +84,7 @@ function AppRoutes() {
               <section className="hero-bg">
                 <div className="hero-section">
                   <div className="company-quote">
-                    At Noble Speedytrac Inc., we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
+                    At NobleSpeedytrac, we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
                     Your trusted logistics partner — driven by precision, powered by innovation.
                   </div>
                   <div className="tracking-card">
@@ -163,10 +163,10 @@ function AppRoutes() {
         <div className="footer-content">
           <div className="footer-left">
             <span className="footer-logo">📦</span>
-            <span className="footer-brand">Noble SpeedyTrac. inc</span>
+            <span className="footer-brand">NobleSpeedytrac</span>
           </div>
           <div className="footer-center">
-            &copy; {new Date().getFullYear()} Noble SpeedyTrac. inc. All rights reserved.
+            &copy; {new Date().getFullYear()} NobleSpeedytrac. All rights reserved.
           </div>
           <div className="footer-right">
             <span>Contact: <a href="mailto:info@noblespeedytrac.com">info@noblespeedytrac.com</a></span>

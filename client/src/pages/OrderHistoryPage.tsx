@@ -1,75 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// User-specific mock data
-const userOrdersData = {
-  'john_doe': [
-    {
-      id: '1',
-      trackingNumber: 'TRK123456789',
-      status: 'Delivered',
-      date: '2024-06-01',
-      recipient: 'John Doe',
-      address: '123 Main St, Toronto, ON',
-      serviceType: 'Express',
-      price: 49.99,
-      history: [
-        { date: '2024-05-30', status: 'Shipped', location: 'Toronto Hub' },
-        { date: '2024-05-31', status: 'In Transit', location: 'Mississauga' },
-        { date: '2024-06-01', status: 'Delivered', location: 'Toronto' },
-      ],
-    },
-    {
-      id: '2',
-      trackingNumber: 'TRK987654321',
-      status: 'In Transit',
-      date: '2024-06-03',
-      recipient: 'John Doe',
-      address: '456 King St, Toronto, ON',
-      serviceType: 'Standard',
-      price: 29.99,
-      history: [
-        { date: '2024-06-02', status: 'Shipped', location: 'Toronto Hub' },
-        { date: '2024-06-03', status: 'In Transit', location: 'Scarborough' },
-      ],
-    },
-  ],
-  'jane_smith': [
-    {
-      id: '3',
-      trackingNumber: 'TRK555666777',
-      status: 'Delivered',
-      date: '2024-05-28',
-      recipient: 'Jane Smith',
-      address: '789 Queen St, Toronto, ON',
-      serviceType: 'Premium',
-      price: 79.99,
-      history: [
-        { date: '2024-05-25', status: 'Shipped', location: 'Toronto Hub' },
-        { date: '2024-05-26', status: 'In Transit', location: 'Vancouver' },
-        { date: '2024-05-28', status: 'Delivered', location: 'Toronto' },
-      ],
-    },
-  ],
-  'admin': [
-    {
-      id: '4',
-      trackingNumber: 'TRK111222333',
-      status: 'Pending',
-      date: '2024-06-05',
-      recipient: 'Admin User',
-      address: '321 Admin Ave, Toronto, ON',
-      serviceType: 'Express',
-      price: 59.99,
-      history: [
-        { date: '2024-06-05', status: 'Order Created', location: 'Toronto Hub' },
-      ],
-    },
-  ],
-};
-
-// Default empty orders for new users
-const defaultOrders: typeof userOrdersData['john_doe'] = [];
+import { shipmentAPI } from '../services/api';
 
 interface User {
   id: number;
@@ -83,41 +14,131 @@ interface OrderHistoryPageProps {
   showToast?: (msg: string) => void;
 }
 
-const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
-  // Get user-specific orders or default to empty array
-  const baseUserOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
-  
-  // Get newly created shipments from localStorage
-  const getNewShipments = () => {
-    if (!user) return [];
-    const newShipments = localStorage.getItem(`newShipments_${user.username}`);
-    return newShipments ? JSON.parse(newShipments) : [];
-  };
+interface Shipment {
+  id: number;
+  shipment_number: string;
+  status: string;
+  created_at: string;
+  recipient_name: string;
+  recipient_address: string;
+  service_type: string;
+  service_type_label?: string;
+  price: number;
+  tracking_number?: string;
+}
 
-  const [userOrders, setUserOrders] = useState([...baseUserOrders, ...getNewShipments()]);
-  const [selectedOrder, setSelectedOrder] = useState<typeof userOrders[0] | null>(null);
+interface Order {
+  id: string;
+  trackingNumber: string;
+  status: string;
+  date: string;
+  recipient: string;
+  address: string;
+  serviceType: string;
+  price: number;
+  history: Array<{
+    date: string;
+    status: string;
+    location: string;
+  }>;
+}
+
+const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Update orders when user changes or component mounts
-  useEffect(() => {
-    const baseOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
-    const newShipments = getNewShipments();
-    console.log('User:', user?.username);
-    console.log('Base orders:', baseOrders.length);
-    console.log('New shipments:', newShipments.length);
-    console.log('Total orders:', baseOrders.length + newShipments.length);
-    setUserOrders([...baseOrders, ...newShipments]);
-  }, [user]);
-
-  // Add a refresh function that can be called manually
-  const refreshOrders = () => {
-    const baseOrders = user ? (userOrdersData[user.username as keyof typeof userOrdersData] || defaultOrders) : defaultOrders;
-    const newShipments = getNewShipments();
-    setUserOrders([...baseOrders, ...newShipments]);
+  // Transform shipment data from API to UI format
+  const transformShipmentToOrder = (shipment: Shipment): Order => {
+    return {
+      id: shipment.id.toString(),
+      trackingNumber: shipment.tracking_number || shipment.shipment_number,
+      status: shipment.status === 'pending' ? 'Processing' : 
+              shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1),
+      date: new Date(shipment.created_at).toLocaleDateString(),
+      recipient: shipment.recipient_name,
+      address: shipment.recipient_address,
+      serviceType: shipment.service_type_label || shipment.service_type,
+      price: shipment.price,
+      history: [
+        {
+          date: new Date(shipment.created_at).toLocaleDateString(),
+          status: 'Order Created',
+          location: 'Toronto Hub'
+        }
+      ]
+    };
   };
 
+  // Fetch shipments from API
+  const fetchShipments = async () => {
+    if (!user) {
+      setUserOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching shipments for user:', user.username);
+      
+      // Check if user is authenticated
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please log in to view your order history');
+      }
+      
+      const shipments = await shipmentAPI.getShipments();
+      console.log('Shipments received:', shipments);
+      
+      const transformedOrders = shipments.map(transformShipmentToOrder);
+      setUserOrders(transformedOrders);
+      
+    } catch (err) {
+      console.error('Error fetching shipments:', err);
+      if (err instanceof Error) {
+        if (err.message.includes('Authentication required') || err.message.includes('log in')) {
+          setError('Please log in to view your order history.');
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('Network')) {
+          setError('Unable to connect to server. Please make sure the server is running and try again.');
+        } else if (err.message.includes('500') || err.message.includes('Server error')) {
+          setError('Server error occurred. Please try again later or contact support.');
+        } else {
+          setError(`${err.message}`);
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
+      setUserOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load shipments when component mounts or user changes
+  useEffect(() => {
+    fetchShipments();
+  }, [user]);
+
+  // Refresh function
+  const refreshOrders = () => {
+    fetchShipments();
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '6rem 2rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#dc2626', fontSize: '1.1rem' }}>Loading order history...</div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '2rem 0' }}>
+    <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '6rem 2rem 2rem', paddingTop: '6rem' }}>
       <div style={{ maxWidth: 700, margin: '0 auto', background: 'white', borderRadius: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '2rem', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24, gap: 16, justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -170,6 +191,36 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
             🔄 Refresh
           </button>
         </div>
+
+        {error && (
+          <div style={{ 
+            color: '#dc2626', 
+            background: '#fef2f2', 
+            padding: '1rem', 
+            borderRadius: 8, 
+            marginBottom: '1rem',
+            border: '1px solid #fecaca'
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Unable to load order history</div>
+            <div style={{ fontSize: '0.9rem' }}>{error}</div>
+            <button
+              onClick={refreshOrders}
+              style={{
+                marginTop: '0.5rem',
+                background: '#dc2626',
+                color: 'white',
+                border: 'none',
+                borderRadius: 6,
+                padding: '0.25rem 0.75rem',
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24 }}>
           <thead>
             <tr style={{ background: '#fef2f2' }}>
@@ -180,11 +231,17 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
             </tr>
           </thead>
           <tbody>
-            {userOrders.map((order: any) => (
+            {userOrders.map((order: Order) => (
               <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                 <td style={{ padding: '0.75rem', color: '#1a1a1a' }}>{order.trackingNumber}</td>
                 <td style={{ padding: '0.75rem' }}>
-                  <span style={{ color: order.status === 'Delivered' ? '#16a34a' : '#b91c1c', fontWeight: 600 }}>{order.status}</span>
+                  <span style={{ 
+                    color: order.status === 'Delivered' ? '#16a34a' : 
+                           order.status === 'Processing' ? '#f59e0b' : '#b91c1c', 
+                    fontWeight: 600 
+                  }}>
+                    {order.status}
+                  </span>
                 </td>
                 <td style={{ padding: '0.75rem', color: '#374151' }}>{order.date}</td>
                 <td style={{ padding: '0.75rem' }}>
@@ -199,8 +256,17 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({ user }) => {
             ))}
           </tbody>
         </table>
-        {userOrders.length === 0 && <div style={{ color: '#b91c1c', textAlign: 'center' }}>No orders found.</div>}
+        
+        {userOrders.length === 0 && !loading && (
+          <div style={{ color: '#b91c1c', textAlign: 'center', padding: '2rem' }}>
+            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No orders found.</p>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+              Create a shipment to see it appear in your order history.
+            </p>
+          </div>
+        )}
       </div>
+      
       {/* Details Modal */}
       {selectedOrder && (
         <div style={{

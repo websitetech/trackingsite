@@ -1,4 +1,4 @@
-# 🚚 Noble SpeedyTrac - Logistics Tracking System
+# 🚚 NobleSpeedytrac - Logistics Tracking System
 
 A comprehensive logistics and package tracking web application built with modern technologies, featuring real-time tracking, admin management, payment processing, and a beautiful Canadian autumn-themed UI.
 
@@ -770,4 +770,4 @@ For support and questions:
 
 ---
 
-**Built with ❤️ for Noble SpeedyTrac Inc.** 
+**Built with ❤️ for NobleSpeedytrac** 
