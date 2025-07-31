@@ -7,7 +7,7 @@ import { dirname } from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-import { dbHelpers } from './supabase.js';
+import { dbHelpers, supabase } from './supabase.js';
 import Stripe from 'stripe';
 
 dotenv.config();
@@ -56,22 +56,6 @@ const authenticateToken = (req, res, next) => {
     req.user = user;
     next();
   });
-};
-
-// Admin middleware
-const requireAdmin = async (req, res, next) => {
-  try {
-    // Get user from database to check role
-    const user = await dbHelpers.getUserById(req.user.id);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-    req.adminUser = user;
-    next();
-  } catch (error) {
-    console.error('Admin middleware error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
 };
 
 // Routes
@@ -219,7 +203,7 @@ app.post('/api/login', async (req, res) => {
     res.json({ 
       message: 'Login successful',
       token,
-      user: { id: user.id, username: user.username, email: user.email, role: user.role }
+      user: { id: user.id, username: user.username, email: user.email }
     });
 
   } catch (error) {
@@ -229,43 +213,26 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Track package
-app.post('/api/track', async (req, res) => {
-  try {
-    const { tracking_number } = req.body;
+app.post('/api/track', (req, res) => {
+  const { tracking_number, zip_code } = req.body;
 
-    if (!tracking_number) {
-      return res.status(400).json({ error: 'Tracking number is required' });
-    }
-
-    // Get package from database
-    const packageData = await dbHelpers.getPackageByTrackingNumber(tracking_number);
-    
-    if (!packageData) {
-      return res.status(404).json({ error: 'Package not found' });
-    }
-
-    // Get tracking history for the package
-    const trackingHistory = await dbHelpers.getPackageTrackingHistory(packageData.id);
-
-    // Format tracking data
-    const trackingData = {
-      tracking_number: packageData.tracking_number,
-      status: packageData.status,
-      location: trackingHistory.length > 0 ? trackingHistory[0].location : 'Origin',
-      estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // Mock delivery date
-      history: trackingHistory.map(entry => ({
-        date: entry.timestamp,
-        status: entry.status,
-        location: entry.location,
-        description: entry.description
-      }))
-    };
-
-    res.json(trackingData);
-  } catch (error) {
-    console.error('Tracking error:', error);
-    res.status(500).json({ error: 'Server error' });
+  if (!tracking_number || !zip_code) {
+    return res.status(400).json({ error: 'Tracking number and zip code are required' });
   }
+
+  // Simulate package tracking with mock data
+  const mockTrackingData = {
+    tracking_number,
+    status: 'In Transit',
+    location: 'Distribution Center',
+    estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    history: [
+      { date: new Date().toISOString(), status: 'Package picked up', location: 'Origin' },
+      { date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), status: 'In transit', location: 'Distribution Center' }
+    ]
+  };
+
+  res.json(mockTrackingData);
 });
 
 // Get shipping estimate
@@ -316,77 +283,33 @@ app.post('/api/estimate', async (req, res) => {
 // Create new shipment
 app.post('/api/ship', authenticateToken, async (req, res) => {
   try {
-    const { 
-      customer, 
-      service_type, 
-      service_type_label, 
-      recipient_name, 
-      recipient_address, 
-      contact_number,
-      origin_postal,
-      destination_postal,
-      weight,
-      price 
-    } = req.body;
+    const { origin_zip, destination_zip, weight, service_type, recipient_name, recipient_address, contact_number } = req.body;
     const user_id = req.user.id;
 
-    if (!customer || !service_type || !recipient_name || !recipient_address || !contact_number || !price) {
-      return res.status(400).json({ error: 'All required fields are missing' });
+    if (!origin_zip || !destination_zip || !weight || !recipient_name || !recipient_address || !contact_number) {
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Generate shipment number
-    const shipment_number = dbHelpers.generateShipmentNumber();
+    // Generate tracking number
+    const tracking_number = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-    const shipmentData = {
+    const packageData = {
+      tracking_number,
       user_id,
-      shipment_number,
-      customer,
-      service_type,
-      service_type_label,
+      origin_zip,
+      destination_zip,
+      weight: parseFloat(weight),
       recipient_name,
       recipient_address,
       contact_number,
-      price: parseFloat(price),
-      origin_postal,
-      destination_postal,
-      weight: weight ? parseFloat(weight) : null,
-      status: 'pending',
-      payment_status: 'pending'
-    };
-
-    const newShipment = await dbHelpers.createShipment(shipmentData);
-
-    // Create package record linked to the shipment
-    const tracking_number = dbHelpers.generateTrackingNumber();
-    const packageData = {
-      user_id,
-      shipment_id: newShipment.id,
-      tracking_number,
-      origin_zip: origin_postal,
-      destination_zip: destination_postal,
-      weight: weight ? parseFloat(weight) : null,
-      status: 'pending',
-      recipient_name,
-      recipient_address,
-      contact_number
+      status: 'pending'
     };
 
     const newPackage = await dbHelpers.createPackage(packageData);
 
-    // Add initial tracking history entry
-    const initialTrackingData = {
-      status: 'Shipment Created',
-      location: 'Origin',
-      description: `Shipment ${shipment_number} created and package ${tracking_number} assigned`
-    };
-
-    await dbHelpers.addTrackingHistory(newPackage.id, initialTrackingData);
-
     res.status(201).json({
-      message: 'Shipment and package created successfully',
-      shipment_number: newShipment.shipment_number,
-      shipment_id: newShipment.id,
-      tracking_number: newPackage.tracking_number,
+      message: 'Shipment created successfully',
+      tracking_number,
       package_id: newPackage.id
     });
 
@@ -406,235 +329,22 @@ app.post('/api/ship/bulk', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Shipments array is required' });
     }
 
-    const createdShipments = [];
+    // Add user_id to each shipment if not already present
+    const shipmentsWithUserId = shipments.map(shipment => ({
+      ...shipment,
+      user_id: shipment.user_id || user_id
+    }));
 
-    for (const shipment of shipments) {
-      const { 
-        customer, 
-        service_type, 
-        service_type_label, 
-        recipient_name, 
-        recipient_address, 
-        contact_number,
-        origin_postal,
-        destination_postal,
-        weight,
-        price 
-      } = shipment;
-
-      if (!customer || !service_type || !recipient_name || !recipient_address || !contact_number || !price) {
-        return res.status(400).json({ error: 'All required fields are missing for each shipment' });
-      }
-
-      // Generate shipment number
-      const shipment_number = dbHelpers.generateShipmentNumber();
-
-      const shipmentData = {
-        user_id,
-        shipment_number,
-        customer,
-        service_type,
-        service_type_label,
-        recipient_name,
-        recipient_address,
-        contact_number,
-        price: parseFloat(price),
-        origin_postal,
-        destination_postal,
-        weight: weight ? parseFloat(weight) : null,
-        status: 'pending',
-        payment_status: 'pending'
-      };
-
-      const newShipment = await dbHelpers.createShipment(shipmentData);
-
-      // Create package record linked to the shipment
-      const tracking_number = dbHelpers.generateTrackingNumber();
-      const packageData = {
-        user_id,
-        shipment_id: newShipment.id,
-        tracking_number,
-        origin_zip: origin_postal,
-        destination_zip: destination_postal,
-        weight: weight ? parseFloat(weight) : null,
-        status: 'pending',
-        recipient_name,
-        recipient_address,
-        contact_number
-      };
-
-      const newPackage = await dbHelpers.createPackage(packageData);
-
-      // Add initial tracking history entry
-      const initialTrackingData = {
-        status: 'Shipment Created',
-        location: 'Origin',
-        description: `Shipment ${shipment_number} created and package ${tracking_number} assigned`
-      };
-
-      await dbHelpers.addTrackingHistory(newPackage.id, initialTrackingData);
-
-      createdShipments.push({
-        shipment_number: newShipment.shipment_number,
-        shipment_id: newShipment.id,
-        tracking_number: newPackage.tracking_number,
-        package_id: newPackage.id
-      });
-    }
+    // Use the database helper function
+    const createdShipments = await dbHelpers.createBulkShipments(shipmentsWithUserId);
 
     res.status(201).json({
-      message: `${createdShipments.length} shipments and packages created successfully`,
+      message: `${createdShipments.length} shipments created successfully`,
       shipments: createdShipments
     });
 
   } catch (error) {
     console.error('Bulk shipment creation error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Cart management endpoints
-app.post('/api/cart/add', authenticateToken, async (req, res) => {
-  try {
-    const cartItem = {
-      user_id: req.user.id,
-      ...req.body
-    };
-
-    const newCartItem = await dbHelpers.addToCart(cartItem);
-    res.status(201).json(newCartItem);
-  } catch (error) {
-    console.error('Add to cart error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.get('/api/cart', authenticateToken, async (req, res) => {
-  try {
-    const cartItems = await dbHelpers.getCartByUserId(req.user.id);
-    res.json(cartItems);
-  } catch (error) {
-    console.error('Get cart error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.delete('/api/cart/:itemId', authenticateToken, async (req, res) => {
-  try {
-    const { itemId } = req.params;
-    await dbHelpers.removeFromCart(itemId, req.user.id);
-    res.json({ message: 'Item removed from cart' });
-  } catch (error) {
-    console.error('Remove from cart error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.delete('/api/cart', authenticateToken, async (req, res) => {
-  try {
-    await dbHelpers.clearCart(req.user.id);
-    res.json({ message: 'Cart cleared' });
-  } catch (error) {
-    console.error('Clear cart error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Get customer tariffs
-app.get('/api/tariffs', async (req, res) => {
-  try {
-    const tariffs = await dbHelpers.getCustomerTariffs();
-    res.json(tariffs);
-  } catch (error) {
-    console.error('Get tariffs error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Get user's shipments
-app.get('/api/shipments', authenticateToken, async (req, res) => {
-  try {
-    const shipments = await dbHelpers.getShipmentsByUserId(req.user.id);
-    res.json(shipments);
-  } catch (error) {
-    console.error('Get shipments error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Get payment transactions
-app.get('/api/payments', authenticateToken, async (req, res) => {
-  try {
-    const transactions = await dbHelpers.getPaymentTransactionsByUserId(req.user.id);
-    res.json(transactions);
-  } catch (error) {
-    console.error('Get payments error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Create payment transaction
-app.post('/api/payments', authenticateToken, async (req, res) => {
-  try {
-    const { 
-      shipment_id, 
-      amount, 
-      payment_method, 
-      stripe_payment_intent_id,
-      stripe_charge_id,
-      billing_address 
-    } = req.body;
-
-    const transactionData = {
-      user_id: req.user.id,
-      shipment_id,
-      transaction_id: dbHelpers.generateTransactionId(),
-      amount: parseFloat(amount),
-      payment_method,
-      payment_status: 'pending',
-      stripe_payment_intent_id,
-      stripe_charge_id,
-      billing_address
-    };
-
-    const newTransaction = await dbHelpers.createPaymentTransaction(transactionData);
-    res.status(201).json(newTransaction);
-  } catch (error) {
-    console.error('Create payment error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Update payment status
-app.patch('/api/payments/:transactionId/status', authenticateToken, async (req, res) => {
-  try {
-    const { transactionId } = req.params;
-    const { status } = req.body;
-
-    const updatedTransaction = await dbHelpers.updatePaymentStatus(transactionId, status);
-    res.json(updatedTransaction);
-  } catch (error) {
-    console.error('Update payment status error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Add tracking history
-app.post('/api/packages/:packageId/tracking', authenticateToken, async (req, res) => {
-  try {
-    const { packageId } = req.params;
-    const { status, location, description } = req.body;
-
-    const trackingData = {
-      status,
-      location,
-      description
-    };
-
-    const newTrackingEntry = await dbHelpers.addTrackingHistory(packageId, trackingData);
-    res.status(201).json(newTrackingEntry);
-  } catch (error) {
-    console.error('Add tracking history error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -665,19 +375,360 @@ app.get('/api/estimates', async (req, res) => {
 // Stripe PaymentIntent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
-    const { amount, currency = 'usd' } = req.body;
+    const { amount, currency = 'cad' } = req.body;
     if (!amount) {
       return res.status(400).json({ error: 'Amount is required' });
     }
+    
+    console.log('Creating payment intent with:', { amount, currency });
+    
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Stripe expects amount in cents
       currency,
-      automatic_payment_methods: { enabled: true },
+      // Focus on payment methods that work well for one-time payments
+      payment_method_types: [
+        'card', // Credit/Debit cards (includes Apple Pay, Google Pay)
+        'link' // Interac e-Transfer
+      ]
     });
+    
+    console.log('Payment intent created:', {
+      id: paymentIntent.id,
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+      payment_method_types: paymentIntent.payment_method_types
+    });
+    
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     console.error('Stripe PaymentIntent error:', error);
     res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+});
+
+// Check Stripe account status and activation
+app.get('/api/stripe-account-status', async (req, res) => {
+  try {
+    // Get account details
+    const account = await stripe.accounts.retrieve();
+    
+    // Get account capabilities
+    const capabilities = await stripe.accounts.listCapabilities(account.id);
+    
+    // Check payment methods availability
+    const paymentMethods = await stripe.paymentMethods.list({
+      limit: 1
+    });
+
+    const status = {
+      accountId: account.id,
+      country: account.country,
+      businessType: account.business_type,
+      chargesEnabled: account.charges_enabled,
+      payoutsEnabled: account.payouts_enabled,
+      detailsSubmitted: account.details_submitted,
+      requirements: account.requirements,
+      capabilities: capabilities.data.reduce((acc, cap) => {
+        acc[cap.object] = cap.status;
+        return acc;
+      }, {}),
+      paymentMethodsAvailable: {
+        card: true, // Always available
+        link: account.country === 'ca', // Link for Canada
+        klarna: account.country === 'ca' // Klarna for Canada
+      },
+      accountStatus: account.charges_enabled && account.payouts_enabled ? 'FULLY_ACTIVATED' : 'PARTIALLY_ACTIVATED'
+    };
+
+    res.json(status);
+  } catch (error) {
+    console.error('Stripe account status check error:', error);
+    res.status(500).json({ 
+      error: 'Failed to check account status',
+      details: error.message 
+    });
+  }
+});
+
+// Check available payment methods and their status
+app.get('/api/payment-methods/available', async (req, res) => {
+  try {
+    // Get account details
+    const account = await stripe.accounts.retrieve();
+    
+    // Get payment method types available for this account
+    const paymentMethods = await stripe.paymentMethods.list({
+      limit: 1
+    });
+
+    // Get account capabilities
+    const capabilities = await stripe.accounts.listCapabilities(account.id);
+    
+    // Create a map of capability statuses
+    const capabilityStatus = capabilities.data.reduce((acc, cap) => {
+      acc[cap.id] = cap.status;
+      return acc;
+    }, {});
+
+    // Check specific payment method availability based on actual capabilities
+    const availableMethods = {
+      card: capabilityStatus['card_payments'] === 'active',
+      link: capabilityStatus['link_payments'] === 'active',
+      klarna: capabilityStatus['klarna_payments'] === 'active',
+      apple_pay: true, // Apple Pay if configured
+      google_pay: true, // Google Pay if configured
+      // Bank transfer options
+      ach_debit: capabilityStatus['us_bank_account_ach_payments'] === 'active',
+      sepa_debit: capabilityStatus['sepa_debit_payments'] === 'active',
+      bacs_debit: capabilityStatus['bacs_debit_payments'] === 'active',
+      // Other payment methods
+      ideal: capabilityStatus['ideal_payments'] === 'active',
+      sofort: capabilityStatus['sofort_payments'] === 'active',
+      bancontact: capabilityStatus['bancontact_payments'] === 'active',
+      eps: capabilityStatus['eps_payments'] === 'active',
+      giropay: capabilityStatus['giropay_payments'] === 'active',
+      p24: capabilityStatus['p24_payments'] === 'active',
+      blik: false, // Not available for CA
+      oxxo: false, // Not available for CA
+      konbini: false, // Not available for CA
+      promptpay: false, // Not available for CA
+      paynow: false, // Not available for CA
+      grabpay: false, // Not available for CA
+      fpx: false, // Not available for CA
+      boleto: false, // Not available for CA
+      pix: false, // Not available for CA
+    };
+    
+    const status = {
+      accountId: account.id,
+      country: account.country,
+      businessType: account.business_type,
+      chargesEnabled: account.charges_enabled,
+      payoutsEnabled: account.payouts_enabled,
+      detailsSubmitted: account.details_submitted,
+      requirements: account.requirements,
+      capabilities: capabilityStatus,
+      availablePaymentMethods: availableMethods,
+      accountStatus: account.charges_enabled && account.payouts_enabled ? 'FULLY_ACTIVATED' : 'PARTIALLY_ACTIVATED',
+      // Check if Link is specifically enabled
+      linkEnabled: capabilityStatus['link_payments'] === 'active',
+      // Check if Apple Pay is configured
+      applePayEnabled: true, // Will be true if configured
+      // Debug info
+      debug: {
+        accountRequirements: account.requirements,
+        accountCapabilities: capabilities.data,
+        paymentMethodTypes: paymentMethods.data.map(pm => pm.type),
+        capabilityStatus: capabilityStatus
+      }
+    };
+
+    res.json(status);
+  } catch (error) {
+    console.error('Payment methods check error:', error);
+    res.status(500).json({ 
+      error: 'Failed to check payment methods',
+      details: error.message 
+    });
+  }
+});
+
+// Cart endpoints
+app.post('/api/cart/add', authenticateToken, async (req, res) => {
+  try {
+    const { 
+      item_id, 
+      customer, 
+      service_type, 
+      service_type_label, 
+      recipient_name, 
+      recipient_address, 
+      contact_number, 
+      origin_postal, 
+      destination_postal, 
+      weight, 
+      price 
+    } = req.body;
+    const user_id = req.user.id;
+
+    if (!customer || !service_type || !recipient_name || !recipient_address || !contact_number || !price) {
+      return res.status(400).json({ error: 'Required fields are missing' });
+    }
+
+    const cartItem = {
+      user_id,
+      item_id: item_id || `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      customer,
+      service_type,
+      service_type_label: service_type_label || '',
+      recipient_name,
+      recipient_address,
+      contact_number,
+      origin_postal: origin_postal || '',
+      destination_postal: destination_postal || '',
+      weight: weight || 1,
+      price: parseFloat(price),
+      created_at: new Date().toISOString()
+    };
+
+    const newCartItem = await dbHelpers.addToCart(cartItem);
+    res.status(201).json(newCartItem);
+  } catch (error) {
+    console.error('Add to cart error:', error);
+    res.status(500).json({ error: 'Failed to add item to cart' });
+  }
+});
+
+app.get('/api/cart', authenticateToken, async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const cartItems = await dbHelpers.getCartByUserId(user_id);
+    res.json(cartItems);
+  } catch (error) {
+    console.error('Get cart error:', error);
+    res.status(500).json({ error: 'Failed to get cart items' });
+  }
+});
+
+app.delete('/api/cart/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user_id = req.user.id;
+    
+    await dbHelpers.removeFromCart(id, user_id);
+    res.json({ message: 'Item removed from cart' });
+  } catch (error) {
+    console.error('Remove from cart error:', error);
+    res.status(500).json({ error: 'Failed to remove item from cart' });
+  }
+});
+
+app.delete('/api/cart', authenticateToken, async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    await dbHelpers.clearCart(user_id);
+    res.json({ message: 'Cart cleared successfully' });
+  } catch (error) {
+    console.error('Clear cart error:', error);
+    res.status(500).json({ error: 'Failed to clear cart' });
+  }
+});
+
+// Manual payment endpoints
+app.post('/api/manual-payment/create', authenticateToken, async (req, res) => {
+  try {
+    const { 
+      amount, 
+      currency = 'cad', 
+      paymentMethod, 
+      orderDetails,
+      fromCart = false,
+      singleShipmentData = null
+    } = req.body;
+    const user_id = req.user.id;
+
+    if (!amount || !paymentMethod) {
+      return res.status(400).json({ error: 'Amount and payment method are required' });
+    }
+
+    // Generate unique reference number
+    const referenceNumber = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+    const manualPayment = {
+      user_id,
+      reference_number: referenceNumber,
+      amount: parseFloat(amount),
+      currency,
+      payment_method: paymentMethod, // 'interac_etransfer', 'bank_transfer'
+      status: 'pending',
+      order_details: orderDetails,
+      from_cart: fromCart,
+      single_shipment_data: singleShipmentData,
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+    };
+
+    const newPayment = await dbHelpers.createManualPayment(manualPayment);
+    res.status(201).json(newPayment);
+  } catch (error) {
+    console.error('Create manual payment error:', error);
+    res.status(500).json({ error: 'Failed to create manual payment' });
+  }
+});
+
+app.post('/api/manual-payment/verify', async (req, res) => {
+  try {
+    const { reference_number, customer_email, customer_name } = req.body;
+
+    if (!reference_number || !customer_email) {
+      return res.status(400).json({ error: 'Reference number and customer email are required' });
+    }
+
+    // Find the manual payment
+    const payment = await dbHelpers.getManualPaymentByReference(reference_number);
+    
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    if (payment.status !== 'pending') {
+      return res.status(400).json({ error: 'Payment already processed' });
+    }
+
+    // Update payment status to verified
+    await dbHelpers.updateManualPaymentStatus(reference_number, 'verified', {
+      customer_email,
+      customer_name,
+      verified_at: new Date().toISOString()
+    });
+
+    // Process the order based on payment type
+    if (payment.from_cart) {
+      // Process cart items
+      // This would create shipments from the cart
+      res.json({ 
+        message: 'Payment verified successfully',
+        reference_number,
+        status: 'verified',
+        next_step: 'process_cart'
+      });
+    } else if (payment.single_shipment_data) {
+      // Process single shipment
+      const shipmentResult = await dbHelpers.createShipment(payment.single_shipment_data);
+      res.json({ 
+        message: 'Payment verified and shipment created',
+        reference_number,
+        status: 'verified',
+        shipment_number: shipmentResult.shipment_number,
+        tracking_number: shipmentResult.tracking_number
+      });
+    } else {
+      res.json({ 
+        message: 'Payment verified successfully',
+        reference_number,
+        status: 'verified'
+      });
+    }
+
+  } catch (error) {
+    console.error('Verify manual payment error:', error);
+    res.status(500).json({ error: 'Failed to verify payment' });
+  }
+});
+
+app.get('/api/manual-payment/:referenceNumber', async (req, res) => {
+  try {
+    const { referenceNumber } = req.params;
+    const payment = await dbHelpers.getManualPaymentByReference(referenceNumber);
+    
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    res.json(payment);
+  } catch (error) {
+    console.error('Get manual payment error:', error);
+    res.status(500).json({ error: 'Failed to get payment details' });
   }
 });
 
@@ -698,126 +749,163 @@ if (process.env.NODE_ENV === 'development') {
     }
   });
 
-  // Debug endpoint to check admin user
-  app.get('/api/dev/check-admin', async (req, res) => {
+  // Development endpoint to add initial tracking history for existing packages
+  app.post('/api/dev/add-initial-history', async (req, res) => {
     try {
-      const adminUser = await dbHelpers.getUserByUsername('admin');
+      // Get all packages that don't have tracking history
+      const { data: packages, error: packagesError } = await supabase
+        .from('packages')
+        .select('id, tracking_number, status')
+        .not('id', 'in', (
+          supabase
+            .from('package_tracking_history')
+            .select('package_id')
+        ));
+      
+      if (packagesError) throw packagesError;
+
+      if (packages.length === 0) {
+        return res.json({ message: 'All packages already have tracking history' });
+      }
+
+      // Add initial tracking history for each package
+      const historyEntries = packages.map(pkg => ({
+        package_id: pkg.id,
+        status: pkg.status || 'pending',
+        location: 'Package created',
+        description: 'Package has been created and is awaiting pickup',
+        timestamp: new Date().toISOString()
+      }));
+
+      const { error: historyError } = await supabase
+        .from('package_tracking_history')
+        .insert(historyEntries);
+
+      if (historyError) throw historyError;
+
       res.json({ 
-        adminUser,
-        exists: !!adminUser,
-        hasRole: adminUser ? !!adminUser.role : false,
-        role: adminUser ? adminUser.role : null
+        message: `Added initial tracking history for ${packages.length} packages`,
+        packages_updated: packages.length
       });
     } catch (error) {
-      console.error('Check admin error:', error);
+      console.error('Add initial history error:', error);
       res.status(500).json({ error: 'Server error' });
     }
   });
 }
 
-// Admin endpoints
-// Get all users (admin only)
-app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const users = await dbHelpers.getAllUsers();
-    res.json(users);
-  } catch (error) {
-    console.error('Get all users error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Update user (admin only)
-app.put('/api/admin/users/:userId', authenticateToken, requireAdmin, async (req, res) => {
+// Tracking endpoints
+app.get('/api/track/:trackingNumber', async (req, res) => {
   try {
-    const { userId } = req.params;
-    const { username, email, role, status } = req.body;
+    const { trackingNumber } = req.params;
     
-    const updateData = { username, email, role };
-    if (status !== undefined) {
-      updateData.email_verified = status === 'active';
+    if (!trackingNumber) {
+      return res.status(400).json({ error: 'Tracking number is required' });
     }
+
+    const packageData = await dbHelpers.getPackageByTrackingNumber(trackingNumber);
     
-    const updatedUser = await dbHelpers.updateUser(userId, updateData);
-    res.json(updatedUser);
+    if (!packageData) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+
+    // Get tracking history
+    const trackingHistory = await dbHelpers.getPackageTrackingHistory(packageData.id);
+
+    res.json({
+      package: packageData,
+      tracking_history: trackingHistory,
+      shipment: packageData.shipments
+    });
+
   } catch (error) {
-    console.error('Update user error:', error);
+    console.error('Track package error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Get all shipments (admin only)
-app.get('/api/admin/shipments', authenticateToken, requireAdmin, async (req, res) => {
+// Search packages by tracking number (partial match)
+app.get('/api/search/track/:trackingNumber', async (req, res) => {
   try {
-    const shipments = await dbHelpers.getAllShipments();
-    res.json(shipments);
+    const { trackingNumber } = req.params;
+    
+    if (!trackingNumber) {
+      return res.status(400).json({ error: 'Tracking number is required' });
+    }
+
+    const packages = await dbHelpers.searchPackagesByTrackingNumber(trackingNumber);
+    
+    res.json({ packages });
+
   } catch (error) {
-    console.error('Get all shipments error:', error);
+    console.error('Search packages error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Update shipment status (admin only)
-app.put('/api/admin/shipments/:shipmentId', authenticateToken, requireAdmin, async (req, res) => {
+// Get user's packages with tracking history
+app.get('/api/packages/with-history', authenticateToken, async (req, res) => {
   try {
-    const { shipmentId } = req.params;
-    const { status, driver, notes } = req.body;
-    
-    const updateData = { status };
-    if (driver !== undefined) updateData.driver = driver;
-    if (notes !== undefined) updateData.notes = notes;
-    
-    const updatedShipment = await dbHelpers.updateShipment(shipmentId, updateData);
-    res.json(updatedShipment);
-  } catch (error) {
-    console.error('Update shipment error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Get all packages (admin only)
-app.get('/api/admin/packages', authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const packages = await dbHelpers.getAllPackages();
+    const user_id = req.user.id;
+    const packages = await dbHelpers.getPackagesWithTrackingHistory(user_id);
     res.json(packages);
   } catch (error) {
-    console.error('Get all packages error:', error);
+    console.error('Get packages with history error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
 // Update package status (admin only)
-app.put('/api/admin/packages/:packageId', authenticateToken, requireAdmin, async (req, res) => {
+app.post('/api/packages/:packageId/status', authenticateToken, async (req, res) => {
   try {
     const { packageId } = req.params;
-    const { status, current_location, delivery_notes } = req.body;
+    const { status, location, description } = req.body;
+    const user_id = req.user.id;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    // Check if user is admin or owns the package
+    const packageData = await dbHelpers.getPackageByTrackingNumber(packageId);
+    if (!packageData) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+
+    // For now, allow any authenticated user to update status
+    // In production, you'd want to check if user is admin or package owner
+    const result = await dbHelpers.updatePackageStatus(packageData.id, status, location, description);
     
-    const updateData = { status };
-    if (current_location !== undefined) updateData.current_location = current_location;
-    if (delivery_notes !== undefined) updateData.delivery_notes = delivery_notes;
-    
-    const updatedPackage = await dbHelpers.updatePackage(packageId, updateData);
-    res.json(updatedPackage);
+    res.json({
+      message: 'Package status updated successfully',
+      package: result.package,
+      history: result.history
+    });
+
   } catch (error) {
-    console.error('Update package error:', error);
+    console.error('Update package status error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Get admin dashboard stats
-app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
+// Get package tracking history
+app.get('/api/packages/:packageId/history', async (req, res) => {
   try {
-    const stats = await dbHelpers.getAdminStats();
-    res.json(stats);
+    const { packageId } = req.params;
+    
+    const history = await dbHelpers.getPackageTrackingHistory(packageId);
+    
+    res.json({ tracking_history: history });
+
   } catch (error) {
-    console.error('Get admin stats error:', error);
+    console.error('Get tracking history error:', error);
     res.status(500).json({ error: 'Server error' });
   }
-});
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 app.listen(PORT, () => {

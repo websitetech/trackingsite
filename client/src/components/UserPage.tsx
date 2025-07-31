@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import PhoneInput from './PhoneInput';
 import type { CountryCode } from '../utils/phoneValidation';
+import CustomPopup from './CustomPopup';
+import TrackingDisplay from './TrackingDisplay';
 
 interface User {
   id: number;
@@ -67,6 +69,8 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   const [error, setError] = useState('');
   const [phoneCountry, setPhoneCountry] = useState<CountryCode | null>(null);
   const [isPhoneValid, setIsPhoneValid] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
   const navigate = useNavigate();
   const { addItem, state: cartState } = useCart();
 
@@ -143,7 +147,44 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   };
 
   const handleProceedToPayment = () => {
-    navigate('/payment', { state: { fromCart: true } });
+    navigate('/payment');
+  };
+
+  const handleTrackClick = () => {
+    console.log('🚀 Track button clicked!');
+    console.log('📦 Tracking number:', trackingNumber);
+    
+    if (!trackingNumber.trim()) {
+      alert('Please enter a tracking number');
+      return;
+    }
+
+    console.log('✅ Showing tracking modal');
+    setShowTrackingModal(true);
+  };
+
+  const handleCloseTrackingModal = () => {
+    console.log('🔒 Closing tracking modal');
+    setShowTrackingModal(false);
+  };
+
+  const renderTrackingContent = () => {
+    console.log('🎨 Rendering tracking content for:', trackingNumber);
+    return (
+      <div style={{ minHeight: '400px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ 
+            fontSize: '18px', 
+            fontWeight: 'bold', 
+            color: '#1f2937',
+            marginBottom: '16px'
+          }}>
+            Tracking Information
+          </h3>
+        </div>
+        <TrackingDisplay trackingNumber={trackingNumber} />
+      </div>
+    );
   };
 
   if (!user) return null;
@@ -152,8 +193,74 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
     <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
       <section className="hero-bg">
         <div className="hero-section">
-          <div className="company-quote" style={{ color: '#111' }}>
-            Welcome back, <b>{user.username}</b>!
+          {/* Welcome Section */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
+            color: 'black',
+            borderRadius: '2rem',
+            boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
+            padding: '2.5rem',
+            margin: '32px auto 24px auto',
+            maxWidth: 600,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(220,38,38,0.1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}>
+            <h1 style={{ color: '#111', fontWeight: 700, fontSize: '1.8rem', marginBottom: 8 }}>Welcome back, {user.username}! 👋</h1>
+            <p style={{ color: '#666', fontSize: '1rem', marginBottom: 24, textAlign: 'center' }}>Manage your shipments and track your packages</p>
+            
+            {/* Quick Actions */}
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                onClick={() => navigate('/orders')}
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.75rem',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <span>📋</span>
+                <span>View Order History</span>
+              </button>
+              
+              <button
+                onClick={() => navigate('/profile')}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.75rem',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <span>👤</span>
+                <span>Profile Settings</span>
+              </button>
+            </div>
           </div>
 
           {/* Admin Quick Actions - Only for admin users */}
@@ -359,6 +466,11 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
               <input 
                 type="text" 
                 placeholder="Enter Tracking Number" 
+                value={trackingNumber}
+                onChange={(e) => {
+                  console.log('📝 Tracking number changed:', e.target.value);
+                  setTrackingNumber(e.target.value);
+                }}
                 style={{ 
                   padding: '1rem 1.2rem', 
                   borderRadius: '1rem', 
@@ -372,26 +484,33 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
               />
               <button 
                 type="button" 
+                onClick={handleTrackClick}
+                disabled={!trackingNumber.trim()}
                 style={{ 
-                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', 
+                  background: trackingNumber.trim() ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)', 
                   color: 'white', 
                   border: 'none', 
                   padding: '1.2rem 2rem', 
                   borderRadius: '1rem', 
                   fontWeight: 600, 
                   fontSize: '1rem', 
-                  cursor: 'pointer', 
+                  cursor: trackingNumber.trim() ? 'pointer' : 'not-allowed', 
                   marginTop: 8,
-                  boxShadow: '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                  boxShadow: trackingNumber.trim() ? '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)' : 'none',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  opacity: trackingNumber.trim() ? 1 : 0.6
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35), 0 6px 16px rgba(220,38,38,0.25)';
+                  if (trackingNumber.trim()) {
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35), 0 6px 16px rgba(220,38,38,0.25)';
+                  }
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)';
+                  if (trackingNumber.trim()) {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)';
+                  }
                 }}
               >
                 Track
@@ -473,6 +592,17 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
           )}
         </div>
       </section>
+
+      {/* Tracking Modal */}
+      {showTrackingModal && (
+        <CustomPopup
+          isOpen={showTrackingModal}
+          onClose={handleCloseTrackingModal}
+          title="Track Package"
+          width="800px"
+          renderContent={renderTrackingContent}
+        />
+      )}
     </div>
   );
 };

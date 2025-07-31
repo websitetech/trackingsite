@@ -8,8 +8,8 @@ const PaymentSuccessPage: React.FC = () => {
   const fromCart = location.state?.fromCart || false;
   const shipmentCount = location.state?.shipmentCount || 1;
   const totalAmount = location.state?.totalAmount || 0;
-  const shipmentNumber = location.state?.shipmentNumber;
-  const trackingNumber = location.state?.trackingNumber;
+  const trackingNumbers = location.state?.trackingNumbers || [];
+  const shipments = location.state?.shipments || [];
 
   const handleGoToUser = () => {
     navigate('/user');
@@ -38,7 +38,7 @@ const PaymentSuccessPage: React.FC = () => {
         {fromCart ? (
           <div>
             <p style={{ color: '#666', marginBottom: '1rem', fontSize: '1.1rem' }}>
-              Your payment of <strong>${totalAmount.toFixed(2)}</strong> has been processed successfully.
+              Your payment of <strong>C${Number(totalAmount).toLocaleString('en-CA', { minimumFractionDigits: 2 })}</strong> has been processed successfully.
             </p>
             <p style={{ color: '#666', marginBottom: '2rem' }}>
               <strong>{shipmentCount} shipment{shipmentCount > 1 ? 's' : ''}</strong> have been created and are being processed.
@@ -47,30 +47,64 @@ const PaymentSuccessPage: React.FC = () => {
         ) : (
           <div>
             <p style={{ color: '#666', marginBottom: '1rem', fontSize: '1.1rem' }}>
-              Your payment of <strong>${totalAmount.toFixed(2)}</strong> has been processed successfully.
+              Your payment of <strong>C${Number(totalAmount).toLocaleString('en-CA', { minimumFractionDigits: 2 })}</strong> has been processed successfully.
             </p>
             <p style={{ color: '#666', marginBottom: '2rem' }}>
               Your shipment has been created and is being processed.
             </p>
-            {shipmentNumber && (
-              <div style={{
-                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                padding: '1.5rem',
-                borderRadius: '16px',
-                margin: '1.5rem 0',
-                textAlign: 'left',
-                border: '2px solid #bae6fd',
-                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
-              }}>
-                <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Shipment Number:</strong> {shipmentNumber}</p>
-                {trackingNumber && (
-                  <p style={{ marginBottom: '0.75rem', fontWeight: 500 }}><strong>Tracking Number:</strong> {trackingNumber}</p>
-                )}
-                <p style={{ marginBottom: '0.75rem', fontSize: '0.9rem', color: '#666' }}>
-                  You can use the tracking number to track your package status.
-                </p>
-              </div>
-            )}
+          </div>
+        )}
+
+        {/* Tracking Numbers Section */}
+        {trackingNumbers && trackingNumbers.length > 0 && (
+          <div style={{ 
+            background: '#f0f9ff', 
+            border: '1px solid #0ea5e9', 
+            borderRadius: '0.75rem', 
+            padding: '1.5rem', 
+            marginBottom: '2rem',
+            textAlign: 'left'
+          }}>
+            <h3 style={{ color: '#0c4a6e', fontWeight: 600, marginBottom: '1rem' }}>
+              📦 Your Tracking Numbers
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {trackingNumbers.map((trackingNumber: string, index: number) => (
+                <div key={index} style={{ 
+                  background: 'white', 
+                  padding: '0.75rem', 
+                  borderRadius: '0.5rem', 
+                  border: '1px solid #e0e7ff',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ color: '#374151', fontWeight: 500 }}>
+                    Shipment {index + 1}:
+                  </span>
+                  <span style={{ 
+                    color: '#1e40af', 
+                    fontWeight: 600, 
+                    fontFamily: 'monospace',
+                    fontSize: '1.1rem',
+                    background: '#f3f4f6',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.25rem'
+                  }}>
+                    {trackingNumber}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p style={{ 
+              color: '#0c4a6e', 
+              fontSize: '0.9rem', 
+              marginTop: '1rem', 
+              marginBottom: 0,
+              fontStyle: 'italic'
+            }}>
+              💡 You can use these tracking numbers to monitor your shipments in your dashboard.
+            </p>
           </div>
         )}
 

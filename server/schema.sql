@@ -155,68 +155,6 @@ INSERT INTO customer_tariffs (customer_name, exclusive_rate, direct_rate, rush_r
   ('Bldg. A to B', 160.5, 131.5, 109.5, 89.5)
 ON CONFLICT (customer_name) DO NOTHING;
 
--- Add foreign key columns for 1-to-1 relationships
--- 1. Each shipment has one shipping_estimate
-ALTER TABLE shipments 
-ADD COLUMN IF NOT EXISTS shipping_estimate_id BIGINT UNIQUE;
-
--- 2. Each package has one package_tracking_history entry
-ALTER TABLE packages 
-ADD COLUMN IF NOT EXISTS package_tracking_history_id BIGINT UNIQUE;
-
--- 3. Each user has one customer_tariff
-ALTER TABLE users 
-ADD COLUMN IF NOT EXISTS customer_tariff_id BIGINT UNIQUE;
-
--- 4. Each package has one payment_transaction
-ALTER TABLE packages 
-ADD COLUMN IF NOT EXISTS payment_transaction_id BIGINT UNIQUE;
-
--- Add foreign key constraints for 1-to-1 relationships
--- Note: These are added after table creation to avoid dependency issues
-DO $$ 
-BEGIN
-  -- Add shipping_estimate foreign key to shipments
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.table_constraints 
-    WHERE constraint_name = 'fk_shipments_shipping_estimate'
-  ) THEN
-    ALTER TABLE shipments 
-    ADD CONSTRAINT fk_shipments_shipping_estimate 
-      FOREIGN KEY (shipping_estimate_id) REFERENCES shipping_estimates(id) ON DELETE SET NULL;
-  END IF;
-
-  -- Add package_tracking_history foreign key to packages
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.table_constraints 
-    WHERE constraint_name = 'fk_packages_tracking_history'
-  ) THEN
-    ALTER TABLE packages 
-    ADD CONSTRAINT fk_packages_tracking_history 
-      FOREIGN KEY (package_tracking_history_id) REFERENCES package_tracking_history(id) ON DELETE SET NULL;
-  END IF;
-
-  -- Add customer_tariff foreign key to users
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.table_constraints 
-    WHERE constraint_name = 'fk_users_customer_tariff'
-  ) THEN
-    ALTER TABLE users 
-    ADD CONSTRAINT fk_users_customer_tariff 
-      FOREIGN KEY (customer_tariff_id) REFERENCES customer_tariffs(id) ON DELETE SET NULL;
-  END IF;
-
-  -- Add payment_transaction foreign key to packages
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.table_constraints 
-    WHERE constraint_name = 'fk_packages_payment_transaction'
-  ) THEN
-    ALTER TABLE packages 
-    ADD CONSTRAINT fk_packages_payment_transaction 
-      FOREIGN KEY (payment_transaction_id) REFERENCES payment_transactions(id) ON DELETE SET NULL;
-  END IF;
-END $$;
-
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
@@ -235,12 +173,6 @@ CREATE INDEX IF NOT EXISTS idx_payment_transactions_user_id ON payment_transacti
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_shipment_id ON payment_transactions(shipment_id);
 CREATE INDEX IF NOT EXISTS idx_payment_transactions_transaction_id ON payment_transactions(transaction_id);
 CREATE INDEX IF NOT EXISTS idx_shipping_estimates_created_at ON shipping_estimates(created_at);
-
--- Indexes for new 1-to-1 relationship foreign keys
-CREATE INDEX IF NOT EXISTS idx_shipments_shipping_estimate_id ON shipments(shipping_estimate_id);
-CREATE INDEX IF NOT EXISTS idx_packages_tracking_history_id ON packages(package_tracking_history_id);
-CREATE INDEX IF NOT EXISTS idx_users_customer_tariff_id ON users(customer_tariff_id);
-CREATE INDEX IF NOT EXISTS idx_packages_payment_transaction_id ON packages(payment_transaction_id);
 
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;

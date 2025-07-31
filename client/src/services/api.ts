@@ -90,6 +90,13 @@ export const authAPI = {
       body: JSON.stringify({ email }),
     });
   },
+
+  // Add initial tracking history for existing packages (development only)
+  addInitialHistory: async () => {
+    return publicRequest('/dev/add-initial-history', {
+      method: 'POST',
+    });
+  },
 };
 
 // Cart API
@@ -202,39 +209,31 @@ export const packageAPI = {
 
 // Payment API
 export const paymentAPI = {
-  // Create payment transaction
-  createPayment: async (paymentData: {
-    shipment_id: number;
-    amount: number;
-    payment_method: string;
-    stripe_payment_intent_id?: string;
-    stripe_charge_id?: string;
-    billing_address?: any;
-  }) => {
-    return authenticatedRequest('/payments', {
-      method: 'POST',
-      body: JSON.stringify(paymentData),
-    });
-  },
-
-  // Get payment transactions
-  getPayments: async () => {
-    return authenticatedRequest('/payments');
-  },
-
-  // Update payment status
-  updatePaymentStatus: async (transactionId: string, status: string) => {
-    return authenticatedRequest(`/payments/${transactionId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-  },
-
-  // Create Stripe payment intent
-  createPaymentIntent: async (amount: number, currency: string = 'usd') => {
+  // Create Stripe payment intent (simplified for Payment Element)
+  createPaymentIntent: async (amount: number, currency: string = 'cad') => {
     return publicRequest('/create-payment-intent', {
       method: 'POST',
       body: JSON.stringify({ amount, currency }),
+    });
+  },
+
+  // Get customer's payment methods
+  getPaymentMethods: async () => {
+    return authenticatedRequest('/payment-methods');
+  },
+
+  // Attach payment method to customer
+  attachPaymentMethod: async (paymentMethodId: string, customerId: string) => {
+    return authenticatedRequest('/attach-payment-method', {
+      method: 'POST',
+      body: JSON.stringify({ payment_method_id: paymentMethodId, customer_id: customerId }),
+    });
+  },
+
+  // Detach payment method
+  detachPaymentMethod: async (paymentMethodId: string) => {
+    return authenticatedRequest(`/detach-payment-method/${paymentMethodId}`, {
+      method: 'DELETE',
     });
   },
 };
@@ -270,15 +269,32 @@ export const estimatesAPI = {
 
 // Tracking API
 export const trackingAPI = {
-  // Track package
-  trackPackage: async (trackingData: {
-    tracking_number: string;
-    zip_code?: string;
-  }) => {
-    return publicRequest('/track', {
+  // Track package by tracking number
+  trackPackage: async (trackingNumber: string) => {
+    return publicRequest(`/track/${trackingNumber}`);
+  },
+
+  // Search packages by tracking number
+  searchPackages: async (trackingNumber: string) => {
+    return publicRequest(`/search/track/${trackingNumber}`);
+  },
+
+  // Get user's packages with tracking history
+  getUserPackagesWithHistory: async () => {
+    return authenticatedRequest('/packages/with-history');
+  },
+
+  // Update package status
+  updatePackageStatus: async (packageId: string, status: string, location?: string, description?: string) => {
+    return authenticatedRequest(`/packages/${packageId}/status`, {
       method: 'POST',
-      body: JSON.stringify(trackingData),
+      body: JSON.stringify({ status, location, description }),
     });
+  },
+
+  // Get package tracking history
+  getPackageHistory: async (packageId: string) => {
+    return publicRequest(`/packages/${packageId}/history`);
   },
 };
 
