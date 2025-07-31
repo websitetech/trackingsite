@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Header from './components/Header';
 import TrackingForm from './components/TrackingForm';
@@ -33,7 +33,9 @@ function AppRoutes() {
   const [showEstimate, setShowEstimate] = useState(false);
   const [showShip, setShowShip] = useState(false);
   const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Check if user is logged in from localStorage
@@ -41,6 +43,21 @@ function AppRoutes() {
     const userData = localStorage.getItem('user');
     if (token && userData) {
       setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Ensure smooth video playback
+    if (videoRef.current) {
+      const video = videoRef.current;
+      video.load();
+      
+      // Wait a moment then try to play
+      setTimeout(() => {
+        video.play().catch(() => {
+          console.log('Autoplay blocked - video will start on user interaction');
+        });
+      }, 100);
     }
   }, []);
 
@@ -58,6 +75,12 @@ function AppRoutes() {
 
   const handleRegisterClick = () => {
     setShowNewCustomer(true);
+  };
+
+  const handleVideoClick = () => {
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play().catch(console.error);
+    }
   };
 
   const handleLoginSuccess = (userData: User, token: string) => {
@@ -80,8 +103,98 @@ function AppRoutes() {
         <Route path="/" element={
           user ? <UserPage user={user} /> : (
             <>
-              {/* Hero Section with background */}
-              <section className="hero-bg">
+              {/* Hero Section with video background */}
+              <section className="hero-bg" onClick={handleVideoClick}>
+                <video 
+                  ref={videoRef}
+                  className="hero-video"
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline
+                  preload="auto"
+                  crossOrigin="anonymous"
+                  key="truck-video-stable"
+                  style={{
+                    position: 'absolute',
+                    top: '0',
+                    left: '0',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: '1'
+                  }}
+                  onLoadedData={() => {
+                    console.log('🚛 TRUCK VIDEO LOADED SUCCESSFULLY!');
+                    setVideoLoaded(true);
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = 0;
+                    }
+                  }}
+                  onError={(e) => {
+                    console.error('Video load error:', e);
+                    console.log('Falling back to alternative video source...');
+                  }}
+                  onLoadStart={() => {
+                    console.log('🔄 Your custom truck video loading started...');
+                    setVideoLoaded(false);
+                  }}
+                  onCanPlayThrough={() => {
+                    if (videoRef.current) {
+                      videoRef.current.play().catch(() => {
+                        console.log('Autoplay prevented, video will play on user interaction');
+                      });
+                    }
+                  }}
+                  onEnded={() => {
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = 0;
+                      videoRef.current.play();
+                    }
+                  }}
+                >
+                  <source src="/truck-video.mp4" type="video/mp4" />
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                  🚛 TRUCK VIDEO LOADING...
+                </video>
+                {!videoLoaded && (
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      color: '#2563eb',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      zIndex: 5,
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      padding: '1rem 2rem',
+                      borderRadius: '1rem',
+                      backdropFilter: 'blur(15px)',
+                      border: '1px solid rgba(37, 99, 235, 0.2)',
+                      boxShadow: '0 8px 25px rgba(37, 99, 235, 0.1)',
+                      transition: 'opacity 0.3s ease'
+                    }}
+                  >
+                    🚛 Loading your truck video...
+                  </div>
+                )}
+                <div 
+                  className="hero-fallback-image"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: 'url(https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=2000&q=80)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    zIndex: 0
+                  }}
+                ></div>
+                <div className="hero-video-overlay"></div>
                 <div className="hero-section">
                   <div className="company-quote">
                     At NobleSpeedytrac, we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
