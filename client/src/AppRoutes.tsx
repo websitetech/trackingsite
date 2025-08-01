@@ -19,7 +19,7 @@ import ProfilePage from './pages/ProfilePage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import FAQPage from './pages/FAQPage';
 import AdminDashboard from './pages/AdminDashboard';
-import DebugUser from './components/DebugUser';
+
 
 
 interface User {
@@ -76,7 +76,6 @@ function AppRoutes() {
 
   return (
     <div className="App">
-      <DebugUser user={user} />
       <Header 
         user={user}
         onLogin={handleLoginClick}
