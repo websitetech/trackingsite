@@ -2575,21 +2575,24 @@ main,
   }
 }
 
-/* Enhanced Footer Banner */
+/* Enhanced Footer Banner - Updated: 2025-08-01 08:30:00 */
 .footer-banner {
-  background: #ffffff;
-  color: #1f2937;
-  padding: 3rem 2rem 1rem 2rem;
-  margin-top: 3rem;
-  border-radius: 2rem 2rem 0 0;
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.1);
-  border-top: 1.5px solid #e5e7eb;
-  width: 100vw;
-  max-width: 100vw;
-  position: relative;
-  z-index: 100;
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  padding: 3rem 2rem 1rem 2rem !important;
+  margin-top: 3rem !important;
+  border-radius: 2rem 2rem 0 0 !important;
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.1) !important;
+  border-top: 1.5px solid #e5e7eb !important;
+
+  width: 100vw !important;
+  max-width: 100vw !important;
+  position: relative !important;
+  z-index: 9999 !important;
   display: block !important;
   visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 200px !important;
 }
 
 .footer-content {
