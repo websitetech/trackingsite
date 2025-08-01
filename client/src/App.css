@@ -2586,6 +2586,10 @@ main,
   border-top: 1.5px solid #e5e7eb;
   width: 100vw;
   max-width: 100vw;
+  position: relative;
+  z-index: 100;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .footer-content {
@@ -2628,6 +2632,8 @@ main,
   align-items: center;
   gap: 0.7rem;
   font-weight: 600;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .footer-contact a {
