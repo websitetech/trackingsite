@@ -8,6 +8,7 @@ import EstimateModal from './components/EstimateModal';
 import ShipModal from './components/ShipModal';
 import NewCustomerModal from './components/NewCustomerModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import logo from './assets/logo.png';
 import TrackingPage from './components/TrackingPage';
 import UserPage from './components/UserPage';
 import ShipmentPage from './pages/ShipmentPage';
@@ -18,6 +19,7 @@ import ProfilePage from './pages/ProfilePage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import FAQPage from './pages/FAQPage';
 import AdminDashboard from './pages/AdminDashboard';
+import DebugUser from './components/DebugUser';
 
 
 interface User {
@@ -74,6 +76,7 @@ function AppRoutes() {
 
   return (
     <div className="App">
+      <DebugUser user={user} />
       <Header 
         user={user}
         onLogin={handleLoginClick}
@@ -127,7 +130,7 @@ function AppRoutes() {
                       <div className="who-we-are-tag">Who we are</div>
                       <h2 className="company-name">Noble-SpeedyTrac Inc.</h2>
                       <p className="company-description">
-                        "At NobleSpeedytrac, we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time."
+                        "At Noble-Speedytrac Inc., we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time."
                       </p>
                       <p className="company-tagline">
                         "Your trusted logistics partner — driven by precision, powered by innovation."
@@ -139,6 +142,32 @@ function AppRoutes() {
               {/* Service Cards Section */}
               <section className="service-cards-section">
                 <div className="service-cards-container">
+                  <div style={{
+                    gridColumn: '1 / -1',
+                    textAlign: 'center',
+                    marginBottom: '3rem'
+                  }}>
+                    <h2 style={{
+                      fontSize: '2.5rem',
+                      fontWeight: 700,
+                      color: '#1a1a1a',
+                      marginBottom: '1rem',
+                      background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}>
+                      Our Services
+                    </h2>
+                    <p style={{
+                      fontSize: '1.2rem',
+                      color: '#6b7280',
+                      maxWidth: '600px',
+                      margin: '0 auto'
+                    }}>
+                      Comprehensive logistics solutions tailored to your business needs
+                    </p>
+                  </div>
                   <div className="service-card-item">
                     <div className="service-card-icon">
                       <span>📦</span>
@@ -167,7 +196,7 @@ function AppRoutes() {
               <section className="business-forward-section">
                 <div className="business-forward-container">
                   <div className="business-forward-content">
-                    <h2>Drive Your Business Forward with NobleSpeedytrac</h2>
+                    <h2>Drive Your Business Forward with Noble-Speedytrac Inc.</h2>
                     <div className="features-list">
                       <div className="feature-item">
                         <span className="feature-icon">✓</span>
@@ -199,10 +228,10 @@ function AppRoutes() {
                     </button>
                   </div>
                   <div className="business-forward-image">
-                    <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=800&q=80" alt="Logistics Operations" />
+                    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" alt="Professional Delivery Truck" />
                     <div className="experience-badge">
-                      <span className="experience-years">15+</span>
-                      <span className="experience-text">Years Experience</span>
+                      <span className="experience-years">Fast</span>
+                      <span className="experience-text">Reliable Delivery</span>
                     </div>
                   </div>
                 </div>
@@ -226,7 +255,7 @@ function AppRoutes() {
               </section>
 
               {/* What We Offer Section */}
-              <section className="what-we-offer-section">
+              <section id="what-we-offer" className="what-we-offer-section">
                 <div className="what-we-offer-container">
                   <div className="section-header">
                     <h2>What We Offer</h2>
@@ -279,24 +308,24 @@ function AppRoutes() {
               <section className="statistics-section">
                 <div className="statistics-container">
                   <div className="testimonial-text">
-                    <p>"We love reliable and strategic fleet and logistics services that streamlines our operations. Happy to work with NobleSpeedytrac!"</p>
+                    <p>"We're excited to provide innovative logistics solutions that will streamline your operations. Ready to partner with Noble-Speedytrac Inc.!"</p>
                   </div>
                   <div className="statistics-grid">
                     <div className="stat-item">
-                      <span className="stat-number">348+</span>
-                      <span className="stat-label">Happy Clients</span>
+                      <span className="stat-number">New</span>
+                      <span className="stat-label">Fresh Start</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">499+</span>
-                      <span className="stat-label">Projects Completed</span>
+                      <span className="stat-number">24/7</span>
+                      <span className="stat-label">Service Available</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">150+</span>
-                      <span className="stat-label">Professional Team</span>
+                      <span className="stat-number">100%</span>
+                      <span className="stat-label">Commitment</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">99.9%</span>
-                      <span className="stat-label">Success Rate</span>
+                      <span className="stat-number">Modern</span>
+                      <span className="stat-label">Technology</span>
                     </div>
                   </div>
                 </div>
@@ -332,7 +361,12 @@ function AppRoutes() {
               </section>
 
               {/* Floating Action Button for Quick Tracking */}
-              <div className="floating-action-btn" onClick={() => document.querySelector('.tracking-card')?.scrollIntoView({ behavior: 'smooth' })}>
+              <div className="floating-action-btn" onClick={() => {
+                const trackingSection = document.querySelector('.tracking-section');
+                if (trackingSection) {
+                  trackingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}>
                 <span className="fab-icon">📦</span>
                 <span className="fab-text">Track</span>
               </div>
@@ -366,20 +400,49 @@ function AppRoutes() {
             </div>
         } />
       </Routes>
-      {/* Footer / Bottom Banner */}
+      {/* Enhanced Footer */}
       <footer className="footer-banner">
         <div className="footer-content">
-          <div className="footer-left">
-            <span className="footer-logo">📦</span>
-            <span className="footer-brand">NobleSpeedytrac</span>
+          <div className="footer-section">
+            <div className="footer-left">
+              <img src={logo} alt="Noble-Speedytrac Inc. logo" className="footer-logo-image" />
+              <span className="footer-brand">Noble-Speedytrac Inc.</span>
+            </div>
+            <p className="footer-description">Your trusted logistics partner - driven by precision, powered by innovation.</p>
           </div>
-          <div className="footer-center">
-            &copy; {new Date().getFullYear()} NobleSpeedytrac. All rights reserved.
+          
+          <div className="footer-section">
+            <h3>Contact Information</h3>
+            <div className="footer-contact">
+              <p>📍 24 Savarin Street, Scarborough, Ontario, M1J1Z8, Canada</p>
+              <p>📧 <a href="mailto:info@noblespeedytrac.com">info@noblespeedytrac.com</a></p>
+              <p>📞 <a href="tel:+14378702022">+1 (437) 870-2022</a></p>
+              <p>🕒 24/7 Customer Support</p>
+            </div>
           </div>
-          <div className="footer-right">
-            <span>Contact: <a href="mailto:info@noblespeedytrac.com">info@noblespeedytrac.com</a></span>
-            <span> | </span>
-            <span>+1 (555) 123-4567</span>
+          
+          <div className="footer-section">
+            <h3>Services</h3>
+            <ul className="footer-services">
+              <li>Same-day Delivery</li>
+              <li>Freight Transportation</li>
+              <li>Supply Chain Management</li>
+              <li>Warehousing Solutions</li>
+              <li>E-commerce Integration</li>
+            </ul>
+          </div>
+          
+
+        </div>
+        
+        <div className="footer-bottom">
+          <div className="footer-bottom-content">
+            <span>&copy; {new Date().getFullYear()} Noble-Speedytrac Inc. All rights reserved.</span>
+            <div className="footer-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+              <a href="#">Cookie Policy</a>
+            </div>
           </div>
         </div>
       </footer>

@@ -16,7 +16,7 @@ const CartPage: React.FC = () => {
 
   if (state.items.length === 0) {
     return (
-      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
+      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
         <div style={{
           background: 'white',
           borderRadius: '1.5rem',
@@ -24,7 +24,9 @@ const CartPage: React.FC = () => {
           padding: '3rem',
           margin: '2rem auto',
           maxWidth: 600,
-          textAlign: 'center'
+          textAlign: 'center',
+          position: 'relative',
+          zIndex: 1
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛒</div>
           <h2 style={{ color: '#111', fontWeight: 700, fontSize: '1.5rem', marginBottom: '1rem' }}>
@@ -54,7 +56,7 @@ const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
+    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
       <div style={{
         background: 'white',
         borderRadius: '1.5rem',
@@ -62,7 +64,9 @@ const CartPage: React.FC = () => {
         padding: '2rem',
         margin: '2rem auto',
         maxWidth: 800,
-        width: '100%'
+        width: '100%',
+        position: 'relative',
+        zIndex: 1
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h1 style={{ color: '#111', fontWeight: 700, fontSize: '1.8rem' }}>Shopping Cart</h1>

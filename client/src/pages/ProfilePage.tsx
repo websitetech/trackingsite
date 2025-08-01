@@ -63,52 +63,72 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#f3f4f6' }}>
-      <div style={{
-        background: 'white',
-        borderRadius: 20,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
-        padding: '2.5rem 2rem',
-        maxWidth: 400,
-        width: '100%',
-        textAlign: 'center',
-        position: 'relative',
-      }}>
+    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
+      <section className="hero-bg">
+        <div className="hero-section">
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
+            borderRadius: '2rem',
+            boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
+            padding: '3rem 2.5rem',
+            margin: '2rem auto',
+            maxWidth: 500,
+            width: '100%',
+            textAlign: 'center',
+            position: 'relative',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(220,38,38,0.1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}>
         <button
           onClick={() => navigate(-1)}
           style={{
             position: 'absolute',
             top: 24,
             left: 24,
-            background: 'none',
+            background: 'rgba(255, 255, 255, 0.9)',
             border: '2px solid #dc2626',
             color: '#dc2626',
-            borderRadius: 8,
-            padding: '0.25rem 0.75rem',
+            borderRadius: '0.75rem',
+            padding: '0.5rem 1rem',
             fontWeight: 600,
-            fontSize: '1rem',
+            fontSize: '0.9rem',
             cursor: 'pointer',
-            transition: 'background 0.2s, color 0.2s',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.1)',
+            backdropFilter: 'blur(10px)',
           }}
           onMouseOver={e => {
-            e.currentTarget.style.background = '#fef2f2';
-            e.currentTarget.style.color = '#b91c1c';
+            e.currentTarget.style.background = '#dc2626';
+            e.currentTarget.style.color = 'white';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
           }}
           onMouseOut={e => {
-            e.currentTarget.style.background = 'none';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
             e.currentTarget.style.color = '#dc2626';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.1)';
           }}
         >
           ← Back
         </button>
-        <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: 24 }}>My Profile</h2>
+        <h2 style={{ color: '#dc2626', fontWeight: 700, marginBottom: 32, fontSize: '2rem' }}>My Profile</h2>
         {/* Profile Picture */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <img
               src={picPreview || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.username)}
               alt="Profile"
-              style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '2px solid #b91c1c', marginBottom: 8 }}
+              style={{ 
+                width: 100, 
+                height: 100, 
+                borderRadius: '50%', 
+                objectFit: 'cover', 
+                border: '3px solid #dc2626', 
+                marginBottom: 12,
+                boxShadow: '0 8px 24px rgba(220, 38, 38, 0.15)'
+              }}
             />
             {editMode && (
               <>
@@ -120,8 +140,26 @@ const ProfilePage: React.FC = () => {
                   onChange={handlePicChange}
                 />
                 <button
-                  style={{ color: '#b91c1c', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}
+                  style={{ 
+                    color: '#dc2626', 
+                    background: 'rgba(220, 38, 38, 0.1)', 
+                    border: '1px solid rgba(220, 38, 38, 0.3)', 
+                    borderRadius: '0.5rem',
+                    padding: '0.25rem 0.75rem',
+                    cursor: 'pointer', 
+                    fontWeight: 600, 
+                    fontSize: 12,
+                    transition: 'all 0.3s ease'
+                  }}
                   onClick={() => fileInputRef.current?.click()}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#dc2626';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)';
+                    e.currentTarget.style.color = '#dc2626';
+                  }}
                 >
                   Change Picture
                 </button>
@@ -131,8 +169,8 @@ const ProfilePage: React.FC = () => {
         </div>
         {/* Editable Fields */}
         <form onSubmit={e => { e.preventDefault(); handleSave(); }}>
-          <div style={{ marginBottom: 16 }}>
-            <strong style={{ color: '#1a1a1a' }}>Username:</strong>
+          <div style={{ marginBottom: 20, textAlign: 'left' }}>
+            <strong style={{ color: '#374151', display: 'block', marginBottom: 8, fontSize: '1rem' }}>Username:</strong>
             {editMode ? (
               <input
                 type="text"
@@ -140,13 +178,22 @@ const ProfilePage: React.FC = () => {
                 onChange={e => setEditUser({ ...editUser, username: e.target.value })}
                 style={{
                   width: '100%',
-                  marginTop: 4,
-                  padding: '0.5rem',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: 8,
-                  color: '#000', // force black text
-                  background: '#fff', // force white background
-                  fontSize: 15,
+                  padding: '0.75rem 1rem',
+                  border: '1.5px solid rgba(220, 38, 38, 0.2)',
+                  borderRadius: '0.75rem',
+                  color: '#1f2937',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(220, 38, 38, 0.2)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
                 required
               />
@@ -154,8 +201,8 @@ const ProfilePage: React.FC = () => {
               <div style={{ color: '#374151', marginTop: 4 }}>{user.username}</div>
             )}
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <strong style={{ color: '#1a1a1a' }}>Email:</strong>
+          <div style={{ marginBottom: 20, textAlign: 'left' }}>
+            <strong style={{ color: '#374151', display: 'block', marginBottom: 8, fontSize: '1rem' }}>Email:</strong>
             {editMode ? (
               <input
                 type="email"
@@ -163,13 +210,22 @@ const ProfilePage: React.FC = () => {
                 onChange={e => setEditUser({ ...editUser, email: e.target.value })}
                 style={{
                   width: '100%',
-                  marginTop: 4,
-                  padding: '0.5rem',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: 8,
-                  color: '#000', // force black text
-                  background: '#fff', // force white background
-                  fontSize: 15,
+                  padding: '0.75rem 1rem',
+                  border: '1.5px solid rgba(220, 38, 38, 0.2)',
+                  borderRadius: '0.75rem',
+                  color: '#1f2937',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(220, 38, 38, 0.2)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
                 required
               />
@@ -178,16 +234,98 @@ const ProfilePage: React.FC = () => {
             )}
           </div>
           {editMode ? (
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16 }}>
-              <button type="submit" style={{ background: '#b91c1c', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}>Save</button>
-              <button type="button" onClick={handleCancel} style={{ background: 'none', color: '#b91c1c', border: '1.5px solid #b91c1c', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 20 }}>
+              <button 
+                type="submit" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '0.75rem', 
+                  padding: '0.75rem 1.5rem', 
+                  fontWeight: 600, 
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                }}
+              >
+                Save Changes
+              </button>
+              <button 
+                type="button" 
+                onClick={handleCancel} 
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.9)', 
+                  color: '#dc2626', 
+                  border: '2px solid #dc2626', 
+                  borderRadius: '0.75rem', 
+                  padding: '0.75rem 1.5rem', 
+                  fontWeight: 600, 
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = '#dc2626';
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                  e.currentTarget.style.color = '#dc2626';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Cancel
+              </button>
             </div>
           ) : (
-            <button type="button" onClick={() => setEditMode(true)} style={{ background: 'none', color: '#b91c1c', border: '1.5px solid #b91c1c', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}>Edit Profile</button>
+            <button 
+              type="button" 
+              onClick={() => setEditMode(true)} 
+              style={{ 
+                background: 'rgba(220, 38, 38, 0.1)', 
+                color: '#dc2626', 
+                border: '2px solid #dc2626', 
+                borderRadius: '0.75rem', 
+                padding: '0.75rem 1.5rem', 
+                fontWeight: 600, 
+                cursor: 'pointer', 
+                marginBottom: 20,
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = '#dc2626';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)';
+                e.currentTarget.style.color = '#dc2626';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Edit Profile
+            </button>
           )}
         </form>
         {/* Change Password Section */}
-        <div style={{ margin: '1.5rem 0' }}>
+        <div style={{ 
+          margin: '2rem 0', 
+          padding: '1.5rem', 
+          background: 'rgba(248, 250, 252, 0.8)',
+          borderRadius: '1rem',
+          border: '1px solid rgba(220, 38, 38, 0.1)'
+        }}>
           {showPw ? (
             <form onSubmit={handlePwChange} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <input
@@ -195,7 +333,23 @@ const ProfilePage: React.FC = () => {
                 placeholder="Old Password"
                 value={pwFields.old}
                 onChange={e => setPwFields({ ...pwFields, old: e.target.value })}
-                style={{ padding: '0.5rem', border: '1.5px solid #e5e7eb', borderRadius: 8, color: '#000', background: '#fff' }}
+                style={{ 
+                  padding: '0.75rem 1rem', 
+                  border: '1.5px solid rgba(220, 38, 38, 0.2)', 
+                  borderRadius: '0.75rem', 
+                  color: '#1f2937', 
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(220, 38, 38, 0.2)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
                 required
               />
               <input
@@ -203,7 +357,23 @@ const ProfilePage: React.FC = () => {
                 placeholder="New Password"
                 value={pwFields.new}
                 onChange={e => setPwFields({ ...pwFields, new: e.target.value })}
-                style={{ padding: '0.5rem', border: '1.5px solid #e5e7eb', borderRadius: 8, color: '#000', background: '#fff' }}
+                style={{ 
+                  padding: '0.75rem 1rem', 
+                  border: '1.5px solid rgba(220, 38, 38, 0.2)', 
+                  borderRadius: '0.75rem', 
+                  color: '#1f2937', 
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(220, 38, 38, 0.2)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
                 required
               />
               <input
@@ -211,20 +381,136 @@ const ProfilePage: React.FC = () => {
                 placeholder="Confirm New Password"
                 value={pwFields.confirm}
                 onChange={e => setPwFields({ ...pwFields, confirm: e.target.value })}
-                style={{ padding: '0.5rem', border: '1.5px solid #e5e7eb', borderRadius: 8, color: '#000', background: '#fff' }}
+                style={{ 
+                  padding: '0.75rem 1rem', 
+                  border: '1.5px solid rgba(220, 38, 38, 0.2)', 
+                  borderRadius: '0.75rem', 
+                  color: '#1f2937', 
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(220, 38, 38, 0.2)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
                 required
               />
-              <button type="submit" style={{ background: '#b91c1c', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}>Change Password</button>
-              <button type="button" onClick={() => setShowPw(false)} style={{ background: 'none', color: '#b91c1c', border: '1.5px solid #b91c1c', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button 
+                type="submit" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '0.75rem', 
+                  padding: '0.75rem 1.5rem', 
+                  fontWeight: 600, 
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                }}
+              >
+                Change Password
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setShowPw(false)} 
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.9)', 
+                  color: '#dc2626', 
+                  border: '2px solid #dc2626', 
+                  borderRadius: '0.75rem', 
+                  padding: '0.75rem 1.5rem', 
+                  fontWeight: 600, 
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = '#dc2626';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                  e.currentTarget.style.color = '#dc2626';
+                }}
+              >
+                Cancel
+              </button>
               {pwMsg && <div style={{ color: '#16a34a', marginTop: 8 }}>{pwMsg}</div>}
             </form>
           ) : (
-            <button type="button" onClick={() => setShowPw(true)} style={{ background: 'none', color: '#b91c1c', border: '1.5px solid #b91c1c', borderRadius: 8, padding: '0.5rem 1.5rem', fontWeight: 600, cursor: 'pointer' }}>Change Password</button>
+            <button 
+              type="button" 
+              onClick={() => setShowPw(true)} 
+              style={{ 
+                background: 'rgba(220, 38, 38, 0.1)', 
+                color: '#dc2626', 
+                border: '2px solid #dc2626', 
+                borderRadius: '0.75rem', 
+                padding: '0.75rem 1.5rem', 
+                fontWeight: 600, 
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = '#dc2626';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)';
+                e.currentTarget.style.color = '#dc2626';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Change Password
+            </button>
           )}
         </div>
         {/* Success Message */}
-        {showSuccess && <div style={{ color: '#16a34a', marginTop: 8 }}>Profile updated!</div>}
-      </div>
+        {showSuccess && (
+          <div style={{ 
+            color: '#059669', 
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '0.75rem',
+            padding: '0.75rem 1rem',
+            marginTop: 16,
+            fontWeight: 600,
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            ✅ Profile updated successfully!
+          </div>
+        )}
+        {pwMsg && (
+          <div style={{ 
+            color: pwMsg.includes('changed') ? '#059669' : '#dc2626', 
+            background: pwMsg.includes('changed') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+            border: `1px solid ${pwMsg.includes('changed') ? 'rgba(16, 185, 129, 0.3)' : 'rgba(220, 38, 38, 0.3)'}`,
+            borderRadius: '0.75rem',
+            padding: '0.75rem 1rem',
+            marginTop: 16,
+            fontWeight: 600,
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            {pwMsg.includes('changed') ? '✅' : '⚠️'} {pwMsg}
+          </div>
+        )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

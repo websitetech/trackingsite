@@ -202,7 +202,7 @@ const AdminDashboard: React.FC = () => {
 
   if (loading && !stats && !users.length && !shipments.length && !packages.length) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '2rem 0' }}>
+      <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '2rem 0', paddingTop: '8rem' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
           <SkeletonLoader type="text" width="300px" height="2rem" className="mx-auto mb-8" />
           <TableSkeleton rows={8} columns={4} />
@@ -213,7 +213,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '2rem 0' }} className="admin-dashboard">
+      <div style={{ minHeight: '100vh', background: '#f3f4f6', padding: '2rem 0', paddingTop: '8rem' }} className="admin-dashboard">
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
           <h1 style={{ color: '#d97706', fontWeight: 700, marginBottom: '2rem', textAlign: 'center' }}>Admin Dashboard</h1>
         

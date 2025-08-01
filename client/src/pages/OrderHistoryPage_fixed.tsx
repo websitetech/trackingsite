@@ -41,15 +41,23 @@ const OrderHistoryPage: React.FC = () => {
   const [orders, setOrders] = useState<PackageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<PackageData | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string>('');
   const [selectedOrderForAction, setSelectedOrderForAction] = useState<PackageData | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
-
-
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   useEffect(() => {
@@ -77,6 +85,22 @@ const OrderHistoryPage: React.FC = () => {
   }, [navigate]);
 
   // Rest of the component methods...
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'text-green-600 bg-green-100';
+      case 'in_transit':
+      case 'out_for_delivery':
+        return 'text-blue-600 bg-blue-100';
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'failed':
+      case 'returned':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
@@ -97,7 +121,17 @@ const OrderHistoryPage: React.FC = () => {
     }
   };
 
+  const handleTrackPackage = (trackingNumber: string) => {
+    setSelectedTrackingNumber(trackingNumber);
+  };
 
+  const handleCloseTracking = () => {
+    setSelectedTrackingNumber(null);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedOrder(null);
+  };
 
   const handleActionClick = (action: string, order: PackageData) => {
     setSelectedAction(action);
@@ -137,7 +171,7 @@ const OrderHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
+      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
         <section className="hero-bg">
           <div className="hero-section">
             <div style={{
@@ -176,7 +210,7 @@ const OrderHistoryPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
+      <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
         <section className="hero-bg">
           <div className="hero-section">
             <div style={{
@@ -240,7 +274,7 @@ const OrderHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
+    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
       <section className="hero-bg">
         <div className="hero-section">
           <div style={{

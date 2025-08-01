@@ -160,7 +160,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
           </div>
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <h3 style={{ color: '#059669', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 700 }}>Customer Registered Successfully!</h3>
-            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Thank you for registering with NobleSpeedytrac. We'll be in touch soon!</p>
+            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>Thank you for registering with Noble-Speedytrac Inc. We'll be in touch soon!</p>
             <div style={{
               background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
               padding: '1.5rem',
@@ -230,42 +230,67 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
       right: 0,
       bottom: 0,
       background: 'rgba(0, 0, 0, 0.6)',
+      backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 9999,
+      zIndex: 99999,
       padding: '1rem'
     }} onClick={onClose}>
       <div style={{
-        background: 'white',
-        borderRadius: '1.5rem',
-        padding: '2rem',
-        maxWidth: '600px',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%)',
+        borderRadius: '2rem',
+        boxShadow: '0 25px 60px rgba(0,0,0,0.15), 0 15px 35px rgba(220,38,38,0.1)',
+        padding: '2.5rem',
+        maxWidth: '650px',
         width: '90%',
         maxHeight: '90vh',
         overflowY: 'auto',
         overflowX: 'hidden',
         position: 'relative',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(220,38,38,0.1)'
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '1.5rem'
+          marginBottom: '2rem'
         }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>New Customer Registration</h2>
+          <h2 style={{ 
+            fontSize: '2rem', 
+            fontWeight: 700, 
+            color: '#111',
+            background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Create Account
+          </h2>
           <button 
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '1.5rem',
+              fontSize: '28px',
               cursor: 'pointer',
-              color: '#6b7280',
-              padding: '0.5rem',
-              borderRadius: '0.5rem'
+              color: '#d97706',
+              padding: '0.2rem 0.7rem',
+              borderRadius: '0.5rem',
+              fontWeight: 700,
+              transition: 'background 0.2s, color 0.2s',
+              alignSelf: 'flex-start'
             }}
             onClick={onClose}
+            aria-label="Close"
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#fef3c7';
+              e.currentTarget.style.color = '#b45309';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'none';
+              e.currentTarget.style.color = '#d97706';
+            }}
           >
             ×
           </button>
@@ -284,11 +309,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter first name"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -303,11 +341,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter last name"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -324,11 +375,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter email address"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -343,11 +407,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter phone number"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -363,7 +440,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
               rows={2}
               style={{
                 padding: '0.75rem',
-                border: '2px solid #e5e7eb',
+                                  border: '2px solid rgba(220,38,38,0.1)',
                 borderRadius: '0.75rem',
                 fontSize: '0.95rem',
                 background: '#fff',
@@ -382,11 +459,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 onChange={handleChange}
                 placeholder="Enter city"
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -401,11 +491,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter state or province"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -420,11 +523,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter postal code"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -440,11 +556,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 onChange={handleChange}
                 placeholder="Enter company name"
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -458,11 +587,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 onChange={handleChange}
                 placeholder="Enter website URL"
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -479,11 +621,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Enter password"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -498,11 +653,24 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
                 placeholder="Confirm password"
                 required
                 style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e5e7eb',
+                  padding: '1rem',
+                  border: '2px solid rgba(220,38,38,0.1)',
                   borderRadius: '0.75rem',
-                  fontSize: '0.95rem',
-                  background: '#fff'
+                  fontSize: '1rem',
+                  color: '#111',
+                  background: 'rgba(255,255,255,0.9)',
+                  backdropFilter: 'blur(10px)',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#dc2626';
+                  e.target.style.boxShadow = '0 0 0 4px rgba(220,38,38,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(220,38,38,0.1)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -526,34 +694,61 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
             <button 
               type="submit" 
               style={{
-                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                flex: 1,
+                background: loading 
+                  ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
+                  : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
                 color: 'white',
                 border: 'none',
-                padding: '1rem 2rem',
+                padding: '1.2rem 2rem',
                 borderRadius: '0.75rem',
-                fontWeight: 600,
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: loading ? 'none' : '0 8px 24px rgba(220,38,38,0.25)',
+                opacity: loading ? 0.7 : 1
               }}
               disabled={loading}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25)';
+                }
+              }}
             >
-              {loading ? 'Registering...' : 'Register Customer'}
+              {loading ? '🔄 Creating Account...' : '✨ Create Account'}
             </button>
             <button 
               type="button"
               style={{
-                background: 'white',
+                flex: 1,
+                background: 'rgba(255,255,255,0.9)',
                 color: '#dc2626',
-                border: '2px solid #dc2626',
-                padding: '1rem 2rem',
+                border: '2px solid rgba(220,38,38,0.3)',
+                padding: '1.2rem 2rem',
                 borderRadius: '0.75rem',
                 fontWeight: 600,
-                fontSize: '1rem',
+                fontSize: '1.1rem',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(10px)'
               }}
               onClick={onClose}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(220,38,38,0.1)';
+                e.currentTarget.style.borderColor = '#dc2626';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
+                e.currentTarget.style.borderColor = 'rgba(220,38,38,0.3)';
+              }}
             >
               Cancel
             </button>

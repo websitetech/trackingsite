@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const faqs = [
   {
@@ -23,8 +23,13 @@ const faqs = [
   },
 ];
 
-const FAQPage: React.FC = () => (
-  <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '2rem 0' }}>
+const FAQPage: React.FC = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+  <div style={{ minHeight: '80vh', background: '#f3f4f6', padding: '2rem 0', paddingTop: '8rem' }}>
     <div style={{ maxWidth: 700, margin: '0 auto', background: 'white', borderRadius: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '2.5rem 2rem' }}>
       <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: 24 }}>Help Center / FAQ</h2>
       {faqs.map((item, i) => (
@@ -35,6 +40,7 @@ const FAQPage: React.FC = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default FAQPage; 

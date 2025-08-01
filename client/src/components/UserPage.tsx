@@ -72,7 +72,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const navigate = useNavigate();
-  const { addItem, state: cartState } = useCart();
+  const { addItem } = useCart();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -146,10 +146,6 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
     navigate('/cart');
   };
 
-  const handleProceedToPayment = () => {
-    navigate('/payment');
-  };
-
   const handleTrackClick = () => {
     console.log('🚀 Track button clicked!');
     console.log('📦 Tracking number:', trackingNumber);
@@ -190,7 +186,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   if (!user) return null;
 
   return (
-    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
+    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
       <section className="hero-bg">
         <div className="hero-section">
           {/* Welcome Section */}
@@ -386,136 +382,247 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
               </div>
             </div>
           )}
-          
-          {/* Cart Summary Banner */}
-          {cartState.items.length > 0 && (
-            <div style={{
-              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-              color: 'white',
-              borderRadius: '1rem',
-              padding: '1rem 1.5rem',
-              margin: '1rem auto',
-              maxWidth: 600,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              boxShadow: '0 4px 12px rgba(185,28,28,0.2)'
-            }}>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: '1rem' }}>
-                  {cartState.items.length} item{cartState.items.length > 1 ? 's' : ''} in cart
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>
-                  Total: ${cartState.total.toFixed(2)}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={handleViewCart}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    color: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  View Cart
-                </button>
-                <button
-                  onClick={handleProceedToPayment}
-                  style={{
-                    background: 'white',
-                    border: 'none',
-                    color: '#dc2626',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    fontWeight: 600
-                  }}
-                >
-                  Checkout
-                </button>
-              </div>
-            </div>
-          )}
 
-          {/* Tracking form at the top */}
+
+          {/* Compact Modern Tracking Section */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
-            color: 'black',
-            borderRadius: '2rem',
-            boxShadow: '0 20px 48px rgba(0,0,0,0.08), 0 8px 24px rgba(220,38,38,0.06), 0 0 0 1px rgba(220,38,38,0.08)',
-            padding: '2.5rem',
-            margin: '32px auto 24px auto',
-            maxWidth: 600,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%)',
+            borderRadius: '1.5rem',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.06), 0 4px 12px rgba(220,38,38,0.04)',
+            padding: '2rem',
+            margin: '1.5rem auto',
+            maxWidth: 550,
             width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(220,38,38,0.1)',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(220,38,38,0.08)',
+            transition: 'all 0.3s ease',
+            position: 'relative'
           }}>
-            <h2 style={{ color: '#111', fontWeight: 700, fontSize: '1.4rem', marginBottom: 16 }}>Track Your Package</h2>
-            {/* Tracking form fields */}
-            <form style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 0 }}>
-              <input 
-                type="text" 
-                placeholder="Enter Tracking Number" 
-                value={trackingNumber}
-                onChange={(e) => {
-                  console.log('📝 Tracking number changed:', e.target.value);
-                  setTrackingNumber(e.target.value);
-                }}
-                style={{ 
-                  padding: '1rem 1.2rem', 
-                  borderRadius: '1rem', 
-                  border: '1px solid rgba(220,38,38,0.15)', 
-                  fontSize: '1rem', 
-                  color: '#111', 
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }} 
-              />
+            {/* Subtle decorative element */}
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              right: '-20px',
+              width: '120px',
+              height: '120px',
+              background: 'radial-gradient(circle, rgba(220,38,38,0.03) 0%, transparent 70%)',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }} />
+
+            {/* Compact Header */}
+            <div style={{ 
+              textAlign: 'center', 
+              marginBottom: '1.5rem',
+              position: 'relative',
+              zIndex: 1 
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '60px',
+                height: '60px',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                borderRadius: '50%',
+                fontSize: '1.8rem',
+                marginBottom: '1rem',
+                boxShadow: '0 8px 20px rgba(220,38,38,0.2)'
+              }}>
+                📦
+              </div>
+              <h2 style={{ 
+                color: '#111', 
+                fontWeight: 700, 
+                fontSize: '1.8rem', 
+                marginBottom: '0.5rem'
+              }}>
+                Track Package
+              </h2>
+              <p style={{ 
+                color: '#6b7280', 
+                fontSize: '0.95rem',
+                lineHeight: '1.5'
+              }}>
+                Enter your tracking number for real-time updates
+              </p>
+            </div>
+            {/* Compact Tracking Form */}
+            <form style={{ 
+              position: 'relative',
+              zIndex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="text"
+                  placeholder="Enter Tracking Number (e.g., TRK123456789)" 
+                  value={trackingNumber}
+                  onChange={(e) => {
+                    console.log('📝 Tracking number changed:', e.target.value);
+                    setTrackingNumber(e.target.value);
+                  }}
+                  style={{ 
+                    width: '100%',
+                    padding: '1rem 1.5rem', 
+                    borderRadius: '0.75rem', 
+                    border: '1px solid rgba(220,38,38,0.15)', 
+                    fontSize: '1rem', 
+                    color: '#111', 
+                    background: 'rgba(255,255,255,0.9)',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'inherit',
+                    fontWeight: 500,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#dc2626';
+                    e.target.style.boxShadow = '0 4px 12px rgba(220,38,38,0.12), 0 0 0 3px rgba(220,38,38,0.08)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(220,38,38,0.15)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                  }}
+                />
+                {trackingNumber && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#dc2626',
+                    fontSize: '1rem'
+                  }}>
+                    ✓
+                  </div>
+                )}
+              </div>
+
               <button 
                 type="button" 
                 onClick={handleTrackClick}
                 disabled={!trackingNumber.trim()}
                 style={{ 
-                  background: trackingNumber.trim() ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)', 
+                  background: trackingNumber.trim() 
+                    ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' 
+                    : 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)', 
                   color: 'white', 
                   border: 'none', 
-                  padding: '1.2rem 2rem', 
-                  borderRadius: '1rem', 
+                  padding: '1rem 2rem', 
+                  borderRadius: '0.75rem', 
                   fontWeight: 600, 
                   fontSize: '1rem', 
                   cursor: trackingNumber.trim() ? 'pointer' : 'not-allowed', 
-                  marginTop: 8,
-                  boxShadow: trackingNumber.trim() ? '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)' : 'none',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  opacity: trackingNumber.trim() ? 1 : 0.6
+                  boxShadow: trackingNumber.trim() 
+                    ? '0 6px 16px rgba(220,38,38,0.25)' 
+                    : 'none',
+                  transition: 'all 0.3s ease',
+                  opacity: trackingNumber.trim() ? 1 : 0.7
                 }}
                 onMouseOver={(e) => {
                   if (trackingNumber.trim()) {
-                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
-                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(220,38,38,0.35), 0 6px 16px rgba(220,38,38,0.25)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(220,38,38,0.3)';
                   }
                 }}
                 onMouseOut={(e) => {
                   if (trackingNumber.trim()) {
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(220,38,38,0.25), 0 4px 12px rgba(220,38,38,0.15)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(220,38,38,0.25)';
                   }
                 }}
               >
-                Track
+                🔍 Track Now
               </button>
             </form>
+
+            {/* Compact Quick Info */}
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              background: 'rgba(248,250,252,0.6)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(220,38,38,0.06)',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <h4 style={{ 
+                color: '#374151', 
+                fontSize: '0.9rem', 
+                fontWeight: 600, 
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                margin: 0
+              }}>
+                💡 Quick Tips
+              </h4>
+              <ul style={{ 
+                color: '#6b7280', 
+                fontSize: '0.85rem', 
+                lineHeight: '1.6',
+                margin: 0,
+                padding: 0,
+                listStyle: 'none'
+              }}>
+                <li style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  marginBottom: '0.5rem',
+                  paddingLeft: '1.2rem',
+                  position: 'relative'
+                }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '0.1rem',
+                    color: '#dc2626',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold'
+                  }}>•</span>
+                  Tracking numbers start with "TRK" followed by 9 digits
+                </li>
+                <li style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  marginBottom: '0.5rem',
+                  paddingLeft: '1.2rem',
+                  position: 'relative'
+                }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '0.1rem',
+                    color: '#dc2626',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold'
+                  }}>•</span>
+                  New shipments may take up to 24 hours to appear
+                </li>
+                <li style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start',
+                  paddingLeft: '1.2rem',
+                  position: 'relative'
+                }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '0.1rem',
+                    color: '#dc2626',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold'
+                  }}>•</span>
+                  Contact support if you need assistance
+                </li>
+              </ul>
+            </div>
           </div>
           
           {/* Create New Shipment - Only for non-admin users */}

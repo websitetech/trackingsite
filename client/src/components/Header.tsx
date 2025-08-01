@@ -34,14 +34,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
       <div className="header-top-bar">
         <div className="header-top-content">
           <div className="contact-info">
-            <span className="address">612-7 Roanoke Rd, Toronto, ON M3A 1E3, Canada</span>
-            <div className="social-links">
-              <a href="#" className="social-link">FB</a>
-              <a href="#" className="social-link">TW</a>
-              <a href="#" className="social-link">LI</a>
-              <a href="#" className="social-link">IG</a>
-              <a href="#" className="social-link">PIN</a>
-            </div>
+            <span className="address">24 Savarin Street, Scarborough, Ontario, M1J1Z8, Canada</span>
           </div>
           <div className="contact-email">
             <span>Info@noblespeedytrac.com</span>
@@ -61,46 +54,100 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
           >
             <img 
               src={logo} 
-              alt="NobleSpeedytrac logo" 
+              alt="Noble-Speedytrac Inc. logo" 
               className="logo-image"
             />
           </Link>
 
-          {/* Navigation Menu - Center (Profile only for logged-in users) */}
+          {/* Navigation Menu - Center */}
           <nav className="main-nav">
-            {user && (
-              <div className="nav-dropdown">
-                <span className="nav-link dropdown-toggle">Profile ▾</span>
-                <div className="dropdown-content">
-                  <Link to="/profile">Profile</Link>
-                  <Link to="/orders">Order History</Link>
-                  <Link to="/faq">FAQ</Link>
-                </div>
-              </div>
-            )}
           </nav>
 
           {/* Right Side - Track Order Button + Services + Contact */}
           <div className="header-right">
+
+            {/* Services - Only for non-logged-in users */}
+            {!user && (
+              <div 
+                className="nav-link" 
+                onClick={() => {
+                  const whatWeOfferSection = document.querySelector('#what-we-offer');
+                  if (whatWeOfferSection) {
+                    // If we're on the landing page, just scroll to the section
+                    whatWeOfferSection.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    // If we're on another page, navigate to home and then scroll
+                    navigate('/');
+                    // Use setTimeout to ensure navigation completes before scrolling
+                    setTimeout(() => {
+                      document.querySelector('#what-we-offer')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                Services
+              </div>
+            )}
+
             <div 
               className="nav-link" 
-              onClick={() => document.querySelector('.what-we-offer-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.querySelector('.footer-banner')?.scrollIntoView({ behavior: 'smooth' })}
               style={{ cursor: 'pointer' }}
             >
-              Services
+              Contact
             </div>
-            <div className="nav-link">Contact</div>
-            <button 
-              className="track-order-btn" 
-              onClick={() => {
-                const trackingSection = document.querySelector('.tracking-section');
-                if (trackingSection) {
-                  trackingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-            >
-              Track Package
-            </button>
+
+            {/* Order History and FAQ - Only for logged-in users */}
+            {user && (
+              <>
+                <Link to="/orders" className="nav-link">
+                  Order History
+                </Link>
+                <Link to="/faq" className="nav-link">
+                  FAQ
+                </Link>
+              </>
+            )}
+
+
+            {/* Cart Button */}
+            {user && (
+              <Link 
+                to="/cart" 
+                className="nav-link"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  position: 'relative',
+                  fontSize: '1.1rem'
+                }}
+              >
+                🛒
+                {cartState.items.length > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    background: '#dc2626',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    border: '2px solid white'
+                  }}>
+                    {cartState.items.length}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* User Auth/Menu Section */}
             {user ? (
@@ -108,8 +155,57 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
                 <button
                   className="user-menu-btn"
                   onClick={() => setMenuOpen(!menuOpen)}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(248,250,252,0.1) 100%)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '2rem',
+                    padding: '0.6rem 1.2rem',
+                    color: '#374151',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(248,250,252,0.2) 100%)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(248,250,252,0.1) 100%)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                  }}
                 >
-                  👤 {user.username} ▾
+                  <span style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                    borderRadius: '50%',
+                    fontSize: '1rem'
+                  }}>
+                    👤
+                  </span>
+                  <span style={{ color: '#1f2937', fontWeight: 700 }}>
+                    {user.username}
+                  </span>
+                  <span style={{ 
+                    color: '#6b7280', 
+                    fontSize: '0.8rem',
+                    marginLeft: '0.2rem'
+                  }}>
+                    ▾
+                  </span>
                 </button>
 
                 {menuOpen && (
@@ -117,15 +213,6 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
                     <div className="dropdown-header">Welcome, {user.username}!</div>
                     <Link to="/user" className="dropdown-item" onClick={() => setMenuOpen(false)}>
                       📊 Dashboard
-                    </Link>
-                    <Link to="/profile" className="dropdown-item" onClick={() => setMenuOpen(false)}>
-                      👤 Profile
-                    </Link>
-                    <Link to="/orders" className="dropdown-item" onClick={() => setMenuOpen(false)}>
-                      📦 Orders
-                    </Link>
-                    <Link to="/cart" className="dropdown-item" onClick={() => setMenuOpen(false)}>
-                      🛒 Cart ({cartState.items.length})
                     </Link>
                     {user.role === 'admin' && (
                       <Link to="/admin" className="dropdown-item admin-item" onClick={() => setMenuOpen(false)}>
@@ -179,22 +266,36 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
                 </button>
               </div>
               <nav className="mobile-nav">
+                {/* Services - Only for non-logged-in users */}
+                {!user && (
+                  <span onClick={() => { 
+                    const whatWeOfferSection = document.querySelector('#what-we-offer');
+                    if (whatWeOfferSection) {
+                      // If we're on the landing page, just scroll to the section
+                      whatWeOfferSection.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      // If we're on another page, navigate to home and then scroll
+                      navigate('/');
+                      // Use setTimeout to ensure navigation completes before scrolling
+                      setTimeout(() => {
+                        document.querySelector('#what-we-offer')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
+                    }
+                    setMobileMenuOpen(false); 
+                  }}>Services</span>
+                )}
+                
+                <span onClick={() => { 
+                  document.querySelector('.footer-banner')?.scrollIntoView({ behavior: 'smooth' }); 
+                  setMobileMenuOpen(false); 
+                }}>Contact</span>
+                
                 {user && (
                   <>
-                    <a href="/profile" onClick={() => setMobileMenuOpen(false)}>Profile</a>
                     <a href="/orders" onClick={() => setMobileMenuOpen(false)}>Order History</a>
                     <a href="/faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
                   </>
                 )}
-                <span onClick={() => { 
-                  document.querySelector('.what-we-offer-section')?.scrollIntoView({ behavior: 'smooth' }); 
-                  setMobileMenuOpen(false); 
-                }}>Services</span>
-                <span>Contact</span>
-                <span onClick={() => { 
-                  document.querySelector('.tracking-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
-                  setMobileMenuOpen(false); 
-                }}>Track Package</span>
               </nav>
               {!user && (
                 <div className="mobile-auth">

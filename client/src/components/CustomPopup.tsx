@@ -32,7 +32,7 @@ const CustomPopup: React.FC<CustomPopupProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 50,
+        zIndex: 99999,
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
         backdropFilter: 'blur(4px)'
       }}

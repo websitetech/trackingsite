@@ -18,7 +18,7 @@ const PaymentSuccessPage: React.FC = () => {
   };
 
   return (
-    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa' }}>
+    <div className="main-container" style={{ minHeight: '100vh', background: '#f7f8fa', paddingTop: '6rem' }}>
       <div style={{
         background: 'white',
         borderRadius: '1.5rem',
