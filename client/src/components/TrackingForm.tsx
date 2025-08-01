@@ -36,13 +36,13 @@ const TrackingForm: React.FC = () => {
     <div className="tracking-form-container">
       <form className="tracking-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="trackingNumber">Tracking Number</label>
+          <label htmlFor="trackingNumber">Enter Tracking Number</label>
           <input
             type="text"
             id="trackingNumber"
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
-            placeholder="Enter tracking number"
+            placeholder="Enter your tracking number"
             required
           />
         </div>

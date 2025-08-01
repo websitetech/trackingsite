@@ -3,10 +3,9 @@
 interface ActionButtonsProps {
   onEstimate: () => void;
   onShip: () => void;
-  onNewCustomer: () => void ;
 }
 
-const ActionButtons: React.FC<ActionButtonsProps> = ({ onEstimate, onShip, onNewCustomer }) => {
+const ActionButtons: React.FC<ActionButtonsProps> = ({ onEstimate, onShip }) => {
   return (
     <div className="action-buttons">
       <div className="action-buttons-container">
@@ -23,14 +22,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onEstimate, onShip, onNew
           <div className="btn-content">
             <h3>Ship Now</h3>
             <p>Create a new shipment</p>
-          </div>
-        </button>
-
-        <button className="action-btn customer-btn" onClick={onNewCustomer}>
-          <div className="btn-icon">👨‍💼</div>
-          <div className="btn-content">
-            <h3>New Customer</h3>
-            <p>Register a new customer</p>
           </div>
         </button>
       </div>

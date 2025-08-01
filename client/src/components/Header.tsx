@@ -17,377 +17,201 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-// User-specific notifications
-const userNotifications = {
-  'john_doe': [
-    { id: 1, message: 'Your shipment TRK123456789 has been delivered.', read: false, date: '2024-06-01' },
-    { id: 2, message: 'Shipment TRK987654321 is now in transit.', read: false, date: '2024-06-03' },
-    { id: 3, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-05-30' },
-  ],
-  'jane_smith': [
-    { id: 4, message: 'Your shipment TRK555666777 has been delivered.', read: false, date: '2024-05-28' },
-    { id: 5, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-05-25' },
-  ],
-  'admin': [
-    { id: 6, message: 'New shipment TRK111222333 has been created.', read: false, date: '2024-06-05' },
-    { id: 7, message: 'Welcome to NobleSpeedytrac!', read: true, date: '2024-06-01' },
-  ],
-};
-
-// Default empty notifications for new users
-const defaultNotifications: typeof userNotifications['john_doe'] = [];
-
 const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { state: cartState } = useCart();
   const navigate = useNavigate();
-  const [notifOpen, setNotifOpen] = useState(false);
-  // Get user-specific notifications or default to empty array
-  const userNotificationsList = user ? (userNotifications[user.username as keyof typeof userNotifications] || defaultNotifications) : defaultNotifications;
-  const [notifications, setNotifications] = useState(userNotificationsList);
-  const unreadCount = notifications.filter((n: any) => !n.read).length;
 
-  const handleLogoClick2 = (e: React.MouseEvent) => {
+  const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate('/');
   };
 
-  const handleBellClick = () => {
-    setNotifOpen((open) => !open);
-    // Mark all as read when opening
-    setNotifications(notifications.map((n: any) => ({ ...n, read: true })));
-  };
-
   return (
-    <header className="header" style={{ pointerEvents: 'auto', zIndex: 9999 }}>
-      <div className="header-content" style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* Logo - Left side */}
-        <Link 
-          to="/"
-          className="logo" 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            cursor: 'pointer', 
-            pointerEvents: 'auto',
-            textDecoration: 'none',
-            color: 'inherit',
-            position: 'relative',
-            zIndex: 10000
-          }}
-          onClick={handleLogoClick2}
-          title="Click to go to home page"
-        >
-          <img 
-            src={logo} 
-            alt="NobleSpeedytrac logo" 
-            style={{ 
-              height: 80, 
-              width: 'auto', 
-              marginRight: 0, 
-              cursor: 'pointer', 
-              pointerEvents: 'auto',
-              filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
-            }}
-          />
-        </Link>
+    <header className="new-header">
+      {/* Top Contact Bar */}
+      <div className="header-top-bar">
+        <div className="header-top-content">
+          <div className="contact-info">
+            <span className="address">612-7 Roanoke Rd, Toronto, ON M3A 1E3, Canada</span>
+            <div className="social-links">
+              <a href="#" className="social-link">FB</a>
+              <a href="#" className="social-link">TW</a>
+              <a href="#" className="social-link">LI</a>
+              <a href="#" className="social-link">IG</a>
+              <a href="#" className="social-link">PIN</a>
+            </div>
+          </div>
+          <div className="contact-email">
+            <span>Info@noblespeedytrac.com</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Center and Right side content */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          {/* Navigation - Center */}
-          <nav className="nav">
-            {user ? (
-              <div className="user-section" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {/* User section - no dropdown here anymore */}
-              </div>
-            ) : (
-              <div className="auth-buttons" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <button 
-                  className="btn btn-login" 
-                  onClick={onLogin}
-                  style={{
-                    background: 'none',
-                    border: '2px solid #b91c1c',
-                    color: '#b91c1c',
-                    padding: '0.5rem 1.5rem',
-                    borderRadius: '0.5rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  Login
-                </button>
-                <button 
-                  className="btn btn-register" 
-                  onClick={onRegister}
-                  style={{
-                    background: '#b91c1c',
-                    border: '2px solid #b91c1c',
-                    color: 'white',
-                    padding: '0.5rem 1.5rem',
-                    borderRadius: '0.5rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  Register
-                </button>
+      {/* Main Header */}
+      <div className="header-main">
+        <div className="header-content">
+          {/* Logo - Left side */}
+          <Link 
+            to="/"
+            className="logo-link" 
+            onClick={handleLogoClick}
+            title="Click to go to home page"
+          >
+            <img 
+              src={logo} 
+              alt="NobleSpeedytrac logo" 
+              className="logo-image"
+            />
+          </Link>
+
+          {/* Navigation Menu - Center (Profile only for logged-in users) */}
+          <nav className="main-nav">
+            {user && (
+              <div className="nav-dropdown">
+                <span className="nav-link dropdown-toggle">Profile ▾</span>
+                <div className="dropdown-content">
+                  <Link to="/profile">Profile</Link>
+                  <Link to="/orders">Order History</Link>
+                  <Link to="/faq">FAQ</Link>
+                </div>
               </div>
             )}
           </nav>
 
-          {/* User Icons - Right side (only for logged in users) */}
-          {user && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {/* Notification Bell */}
-              <div style={{ position: 'relative', display: 'inline-block', marginRight: 8 }}>
-                <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    color: '#b91c1c',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    position: 'relative',
-                  }}
-                  aria-label="Notifications"
-                  onClick={handleBellClick}
-                >
-                  <span role="img" aria-label="bell">🔔</span>
-                  {unreadCount > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: 2,
-                      right: 2,
-                      background: '#dc2626',
-                      color: 'white',
-                      borderRadius: '50%',
-                      width: 16,
-                      height: 16,
-                      fontSize: 11,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                    }}>{unreadCount}</span>
-                  )}
-                </button>
-                {/* Dropdown */}
-                {notifOpen && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '2.5rem',
-                    right: 0,
-                    background: 'white',
-                    color: '#1a1a1a',
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 8px 32px rgba(185,28,28,0.12)',
-                    minWidth: 260,
-                    zIndex: 3000,
-                    padding: '0.5rem 0',
-                    maxHeight: 260,
-                    overflowY: 'auto',
-                  }}>
-                    <div style={{ fontWeight: 700, color: '#b91c1c', padding: '0.5rem 1.5rem', borderBottom: '1px solid #f3f4f6' }}>Notifications</div>
-                    {notifications.length === 0 && <div style={{ padding: '1rem', color: '#6b7280' }}>No notifications.</div>}
-                                      {notifications.map((n: any) => (
-                    <div key={n.id} style={{ padding: '0.75rem 1.5rem', borderBottom: '1px solid #f3f4f6', background: n.read ? 'white' : '#fef2f2', color: n.read ? '#374151' : '#b91c1c', fontWeight: n.read ? 400 : 600 }}>
-                      {n.message}
-                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{n.date}</div>
-                    </div>
-                  ))}
-                  </div>
-                )}
-              </div>
+          {/* Right Side - Track Order Button + Services + Contact */}
+          <div className="header-right">
+            <div 
+              className="nav-link" 
+              onClick={() => document.querySelector('.what-we-offer-section')?.scrollIntoView({ behavior: 'smooth' })}
+              style={{ cursor: 'pointer' }}
+            >
+              Services
+            </div>
+            <div className="nav-link">Contact</div>
+            <button 
+              className="track-order-btn" 
+              onClick={() => {
+                const trackingSection = document.querySelector('.tracking-section');
+                if (trackingSection) {
+                  trackingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+            >
+              Track Package
+            </button>
 
-              {/* Cart Icon */}
-              <Link to="/cart" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            {/* User Auth/Menu Section */}
+            {user ? (
+              <div className="user-menu">
                 <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1.5rem',
-                    cursor: 'pointer',
-                    color: '#b91c1c',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    position: 'relative'
-                  }}
+                  className="user-menu-btn"
+                  onClick={() => setMenuOpen(!menuOpen)}
                 >
-                  🛒
-                  {cartState.items.length > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      right: '-5px',
-                      background: '#dc2626',
-                      color: 'white',
-                      borderRadius: '50%',
-                      width: '20px',
-                      height: '20px',
-                      fontSize: '0.75rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 'bold'
-                    }}>
-                      {cartState.items.length}
-                    </span>
-                  )}
-                </button>
-              </Link>
-
-              {/* Burger icon - Last */}
-              <div style={{ position: 'relative' }}>
-                <button
-                  className="burger-menu"
-                  aria-label="Open menu"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '2rem',
-                    cursor: 'pointer',
-                    color: '#b91c1c',
-                    verticalAlign: 'middle',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    transition: 'color 0.2s',
-                  }}
-                  onClick={() => setMenuOpen((open) => !open)}
-                  onBlur={() => setTimeout(() => setMenuOpen(false), 200)}
-                >
-                  <span style={{ fontSize: '2rem', lineHeight: 1, transition: 'transform 0.3s', transform: menuOpen ? 'rotate(90deg)' : 'none' }}>☰</span>
+                  👤 {user.username} ▾
                 </button>
 
-                {/* Dropdown menu */}
                 {menuOpen && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '2.5rem',
-                    right: 0,
-                    background: 'white',
-                    color: '#1a1a1a',
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 8px 32px rgba(185,28,28,0.12)',
-                    minWidth: 200,
-                    zIndex: 3000,
-                    padding: '0.5rem 0',
-                  }}>
-                    <button
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.75rem 1.5rem',
-                        fontSize: '1rem',
-                        color: '#1a1a1a',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                      }}
-                      onClick={() => {
-                        setMenuOpen(false);
-                        navigate('/orders');
-                      }}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      Order History
-                    </button>
-                    <button
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.75rem 1.5rem',
-                        fontSize: '1rem',
-                        color: '#1a1a1a',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                      }}
-                      onClick={() => {
-                        setMenuOpen(false);
-                        navigate('/profile');
-                      }}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      Profile
-                    </button>
-                    {user?.role === 'admin' && (
-                      <button
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          width: '100%',
-                          textAlign: 'left',
-                          padding: '0.75rem 1.5rem',
-                          fontSize: '1rem',
-                          color: '#b91c1c',
-                          cursor: 'pointer',
-                          transition: 'background 0.2s',
-                        }}
-                        onClick={() => {
-                          setMenuOpen(false);
-                          navigate('/admin');
-                        }}
-                        onMouseDown={e => e.preventDefault()}
-                      >
-                        Admin
-                      </button>
+                  <div className="user-dropdown" onMouseLeave={() => setMenuOpen(false)}>
+                    <div className="dropdown-header">Welcome, {user.username}!</div>
+                    <Link to="/user" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                      📊 Dashboard
+                    </Link>
+                    <Link to="/profile" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                      👤 Profile
+                    </Link>
+                    <Link to="/orders" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                      📦 Orders
+                    </Link>
+                    <Link to="/cart" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                      🛒 Cart ({cartState.items.length})
+                    </Link>
+                    {user.role === 'admin' && (
+                      <Link to="/admin" className="dropdown-item admin-item" onClick={() => setMenuOpen(false)}>
+                        ⚙️ Admin Panel
+                      </Link>
                     )}
                     <button
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.75rem 1.5rem',
-                        fontSize: '1rem',
-                        color: '#b91c1c',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                      }}
+                      className="dropdown-item logout-btn"
                       onClick={() => {
                         setMenuOpen(false);
                         onLogout();
                       }}
-                      onMouseDown={e => e.preventDefault()}
                     >
-                      Logout
-                    </button>
-                    <button
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '0.75rem 1.5rem',
-                        fontSize: '1rem',
-                        color: '#b91c1c',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                      }}
-                      onClick={() => {
-                        setMenuOpen(false);
-                        navigate('/faq');
-                      }}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      Help
+                      🚪 Logout
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="auth-section">
+                <button className="login-btn" onClick={onLogin}>
+                  Login
+                </button>
+                <button className="register-btn" onClick={onRegister}>
+                  Register
+                </button>
+              </div>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              ☰
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)}>
+            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="mobile-menu-header">
+                <span>Menu</span>
+                <button 
+                  className="mobile-menu-close"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <nav className="mobile-nav">
+                {user && (
+                  <>
+                    <a href="/profile" onClick={() => setMobileMenuOpen(false)}>Profile</a>
+                    <a href="/orders" onClick={() => setMobileMenuOpen(false)}>Order History</a>
+                    <a href="/faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+                  </>
+                )}
+                <span onClick={() => { 
+                  document.querySelector('.what-we-offer-section')?.scrollIntoView({ behavior: 'smooth' }); 
+                  setMobileMenuOpen(false); 
+                }}>Services</span>
+                <span>Contact</span>
+                <span onClick={() => { 
+                  document.querySelector('.tracking-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                  setMobileMenuOpen(false); 
+                }}>Track Package</span>
+              </nav>
+              {!user && (
+                <div className="mobile-auth">
+                  <button className="mobile-login-btn" onClick={() => { onLogin(); setMobileMenuOpen(false); }}>
+                    Login
+                  </button>
+                  <button className="mobile-register-btn" onClick={() => { onRegister(); setMobileMenuOpen(false); }}>
+                    Register
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
 };
 
-export default Header; 
+export default Header;

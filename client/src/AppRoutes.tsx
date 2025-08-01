@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
 import TrackingForm from './components/TrackingForm';
@@ -33,9 +33,7 @@ function AppRoutes() {
   const [showEstimate, setShowEstimate] = useState(false);
   const [showShip, setShowShip] = useState(false);
   const [showNewCustomer, setShowNewCustomer] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Check if user is logged in from localStorage
@@ -46,20 +44,7 @@ function AppRoutes() {
     }
   }, []);
 
-  useEffect(() => {
-    // Ensure smooth video playback
-    if (videoRef.current) {
-      const video = videoRef.current;
-      video.load();
-      
-      // Wait a moment then try to play
-      setTimeout(() => {
-        video.play().catch(() => {
-          console.log('Autoplay blocked - video will start on user interaction');
-        });
-      }, 100);
-    }
-  }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -77,11 +62,7 @@ function AppRoutes() {
     setShowNewCustomer(true);
   };
 
-  const handleVideoClick = () => {
-    if (videoRef.current && videoRef.current.paused) {
-      videoRef.current.play().catch(console.error);
-    }
-  };
+
 
   const handleLoginSuccess = (userData: User, token: string) => {
     localStorage.setItem('token', token);
@@ -103,103 +84,40 @@ function AppRoutes() {
         <Route path="/" element={
           user ? <UserPage user={user} /> : (
             <>
-              {/* Hero Section with video background */}
-              <section className="hero-bg" onClick={handleVideoClick}>
-                <video 
-                  ref={videoRef}
-                  className="hero-video"
-                  autoPlay 
-                  muted 
-                  loop 
-                  playsInline
-                  preload="auto"
-                  crossOrigin="anonymous"
-                  key="truck-video-stable"
-                  style={{
-                    position: 'absolute',
-                    top: '0',
-                    left: '0',
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    zIndex: '1'
-                  }}
-                  onLoadedData={() => {
-                    console.log('🚛 TRUCK VIDEO LOADED SUCCESSFULLY!');
-                    setVideoLoaded(true);
-                    if (videoRef.current) {
-                      videoRef.current.currentTime = 0;
-                    }
-                  }}
-                  onError={(e) => {
-                    console.error('Video load error:', e);
-                    console.log('Falling back to alternative video source...');
-                  }}
-                  onLoadStart={() => {
-                    console.log('🔄 Your custom truck video loading started...');
-                    setVideoLoaded(false);
-                  }}
-                  onCanPlayThrough={() => {
-                    if (videoRef.current) {
-                      videoRef.current.play().catch(() => {
-                        console.log('Autoplay prevented, video will play on user interaction');
-                      });
-                    }
-                  }}
-                  onEnded={() => {
-                    if (videoRef.current) {
-                      videoRef.current.currentTime = 0;
-                      videoRef.current.play();
-                    }
-                  }}
-                >
-                  <source src="/truck-video.mp4" type="video/mp4" />
-                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-                  🚛 TRUCK VIDEO LOADING...
-                </video>
-                {!videoLoaded && (
-                  <div 
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      color: '#2563eb',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      zIndex: 5,
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      padding: '1rem 2rem',
-                      borderRadius: '1rem',
-                      backdropFilter: 'blur(15px)',
-                      border: '1px solid rgba(37, 99, 235, 0.2)',
-                      boxShadow: '0 8px 25px rgba(37, 99, 235, 0.1)',
-                      transition: 'opacity 0.3s ease'
-                    }}
-                  >
-                    🚛 Loading your truck video...
-                  </div>
-                )}
+              {/* Hero Section with LogiHub-style background */}
+              <section className="hero-bg logihub-hero">
                 <div 
-                  className="hero-fallback-image"
+                  className="hero-background-image"
                   style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: 0,
                     left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: 'url(https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&w=2000&q=80)',
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundImage: 'url(/toronto-delivery-vehicles-bg.jpg?v=2)',
                     backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    zIndex: 0
+                    backgroundPosition: 'center center',
+                    backgroundAttachment: 'fixed',
+                    backgroundRepeat: 'no-repeat',
+                    objectFit: 'cover',
+                    zIndex: -1
                   }}
                 ></div>
-                <div className="hero-video-overlay"></div>
-                <div className="hero-section">
-                  <div className="company-quote">
-                    At NobleSpeedytrac, we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time.
-                    Your trusted logistics partner — driven by precision, powered by innovation.
+                <div className="hero-overlay"></div>
+                
+                {/* Centered Content */}
+                <div className="hero-content-center">
+                  <ActionButtons 
+                    onEstimate={() => setShowEstimate(true)}
+                    onShip={() => setShowShip(true)}
+                  />
                   </div>
+              </section>
+
+              {/* Tracking Section with Company Quote */}
+              <section className="tracking-section">
+                <div className="tracking-container">
+                  <div className="tracking-content-left">
                   <div className="tracking-card">
                     <div className="tracking-tab">
                       <span className="tracking-tab-icon">📦</span> Tracking Package
@@ -207,40 +125,221 @@ function AppRoutes() {
                     <span className="tracking-sub">Looking for a shipment update?</span>
                     <TrackingForm />
                   </div>
-                  <h1 className="hero-title">FAST. RELIABLE. SECURE.<br />Toronto's go-to delivery service.</h1>
-                  <ActionButtons 
-                    onEstimate={() => setShowEstimate(true)}
-                    onShip={() => setShowShip(true)}
-                    onNewCustomer={() => setShowNewCustomer(true)}
-                  />
-                </div>
-              </section>
-              {/* Specialty Delivery Areas */}
-              <section className="specialty-section">
-                <h2 className="specialty-title">Our Specialty Delivery Areas</h2>
-                <div className="specialty-grid">
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🔌</span>
-                    <span className="specialty-label">Technology<br />and Electronics</span>
                   </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🩺</span>
-                    <span className="specialty-label">Medical<br />Supplies</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🍽️</span>
-                    <span className="specialty-label">Catering<br />Services</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">🏭</span>
-                    <span className="specialty-label">General Manufacturing<br />Products</span>
-                  </div>
-                  <div className="specialty-card">
-                    <span className="specialty-icon">📄</span>
-                    <span className="specialty-label">Confidential Documents</span>
+                  <div className="tracking-content-right">
+                    <div className="company-quote-overlay">
+                      <div className="who-we-are-tag">Who we are</div>
+                      <h2 className="company-name">Noble-SpeedyTrac Inc.</h2>
+                      <p className="company-description">
+                        "At NobleSpeedytrac, we specialize in fast, reliable, and secure logistics solutions tailored to your business needs. From first mile to last mile, we ensure your cargo reaches its destination on time, every time."
+                      </p>
+                      <p className="company-tagline">
+                        "Your trusted logistics partner — driven by precision, powered by innovation."
+                      </p>
+                    </div>
                   </div>
                 </div>
               </section>
+              {/* Service Cards Section */}
+              <section className="service-cards-section">
+                <div className="service-cards-container">
+                  <div className="service-card-item">
+                    <div className="service-card-icon">
+                      <span>📦</span>
+                    </div>
+                    <h3>Rapid Freight Services</h3>
+                    <p>Fast and reliable shipping solutions for urgent deliveries</p>
+                  </div>
+                  <div className="service-card-item">
+                    <div className="service-card-icon">
+                      <span>🚚</span>
+                    </div>
+                    <h3>Secure Transportation</h3>
+                    <p>Safe handling and transport of sensitive cargo</p>
+                  </div>
+                  <div className="service-card-item">
+                    <div className="service-card-icon">
+                      <span>⚡</span>
+                    </div>
+                    <h3>All Freight Solutions</h3>
+                    <p>Comprehensive logistics for all your shipping needs</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Drive Your Business Forward Section */}
+              <section className="business-forward-section">
+                <div className="business-forward-container">
+                  <div className="business-forward-content">
+                    <h2>Drive Your Business Forward with NobleSpeedytrac</h2>
+                    <div className="features-list">
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Same-day delivery options</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Real-time tracking</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Professional handling</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Competitive pricing</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>24/7 customer support</span>
+                      </div>
+                      <div className="feature-item">
+                        <span className="feature-icon">✓</span>
+                        <span>Specialized cargo handling</span>
+                      </div>
+                    </div>
+                    <button className="cta-button" onClick={() => setShowShip(true)}>
+                      Get Started
+                    </button>
+                  </div>
+                  <div className="business-forward-image">
+                    <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=800&q=80" alt="Logistics Operations" />
+                    <div className="experience-badge">
+                      <span className="experience-years">15+</span>
+                      <span className="experience-text">Years Experience</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Speed Precision Excellence Section */}
+              <section className="spe-section">
+                <div className="spe-container">
+                  <div className="spe-item">
+                    <h3>Speed</h3>
+                    <div className="spe-arrow">→</div>
+                  </div>
+                  <div className="spe-item">
+                    <h3>Precision</h3>
+                    <div className="spe-arrow">→</div>
+                  </div>
+                  <div className="spe-item">
+                    <h3>Excellence</h3>
+                  </div>
+                </div>
+              </section>
+
+              {/* What We Offer Section */}
+              <section className="what-we-offer-section">
+                <div className="what-we-offer-container">
+                  <div className="section-header">
+                    <h2>What We Offer</h2>
+                    <button className="view-all-btn" onClick={() => setShowEstimate(true)}>
+                      View All
+                    </button>
+                  </div>
+                  <div className="offer-items">
+                    <div className="offer-item">
+                      <div className="offer-icon">
+                        <span>📋</span>
+                      </div>
+                      <div className="offer-content">
+                        <h3>Freight Consultation</h3>
+                        <p>Expert advice on shipping solutions and logistics optimization</p>
+                      </div>
+                    </div>
+                    <div className="offer-item">
+                      <div className="offer-icon">
+                        <span>📊</span>
+                      </div>
+                      <div className="offer-content">
+                        <h3>Warehousing & Distribution</h3>
+                        <p>Secure storage and efficient distribution network management</p>
+                      </div>
+                    </div>
+                    <div className="offer-item">
+                      <div className="offer-icon">
+                        <span>🚛</span>
+                      </div>
+                      <div className="offer-content">
+                        <h3>Supply Chain Management</h3>
+                        <p>End-to-end supply chain solutions for optimal efficiency</p>
+                      </div>
+                    </div>
+                    <div className="offer-item">
+                      <div className="offer-icon">
+                        <span>🎯</span>
+                      </div>
+                      <div className="offer-content">
+                        <h3>E-commerce Integration</h3>
+                        <p>Seamless integration with your online business operations</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Statistics Section */}
+              <section className="statistics-section">
+                <div className="statistics-container">
+                  <div className="testimonial-text">
+                    <p>"We love reliable and strategic fleet and logistics services that streamlines our operations. Happy to work with NobleSpeedytrac!"</p>
+                  </div>
+                  <div className="statistics-grid">
+                    <div className="stat-item">
+                      <span className="stat-number">348+</span>
+                      <span className="stat-label">Happy Clients</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">499+</span>
+                      <span className="stat-label">Projects Completed</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">150+</span>
+                      <span className="stat-label">Professional Team</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-number">99.9%</span>
+                      <span className="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Specialized Services Section */}
+              <section className="specialized-services-section">
+                <div className="specialized-container">
+                  <div className="specialized-content">
+                    <h2>Specialized Services</h2>
+                    <div className="specialized-services">
+                      <div className="specialized-item">
+                        <span>Technology & Electronics</span>
+                      </div>
+                      <div className="specialized-item">
+                        <span>Medical Supplies</span>
+                      </div>
+                      <div className="specialized-item">
+                        <span>Manufacturing Products</span>
+                      </div>
+                      <div className="specialized-item">
+                        <span>Confidential Documents</span>
+                      </div>
+                    </div>
+                    <button className="specialized-cta" onClick={() => setShowEstimate(true)}>
+                      Learn More
+                    </button>
+                  </div>
+                  <div className="specialized-image">
+                    <img src="https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=800&q=80" alt="Specialized Services" />
+                  </div>
+                </div>
+              </section>
+
+              {/* Floating Action Button for Quick Tracking */}
+              <div className="floating-action-btn" onClick={() => document.querySelector('.tracking-card')?.scrollIntoView({ behavior: 'smooth' })}>
+                <span className="fab-icon">📦</span>
+                <span className="fab-text">Track</span>
+              </div>
             </>
           )
         } />
