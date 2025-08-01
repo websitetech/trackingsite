@@ -128,10 +128,6 @@ const OrderHistoryPage: React.FC = () => {
     setSelectedTrackingNumber(null);
   };
 
-  const handleViewDetails = (order: PackageData) => {
-    setSelectedOrder(order);
-  };
-
   const handleCloseDetails = () => {
     setSelectedOrder(null);
   };

@@ -47,17 +47,10 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
         setLoading(true);
         setError(null);
         
-        console.log('🔍 Fetching tracking data for:', trackingNumber);
         const response = await trackingAPI.trackPackage(trackingNumber);
-        console.log('📦 API Response:', response);
-        console.log('📋 Package Data:', response.package);
-        console.log('📊 Tracking History:', response.tracking_history);
-        console.log('📊 Tracking History Length:', response.tracking_history?.length);
-        
         setPackageData(response.package);
         setTrackingHistory(response.tracking_history || []);
       } catch (err: any) {
-        console.error('❌ Tracking API Error:', err);
         setError(err.message || 'Failed to fetch tracking information');
       } finally {
         setLoading(false);
@@ -68,23 +61,6 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
       fetchTrackingData();
     }
   }, [trackingNumber]);
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-        return 'text-green-600 bg-green-100';
-      case 'in_transit':
-      case 'out_for_delivery':
-        return 'text-blue-600 bg-blue-100';
-      case 'pending':
-        return 'text-yellow-600 bg-yellow-100';
-      case 'failed':
-      case 'returned':
-        return 'text-red-600 bg-red-100';
-      default:
-        return 'text-gray-600 bg-gray-100';
-    }
-  };
 
   if (loading) {
     return (
@@ -262,13 +238,7 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
           Tracking History
         </h3>
         {(() => {
-          console.log('🎨 Rendering tracking history section');
-          console.log('📊 Current trackingHistory state:', trackingHistory);
-          console.log('📊 trackingHistory.length:', trackingHistory.length);
-          console.log('📊 trackingHistory type:', typeof trackingHistory);
-          
           if (trackingHistory.length === 0) {
-            console.log('📭 No tracking history found, showing empty state');
             return (
               <div style={{
                 textAlign: 'center',
@@ -280,11 +250,9 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
               </div>
             );
           } else {
-            console.log('📋 Rendering tracking history entries:', trackingHistory);
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {trackingHistory.map((entry, index) => {
-                  console.log('📝 Rendering entry:', entry, 'at index:', index);
                   return (
                     <div key={entry.id} style={{
                       display: 'flex',

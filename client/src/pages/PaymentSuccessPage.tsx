@@ -5,11 +5,9 @@ const PaymentSuccessPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  const { trackingNumbers, totalAmount } = location.state || {};
   const fromCart = location.state?.fromCart || false;
   const shipmentCount = location.state?.shipmentCount || 1;
-  const totalAmount = location.state?.totalAmount || 0;
-  const trackingNumbers = location.state?.trackingNumbers || [];
-  const shipments = location.state?.shipments || [];
 
   const handleGoToUser = () => {
     navigate('/user');

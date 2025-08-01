@@ -3,80 +3,21 @@ import React from 'react';
 interface CustomPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
   title: string;
   message?: string;
-  children?: React.ReactNode;
-  renderContent?: () => React.ReactNode;
+  orderInfo?: any;
   width?: string;
-  height?: string;
-  confirmText?: string;
-  cancelText?: string;
-  confirmButtonColor?: string;
-  cancelButtonColor?: string;
-  confirmButtonTextColor?: string;
-  cancelButtonTextColor?: string;
-  confirmButtonBorderColor?: string;
-  cancelButtonBorderColor?: string;
-  confirmButtonHoverBackgroundColor?: string;
-  cancelButtonHoverBackgroundColor?: string;
-  confirmButtonFontWeight?: string;
-  cancelButtonFontWeight?: string;
-  confirmButtonFontSize?: string;
-  cancelButtonFontSize?: string;
-  confirmButtonBorderRadius?: string;
-  cancelButtonBorderRadius?: string;
-  confirmButtonBorder?: string;
-  cancelButtonBorder?: string;
-  confirmButtonTransition?: string;
-  cancelButtonTransition?: string;
-  confirmButtonOnMouseOver?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  cancelButtonOnMouseOver?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  confirmButtonOnMouseOut?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  cancelButtonOnMouseOut?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  showOrderInfo?: boolean;
-  orderInfo?: {
-    trackingNumber?: string;
-    customer?: string;
-  };
+  renderContent?: () => React.ReactNode;
 }
 
 const CustomPopup: React.FC<CustomPopupProps> = ({
   isOpen,
   onClose,
-  onConfirm,
   title,
   message,
-  children,
-  renderContent,
+  orderInfo,
   width = '400px',
-  height = 'auto',
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  confirmButtonColor = '#3b82f6',
-  cancelButtonColor = '#f3f4f6',
-  confirmButtonTextColor = 'white',
-  cancelButtonTextColor = '#374151',
-  confirmButtonBorderColor = '#d1d5db',
-  cancelButtonBorderColor = '#d1d5db',
-  confirmButtonHoverBackgroundColor = '#2563eb',
-  cancelButtonHoverBackgroundColor = '#e5e7eb',
-  confirmButtonFontWeight = '500',
-  cancelButtonFontWeight = '500',
-  confirmButtonFontSize = '14px',
-  cancelButtonFontSize = '14px',
-  confirmButtonBorderRadius = '6px',
-  cancelButtonBorderRadius = '6px',
-  confirmButtonBorder = 'none',
-  cancelButtonBorder = '1px solid #d1d5db',
-  confirmButtonTransition = 'all 0.2s ease',
-  cancelButtonTransition = 'all 0.2s ease',
-  confirmButtonOnMouseOver,
-  cancelButtonOnMouseOver,
-  confirmButtonOnMouseOut,
-  cancelButtonOnMouseOut,
-  showOrderInfo = false,
-  orderInfo
+  renderContent
 }) => {
   if (!isOpen) return null;
 
@@ -102,7 +43,6 @@ const CustomPopup: React.FC<CustomPopupProps> = ({
           borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           width: width,
-          height: height === 'auto' ? 'auto' : height,
           maxHeight: '90vh',
           animation: 'modalSlideIn 0.3s ease-out',
           border: '1px solid #e5e7eb',
@@ -173,7 +113,7 @@ const CustomPopup: React.FC<CustomPopupProps> = ({
             maxHeight: 'calc(90vh - 80px)'
           }}
         >
-          {renderContent ? renderContent() : (children || (
+          {renderContent ? renderContent() : (
             <>
               {message && (
                 <p 
@@ -188,7 +128,7 @@ const CustomPopup: React.FC<CustomPopupProps> = ({
                 </p>
               )}
               
-              {showOrderInfo && orderInfo && (
+              {orderInfo && (
                 <div 
                   style={{
                     padding: '12px',
@@ -246,54 +186,8 @@ const CustomPopup: React.FC<CustomPopupProps> = ({
                   )}
                 </div>
               )}
-
-              {/* Action Buttons */}
-              {onConfirm && (
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '12px'
-                }}>
-                  <button
-                    onClick={onClose}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: cancelButtonColor,
-                      color: cancelButtonTextColor,
-                      borderRadius: cancelButtonBorderRadius,
-                      fontSize: cancelButtonFontSize,
-                      fontWeight: cancelButtonFontWeight,
-                      border: cancelButtonBorder,
-                      cursor: 'pointer',
-                      transition: cancelButtonTransition
-                    }}
-                    onMouseOver={cancelButtonOnMouseOver}
-                    onMouseOut={cancelButtonOnMouseOut}
-                  >
-                    {cancelText}
-                  </button>
-                  <button
-                    onClick={onConfirm}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: confirmButtonColor,
-                      color: confirmButtonTextColor,
-                      borderRadius: confirmButtonBorderRadius,
-                      fontSize: confirmButtonFontSize,
-                      fontWeight: confirmButtonFontWeight,
-                      border: confirmButtonBorder,
-                      cursor: 'pointer',
-                      transition: confirmButtonTransition
-                    }}
-                    onMouseOver={confirmButtonOnMouseOver}
-                    onMouseOut={confirmButtonOnMouseOut}
-                  >
-                    {confirmText}
-                  </button>
-                </div>
-              )}
             </>
-          ))}
+          )}
         </div>
       </div>
     </div>
