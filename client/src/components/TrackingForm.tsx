@@ -51,37 +51,33 @@ const TrackingForm: React.FC = () => {
   console.log('🔄 Current modal state:', showTrackingModal);
 
   return (
-    <>
-      <div className="tracking-form-container">
-        <div className="tracking-form">
-          <div className="form-group">
-            <label htmlFor="trackingNumber">Tracking Number</label>
-            <input
-              type="text"
-              id="trackingNumber"
-              value={trackingNumber}
-              onChange={(e) => {
-                console.log('📝 Tracking number changed:', e.target.value);
-                setTrackingNumber(e.target.value);
-              }}
-              placeholder="Enter tracking number"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="postalCode">Postal Code</label>
-            <input
-              type="text"
-              id="postalCode"
-              value={postalCode}
-              onChange={(e) => {
-                console.log('📝 Postal code changed:', e.target.value);
-                setPostalCode(e.target.value);
-              }}
-              placeholder="Enter postal code"
-            />
-          </div>
+    <div className="tracking-form-container">
+      <div className="tracking-form">
+        <div className="form-group">
+          <label htmlFor="trackingNumber">Enter Tracking Number</label>
+          <input
+            type="text"
+            id="trackingNumber"
+            value={trackingNumber}
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            placeholder="Enter your tracking number"
+            required
+          />
+        </div>
 
+        <div className="form-group">
+          <label htmlFor="postalCode">Postal Code</label>
+          <input
+            type="text"
+            id="postalCode"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            placeholder="Enter postal code"
+            required
+          />
+        </div>
+
+        <div className="button-group">
           <button 
             type="button" 
             className="btn btn-primary track-btn"
@@ -194,7 +190,7 @@ const TrackingForm: React.FC = () => {
           renderContent={renderTrackingContent}
         />
       )}
-    </>
+    </div>
   );
 };
 
