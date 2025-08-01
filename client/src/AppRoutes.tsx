@@ -118,13 +118,9 @@ function AppRoutes() {
               <section className="tracking-section">
                 <div className="tracking-container">
                   <div className="tracking-content-left">
-                  <div className="tracking-card">
-                    <div className="tracking-tab">
-                      <span className="tracking-tab-icon">📦</span> Tracking Package
-                    </div>
-                    <span className="tracking-sub">Looking for a shipment update?</span>
-                    <TrackingForm />
-                  </div>
+                                     <div className="tracking-card">
+                     <TrackingForm />
+                   </div>
                   </div>
                   <div className="tracking-content-right">
                     <div className="company-quote-overlay">

@@ -1,197 +1,68 @@
 import { useState } from 'react';
-import CustomPopup from './CustomPopup';
-import TrackingDisplay from './TrackingDisplay';
+import { useNavigate } from 'react-router-dom';
+import { trackingAPI } from '../services/api';
 
 const TrackingForm: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  console.log('🎯 TrackingForm component rendered');
-
-  const handleTrackClick = () => {
-    console.log('🚀 Track button clicked!');
-    console.log('📦 Tracking number:', trackingNumber);
-    console.log('📮 Postal code:', postalCode);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    if (!trackingNumber || !postalCode) {
-      console.log('❌ Missing fields');
-      alert('Please fill in both tracking number and postal code');
+    if (!trackingNumber) {
+      setError('Please enter a tracking number');
       return;
     }
 
-    console.log('✅ All fields filled, showing modal');
-    setShowTrackingModal(true);
-  };
+    setLoading(true);
+    setError('');
 
-  const handleCloseTrackingModal = () => {
-    console.log('🔒 Closing modal...');
-    setShowTrackingModal(false);
+    try {
+      await trackingAPI.trackPackage(trackingNumber);
+      navigate(`/track/${trackingNumber}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const renderTrackingContent = () => {
-    console.log('🎨 Rendering tracking content for:', trackingNumber);
-    return (
-      <div style={{ minHeight: '400px' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold', 
-            color: '#1f2937',
-            marginBottom: '16px'
-          }}>
-            Tracking Information
-          </h3>
-        </div>
-        <TrackingDisplay trackingNumber={trackingNumber} />
-      </div>
-    );
-  };
-
-  console.log('🔄 Current modal state:', showTrackingModal);
 
   return (
     <div className="tracking-form-container">
-      <div className="tracking-form">
+      <form className="tracking-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="trackingNumber">Enter Tracking Number</label>
+          <label htmlFor="trackingNumber">Tracking Number</label>
           <input
             type="text"
             id="trackingNumber"
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
-            placeholder="Enter your tracking number"
+            placeholder="Enter tracking number"
             required
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="postalCode">Postal Code</label>
-          <input
-            type="text"
-            id="postalCode"
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-            placeholder="Enter postal code"
-            required
-          />
-        </div>
+        {error && <div className="error-message">{error}</div>}
 
-        <div className="button-group">
-          <button 
-            type="button" 
-            className="btn btn-primary track-btn"
-            onClick={handleTrackClick}
-            disabled={!trackingNumber.trim()}
-            style={{
-              opacity: trackingNumber.trim() ? 1 : 0.5,
-              cursor: trackingNumber.trim() ? 'pointer' : 'not-allowed'
-            }}
-          >
-            Track Package
-          </button>
-          
-          {/* Inline-styled track button to bypass CSS issues */}
-          <button 
-            type="button" 
-            onClick={handleTrackClick}
-            disabled={!trackingNumber.trim()}
-            style={{
-              marginTop: '10px',
-              padding: '12px 24px',
-              backgroundColor: trackingNumber.trim() ? '#d97706' : '#9ca3af',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              cursor: trackingNumber.trim() ? 'pointer' : 'not-allowed',
-              fontSize: '16px',
-              fontWeight: '600',
-              width: '100%',
-              maxWidth: '220px',
-              display: 'block',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              boxShadow: trackingNumber.trim() ? '0 4px 15px rgba(217, 119, 6, 0.2)' : 'none',
-              transition: 'all 0.3s ease',
-              opacity: trackingNumber.trim() ? 1 : 0.6
-            }}
-            onMouseOver={(e) => {
-              if (trackingNumber.trim()) {
-                e.currentTarget.style.backgroundColor = '#b45309';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (trackingNumber.trim()) {
-                e.currentTarget.style.backgroundColor = '#d97706';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }
-            }}
-          >
-            Track Package (Inline Styled)
-          </button>
-          
-          {/* Simple test button with inline styles */}
-          <button 
-            type="button" 
-            onClick={() => {
-              console.log('🧪 Simple test button clicked');
-              setShowTrackingModal(true);
-            }}
-            style={{
-              marginTop: '10px',
-              padding: '12px 24px',
-              backgroundColor: '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              width: '100%',
-              maxWidth: '220px',
-              display: 'block',
-              marginLeft: 'auto',
-              marginRight: 'auto'
-            }}
-          >
-            Simple Test Button
-          </button>
-          
-          {/* Test button to verify modal works */}
-          <button 
-            type="button" 
-            onClick={() => {
-              console.log('🧪 Test button clicked');
-              setShowTrackingModal(true);
-            }}
-            style={{
-              marginTop: '10px',
-              padding: '8px 16px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Test Modal
-          </button>
-        </div>
-      </div>
-
-      {/* Tracking Modal */}
-      {showTrackingModal && (
-        <CustomPopup
-          isOpen={showTrackingModal}
-          onClose={handleCloseTrackingModal}
-          title="Track Package"
-          width="800px"
-          renderContent={renderTrackingContent}
-        />
-      )}
+        <button 
+          type="submit" 
+          className="btn btn-primary track-btn"
+          disabled={loading}
+        >
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="loading-spinner" style={{ width: '16px', height: '16px', border: '2px solid transparent', borderTop: '2px solid white', borderRadius: '50%' }}></div>
+              Tracking...
+            </div>
+          ) : (
+            'Track Package'
+          )}
+        </button>
+      </form>
     </div>
   );
 };
 
-export default TrackingForm; 
+export default TrackingForm;
