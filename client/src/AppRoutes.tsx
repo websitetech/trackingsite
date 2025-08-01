@@ -37,6 +37,91 @@ function AppRoutes() {
   const [showNewCustomer, setShowNewCustomer] = useState(false);
   const navigate = useNavigate();
 
+  // Scroll animation functionality
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+
+    // Observe service cards section
+    const serviceCardsSection = document.querySelector('.service-cards-section');
+    const serviceCards = document.querySelectorAll('.service-card-item');
+    const businessForwardSection = document.querySelector('.business-forward-section');
+    const featureItems = document.querySelectorAll('.feature-item');
+    const speItems = document.querySelectorAll('.spe-item');
+    const offerItems = document.querySelectorAll('.offer-item');
+    const statItems = document.querySelectorAll('.stat-item');
+    const specializedItems = document.querySelectorAll('.specialized-item');
+    
+    if (serviceCardsSection) {
+      observer.observe(serviceCardsSection);
+    }
+    
+    if (businessForwardSection) {
+      observer.observe(businessForwardSection);
+    }
+    
+    serviceCards.forEach((card) => {
+      observer.observe(card);
+    });
+    
+    featureItems.forEach((item) => {
+      observer.observe(item);
+    });
+    
+    speItems.forEach((item) => {
+      observer.observe(item);
+    });
+    
+    offerItems.forEach((item) => {
+      observer.observe(item);
+    });
+    
+    statItems.forEach((item) => {
+      observer.observe(item);
+    });
+    
+    specializedItems.forEach((item) => {
+      observer.observe(item);
+    });
+
+    return () => {
+      if (serviceCardsSection) {
+        observer.unobserve(serviceCardsSection);
+      }
+      if (businessForwardSection) {
+        observer.unobserve(businessForwardSection);
+      }
+      serviceCards.forEach((card) => {
+        observer.unobserve(card);
+      });
+      featureItems.forEach((item) => {
+        observer.unobserve(item);
+      });
+      speItems.forEach((item) => {
+        observer.unobserve(item);
+      });
+      offerItems.forEach((item) => {
+        observer.unobserve(item);
+      });
+      statItems.forEach((item) => {
+        observer.unobserve(item);
+      });
+      specializedItems.forEach((item) => {
+        observer.unobserve(item);
+      });
+    };
+  }, []);
+
   useEffect(() => {
     // Check if user is logged in from localStorage
     const token = localStorage.getItem('token');
@@ -381,23 +466,24 @@ function AppRoutes() {
         <Route path="/payment-success" element={user ? <PaymentSuccessPage /> : <div>Please log in to view payment success.</div>} />
         <Route path="/orders" element={user ? <OrderHistoryPage /> : <div>Please log in to view your orders.</div>} />
         <Route path="/faq" element={<FAQPage />} />
-        <Route path="/admin" element={
-          user && user.role === 'admin' ? 
-            <AdminDashboard /> : 
-            <div style={{ 
-              minHeight: '100vh', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              background: '#f3f4f6',
-              color: '#dc2626',
-              fontSize: '1.25rem',
-              textAlign: 'center',
-              padding: '2rem'
-            }}>
-              {user ? 'Access denied. Admin privileges required.' : 'Please log in to access admin dashboard.'}
-            </div>
-        } />
+                 <Route path="/admin" element={
+           user && user.role === 'admin' ? 
+             <AdminDashboard /> : 
+             <div style={{ 
+               minHeight: '100vh', 
+               display: 'flex', 
+               alignItems: 'center', 
+               justifyContent: 'center', 
+               background: '#f3f4f6',
+               color: '#dc2626',
+               fontSize: '1.25rem',
+               textAlign: 'center',
+               padding: '2rem',
+               paddingTop: '8rem'
+             }}>
+               {user ? 'Access denied. Admin privileges required.' : 'Please log in to access admin dashboard.'}
+             </div>
+         } />
       </Routes>
       {/* Enhanced Footer */}
       <footer className="footer-banner">

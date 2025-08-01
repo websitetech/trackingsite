@@ -46,7 +46,15 @@ const OrderHistoryPage: React.FC = () => {
   const [selectedOrderForAction, setSelectedOrderForAction] = useState<PackageData | null>(null);
   const navigate = useNavigate();
 
-
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here
+      console.log('Tracking number copied to clipboard:', text);
+    } catch (err) {
+      console.error('Failed to copy tracking number:', err);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -378,8 +386,36 @@ const OrderHistoryPage: React.FC = () => {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <h4 style={{ color: '#111', fontWeight: 600, marginBottom: '0.5rem' }}>
-                            {getStatusIcon(order.status)} {order.tracking_number}
+                          <h4 style={{ color: '#111', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {getStatusIcon(order.status)} 
+                            <span style={{ fontFamily: 'monospace' }}>{order.tracking_number}</span>
+                            <button
+                              onClick={() => copyToClipboard(order.tracking_number)}
+                              style={{
+                                background: '#1e40af',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.25rem',
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.7rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = '#1d4ed8';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = '#1e40af';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
+                              title="Copy tracking number"
+                            >
+                              📋
+                            </button>
                           </h4>
                           <p style={{ color: '#666', fontSize: '0.9rem' }}>
                             {order.recipient_name} • {order.shipments?.customer || 'Unknown Customer'}

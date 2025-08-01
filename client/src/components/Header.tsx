@@ -111,6 +111,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
             )}
 
 
+
+
             {/* Cart Button */}
             {user && (
               <Link 

@@ -9,6 +9,16 @@ const PaymentSuccessPage: React.FC = () => {
   const fromCart = location.state?.fromCart || false;
   const shipmentCount = location.state?.shipmentCount || 1;
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here
+      console.log('Tracking number copied to clipboard:', text);
+    } catch (err) {
+      console.error('Failed to copy tracking number:', err);
+    }
+  };
+
   const handleGoToUser = () => {
     navigate('/user');
   };
@@ -80,17 +90,46 @@ const PaymentSuccessPage: React.FC = () => {
                   <span style={{ color: '#374151', fontWeight: 500 }}>
                     Shipment {index + 1}:
                   </span>
-                  <span style={{ 
-                    color: '#1e40af', 
-                    fontWeight: 600, 
-                    fontFamily: 'monospace',
-                    fontSize: '1.1rem',
-                    background: '#f3f4f6',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '0.25rem'
-                  }}>
-                    {trackingNumber}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ 
+                      color: '#1e40af', 
+                      fontWeight: 600, 
+                      fontFamily: 'monospace',
+                      fontSize: '1.1rem',
+                      background: '#f3f4f6',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '0.25rem'
+                    }}>
+                      {trackingNumber}
+                    </span>
+                                         <button
+                       onClick={() => copyToClipboard(trackingNumber)}
+                       style={{
+                         background: '#1e40af',
+                         color: 'white',
+                         border: 'none',
+                         borderRadius: '0.25rem',
+                         padding: '0.25rem 0.5rem',
+                         fontSize: '0.8rem',
+                         cursor: 'pointer',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                         transition: 'all 0.2s ease'
+                       }}
+                       onMouseOver={(e) => {
+                         e.currentTarget.style.background = '#1d4ed8';
+                         e.currentTarget.style.transform = 'scale(1.05)';
+                       }}
+                       onMouseOut={(e) => {
+                         e.currentTarget.style.background = '#1e40af';
+                         e.currentTarget.style.transform = 'scale(1)';
+                       }}
+                       title="Copy tracking number"
+                     >
+                       📋
+                     </button>
+                  </div>
                 </div>
               ))}
             </div>

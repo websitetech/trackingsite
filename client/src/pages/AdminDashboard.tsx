@@ -35,6 +35,7 @@ interface Package {
   current_location?: string;
   created_at: string;
   shipments: {
+    id: number;
     shipment_number: string;
     customer: string;
   };
@@ -59,8 +60,8 @@ interface AdminStats {
 
 const AdminDashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get('tab') as 'overview' | 'users' | 'shipments' | 'packages' | 'tracking' || 'overview';
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'shipments' | 'packages' | 'tracking'>(defaultTab);
+  const defaultTab = searchParams.get('tab') as 'overview' | 'users' | 'tracking' || 'overview';
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'tracking'>(defaultTab);
   const [users, setUsers] = useState<User[]>([]);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
@@ -99,16 +100,8 @@ const AdminDashboard: React.FC = () => {
           const usersData = await api.admin.getAllUsers();
           setUsers(usersData);
           break;
-        case 'shipments':
-          const shipmentsData = await api.admin.getAllShipments();
-          setShipments(shipmentsData);
-          break;
-        case 'packages':
-          const packagesData = await api.admin.getAllPackages();
-          setPackages(packagesData);
-          break;
         case 'tracking':
-          // For tracking tab, we'll load packages data as well
+          // For tracking tab, we'll load packages data
           const trackingData = await api.admin.getAllPackages();
           setPackages(trackingData);
           break;
@@ -162,27 +155,43 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleShipmentStatusUpdate = async (shipmentId: number, newStatus: string) => {
-    try {
-      await api.admin.updateShipment(shipmentId, { status: newStatus });
-      setShipments(shipments.map(shipment => 
-        shipment.id === shipmentId 
-          ? { ...shipment, status: newStatus }
-          : shipment
-      ));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update shipment status');
-    }
-  };
+
 
   const handlePackageStatusUpdate = async (packageId: number, newStatus: string) => {
     try {
+      // Update package status
       await api.admin.updatePackage(packageId, { status: newStatus });
+      
+      // Update local package state
       setPackages(packages.map(pkg => 
         pkg.id === packageId 
           ? { ...pkg, status: newStatus }
           : pkg
       ));
+      
+      // Also update related shipment status if it exists
+      const updatedPackage = packages.find(pkg => pkg.id === packageId);
+      if (updatedPackage && updatedPackage.shipments) {
+        try {
+          // Update the related shipment status to match
+          await api.admin.updateShipment(updatedPackage.shipments.id, { status: newStatus });
+          
+          // Update local shipment state if we have shipments loaded
+          setShipments(shipments.map(shipment => 
+            shipment.id === updatedPackage.shipments.id 
+              ? { ...shipment, status: newStatus }
+              : shipment
+          ));
+        } catch (shipmentErr) {
+          console.warn('Failed to update related shipment status:', shipmentErr);
+        }
+      }
+      
+      // Refresh overview stats to reflect changes
+      if (activeTab === 'overview') {
+        const statsData = await api.admin.getStats();
+        setStats(statsData);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update package status');
     }
@@ -196,6 +205,15 @@ const AdminDashboard: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      console.log('Tracking number copied to clipboard:', text);
+    } catch (err) {
+      console.error('Failed to copy tracking number:', err);
+    }
   };
 
 
@@ -277,36 +295,6 @@ const AdminDashboard: React.FC = () => {
             User Management
           </button>
           <button
-            onClick={() => setActiveTab('shipments')}
-            style={{
-              background: activeTab === 'shipments' ? '#b91c1c' : 'white',
-              color: activeTab === 'shipments' ? 'white' : '#b91c1c',
-              border: '2px solid #b91c1c',
-              borderRadius: '0.75rem',
-              padding: '0.75rem 2rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            Shipment Management
-          </button>
-          <button
-            onClick={() => setActiveTab('packages')}
-            style={{
-              background: activeTab === 'packages' ? '#b91c1c' : 'white',
-              color: activeTab === 'packages' ? 'white' : '#b91c1c',
-              border: '2px solid #b91c1c',
-              borderRadius: '0.75rem',
-              padding: '0.75rem 2rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            Package Management
-          </button>
-          <button
             onClick={() => setActiveTab('tracking')}
             style={{
               background: activeTab === 'tracking' ? '#b91c1c' : 'white',
@@ -319,7 +307,7 @@ const AdminDashboard: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            Tracking Management
+            Tracking Package
           </button>
         </div>
 
@@ -501,159 +489,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Shipment Management Tab */}
-        {activeTab === 'shipments' && (
-          <div style={{ background: 'white', borderRadius: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '2rem' }}>
-            <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: '1.5rem' }}>Shipment Management</h2>
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Loading shipments...</div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#fef2f2' }}>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>ID</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Shipment #</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Customer</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>User</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600, minWidth: '180px' }}>Status</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Route</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Created</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {shipments.map(shipment => (
-                      <tr key={shipment.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{shipment.id}</td>
-                        <td style={{ padding: '1rem', color: '#1a1a1a', fontWeight: 500 }}>{shipment.shipment_number}</td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{shipment.customer}</td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{shipment.users.username}</td>
-                        <td style={{ padding: '1rem', minWidth: '180px' }}>
-                          <select
-                            value={shipment.status}
-                            onChange={(e) => handleShipmentStatusUpdate(shipment.id, e.target.value)}
-                            style={{
-                              padding: '0.5rem 0.75rem',
-                              border: '1px solid #d1d5db',
-                              borderRadius: '0.5rem',
-                              background: 'white',
-                              color: '#374151',
-                              fontSize: '0.875rem',
-                              minWidth: '160px',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="in_transit">In Transit</option>
-                            <option value="out_for_delivery">Out for Delivery</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>
-                          {shipment.origin_postal} → {shipment.destination_postal}
-                        </td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{formatDate(shipment.created_at)}</td>
-                        <td style={{ padding: '1rem' }}>
-                          <button
-                            style={{
-                              background: '#b91c1c',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '0.5rem',
-                              padding: '0.5rem 1rem',
-                              fontSize: '0.875rem',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Package Management Tab */}
-        {activeTab === 'packages' && (
-          <div style={{ background: 'white', borderRadius: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '2rem' }}>
-            <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: '1.5rem' }}>Package Management</h2>
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Loading packages...</div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#fef2f2' }}>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>ID</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Tracking #</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Customer</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>User</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600, minWidth: '180px' }}>Status</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Location</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Created</th>
-                      <th style={{ padding: '1rem', textAlign: 'left', color: '#b91c1c', fontWeight: 600 }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {packages.map(pkg => (
-                      <tr key={pkg.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{pkg.id}</td>
-                        <td style={{ padding: '1rem', color: '#1a1a1a', fontWeight: 500 }}>{pkg.tracking_number}</td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{pkg.shipments.customer}</td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{pkg.users.username}</td>
-                        <td style={{ padding: '1rem', minWidth: '180px' }}>
-                          <select
-                            value={pkg.status}
-                            onChange={(e) => handlePackageStatusUpdate(pkg.id, e.target.value)}
-                            style={{
-                              padding: '0.5rem 0.75rem',
-                              border: '1px solid #d1d5db',
-                              borderRadius: '0.5rem',
-                              background: 'white',
-                              color: '#374151',
-                              fontSize: '0.875rem',
-                              minWidth: '160px',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="in_transit">In Transit</option>
-                            <option value="out_for_delivery">Out for Delivery</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{pkg.current_location || 'N/A'}</td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{formatDate(pkg.created_at)}</td>
-                        <td style={{ padding: '1rem' }}>
-                          <button
-                            style={{
-                              background: '#b91c1c',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '0.5rem',
-                              padding: '0.5rem 1rem',
-                              fontSize: '0.875rem',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Edit User Modal */}
         {editingUser && (
@@ -764,10 +600,10 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Tracking Management Tab */}
+        {/* Tracking Package Tab */}
         {activeTab === 'tracking' && (
           <div style={{ background: 'white', borderRadius: 20, boxShadow: '0 8px 32px rgba(0,0,0,0.10)', padding: '2rem' }}>
-            <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: '1.5rem' }}>Tracking Management</h2>
+            <h2 style={{ color: '#b91c1c', fontWeight: 700, marginBottom: '1.5rem' }}>Tracking Package Management</h2>
             {loading ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Loading tracking data...</div>
             ) : (
@@ -787,27 +623,91 @@ const AdminDashboard: React.FC = () => {
                   <tbody>
                     {packages.map(pkg => (
                       <tr key={pkg.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '1rem', color: '#1a1a1a', fontWeight: 500 }}>{pkg.tracking_number}</td>
+                        <td style={{ padding: '1rem', color: '#1a1a1a', fontWeight: 500 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontFamily: 'monospace' }}>{pkg.tracking_number}</span>
+                            <button
+                              onClick={() => copyToClipboard(pkg.tracking_number)}
+                              style={{
+                                background: '#1e40af',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.25rem',
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.7rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = '#1d4ed8';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = '#1e40af';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
+                              title="Copy tracking number"
+                            >
+                              📋
+                            </button>
+                          </div>
+                        </td>
                         <td style={{ padding: '1rem', color: '#374151' }}>{pkg.shipments.customer}</td>
                         <td style={{ padding: '1rem', color: '#374151' }}>{pkg.users.username}</td>
                         <td style={{ padding: '1rem', minWidth: '180px' }}>
-                          <span style={{ 
-                            background: pkg.status === 'delivered' ? '#16a34a' : 
-                                       pkg.status === 'in_transit' ? '#3b82f6' : 
-                                       pkg.status === 'out_for_delivery' ? '#f59e0b' : '#dc2626', 
-                            color: 'white', 
-                            padding: '0.5rem 1rem', 
-                            borderRadius: '0.5rem', 
-                            fontSize: '0.875rem',
-                            display: 'inline-block',
-                            minWidth: '140px',
-                            textAlign: 'center',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {pkg.status.replace('_', ' ').toUpperCase()}
-                          </span>
+                          <select
+                            value={pkg.status}
+                            onChange={(e) => handlePackageStatusUpdate(pkg.id, e.target.value)}
+                            style={{
+                              padding: '0.5rem 0.75rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '0.5rem',
+                              background: 'white',
+                              color: '#374151',
+                              fontSize: '0.875rem',
+                              minWidth: '160px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="in_transit">In Transit</option>
+                            <option value="out_for_delivery">Out for Delivery</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
                         </td>
-                        <td style={{ padding: '1rem', color: '#374151' }}>{pkg.current_location || 'N/A'}</td>
+                        <td style={{ padding: '1rem', color: '#374151' }}>
+                          <input
+                            type="text"
+                            value={pkg.current_location || ''}
+                            onChange={async (e) => {
+                              try {
+                                await api.admin.updatePackage(pkg.id, { current_location: e.target.value });
+                                setPackages(packages.map(p => 
+                                  p.id === pkg.id 
+                                    ? { ...p, current_location: e.target.value }
+                                    : p
+                                ));
+                              } catch (err) {
+                                setError(err instanceof Error ? err.message : 'Failed to update location');
+                              }
+                            }}
+                            placeholder="Enter location"
+                            style={{
+                              padding: '0.5rem',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '0.25rem',
+                              background: 'white',
+                              color: '#374151',
+                              fontSize: '0.875rem',
+                              width: '100%',
+                              maxWidth: '200px'
+                            }}
+                          />
+                        </td>
                         <td style={{ padding: '1rem', color: '#374151' }}>{formatDate(pkg.created_at)}</td>
                         <td style={{ padding: '1rem' }}>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
