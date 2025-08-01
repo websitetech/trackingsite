@@ -5,15 +5,15 @@ async function testAdminLogin() {
   try {
     console.log('🧪 Testing admin login process...\n');
 
-    // Step 1: Get admin user from database
-    const admin = await dbHelpers.getUserByUsername('admin');
+    // Test the new admin user
+    const admin = await dbHelpers.getUserByUsername('adminuser');
     
     if (!admin) {
       console.log('❌ Admin user not found');
       return;
     }
 
-    console.log('✅ Admin user found in database:', {
+    console.log('✅ Admin user found:', {
       id: admin.id,
       username: admin.username,
       email: admin.email,
@@ -21,49 +21,45 @@ async function testAdminLogin() {
       email_verified: admin.email_verified
     });
 
-    // Step 2: Test password verification
-    const password = 'admin123';
+    // Test password verification
+    const password = 'password123';
     const isValidPassword = await bcrypt.compare(password, admin.password);
     
-    console.log('\n🔑 Password verification:', {
+    console.log('\\n🔑 Password verification:', {
       password,
-      isValidPassword
+      isValidPassword,
+      hashedPassword: admin.password.substring(0, 20) + '...'
     });
 
-    if (!isValidPassword) {
-      console.log('❌ Password verification failed');
-      return;
+    if (isValidPassword) {
+      console.log('✅ Password is correct');
+    } else {
+      console.log('❌ Password is incorrect');
     }
 
-    // Step 3: Simulate the login response (what the server should return)
-    const loginResponse = {
-      message: 'Login successful',
-      token: 'mock-token',
-      user: { 
-        id: admin.id, 
-        username: admin.username, 
-        email: admin.email, 
-        role: admin.role 
-      }
-    };
-
-    console.log('\n📤 Login response (what server should return):', loginResponse);
-
-    // Step 4: Check if role is present
-    if (loginResponse.user.role === 'admin') {
-      console.log('✅ Role field is present and correct: admin');
+    if (admin.role === 'admin') {
+      console.log('✅ User has admin role');
     } else {
-      console.log('❌ Role field is missing or incorrect:', loginResponse.user.role);
+      console.log('❌ User does not have admin role');
     }
 
-    // Step 5: Test admin access check
-    const hasAdminAccess = loginResponse.user && loginResponse.user.role === 'admin';
-    console.log('\n🔐 Admin access check:', hasAdminAccess ? 'GRANTED' : 'DENIED');
-
-    if (hasAdminAccess) {
-      console.log('✅ Admin access should work correctly');
+    if (admin.email_verified) {
+      console.log('✅ Email is verified');
     } else {
-      console.log('❌ Admin access will be denied');
+      console.log('❌ Email is not verified');
+    }
+
+    console.log('\\n📋 Login Summary:');
+    console.log('   Username: adminuser');
+    console.log('   Password: password123');
+    console.log('   Role: ' + admin.role);
+    console.log('   Email Verified: ' + admin.email_verified);
+    console.log('   Password Valid: ' + isValidPassword);
+    
+    if (isValidPassword && admin.role === 'admin' && admin.email_verified) {
+      console.log('\\n✅ Admin login should work!');
+    } else {
+      console.log('\\n❌ Admin login will fail - check the issues above');
     }
 
   } catch (error) {

@@ -35,6 +35,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
     try {
       const data = await authAPI.login({ username, password });
       
+      console.log('Login response:', data);
+      console.log('User type selected:', userType);
+      console.log('User role from server:', data.user.role);
+      
       // Check if user type matches the logged-in user's role
       if (userType === 'admin' && data.user.role !== 'admin') {
         setError('Access denied. Admin privileges required.');
