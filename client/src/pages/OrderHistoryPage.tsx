@@ -49,10 +49,8 @@ const OrderHistoryPage: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
-      console.log('Tracking number copied to clipboard:', text);
     } catch (err) {
-      console.error('Failed to copy tracking number:', err);
+      // Handle clipboard error silently
     }
   };
 

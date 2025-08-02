@@ -235,6 +235,38 @@ export const dbHelpers = {
     return { package: packageData, history: historyData };
   },
 
+  async updatePackageLocation(packageId, location, description = null) {
+    // Update package location
+    const { data: packageData, error: packageError } = await supabase
+      .from('packages')
+      .update({ 
+        current_location: location,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', packageId)
+      .select()
+      .single();
+    
+    if (packageError) throw packageError;
+
+    // Add tracking history entry for location update
+    const { data: historyData, error: historyError } = await supabase
+      .from('package_tracking_history')
+      .insert([{
+        package_id: packageId,
+        status: packageData.status, // Keep current status
+        location,
+        description: description || `Location updated to: ${location}`,
+        timestamp: new Date().toISOString()
+      }])
+      .select()
+      .single();
+    
+    if (historyError) throw historyError;
+
+    return { package: packageData, history: historyData };
+  },
+
   async getPackagesByUserId(userId) {
     const { data, error } = await supabase
       .from('packages')
@@ -246,7 +278,6 @@ export const dbHelpers = {
           customer,
           service_type,
           service_type_label,
-          status,
           payment_status,
           created_at
         )
@@ -269,7 +300,6 @@ export const dbHelpers = {
           customer,
           service_type,
           service_type_label,
-          status,
           payment_status,
           created_at
         ),
@@ -299,7 +329,6 @@ export const dbHelpers = {
           customer,
           service_type,
           service_type_label,
-          status,
           payment_status,
           created_at
         ),
@@ -352,7 +381,6 @@ export const dbHelpers = {
       .insert([{
         ...shipmentData,
         shipment_number: 'SHP' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase(),
-        status: 'pending',
         payment_status: 'paid'
       }])
       .select()
@@ -427,7 +455,6 @@ export const dbHelpers = {
           origin_postal: shipmentData.origin_zip || shipmentData.origin_postal || '', // Use correct field name
           destination_postal: shipmentData.destination_zip || shipmentData.destination_postal || '', // Use correct field name
           weight: shipmentData.weight,
-          status: 'pending',
           payment_status: 'paid'
         }])
         .select()
@@ -494,21 +521,6 @@ export const dbHelpers = {
     return data;
   },
 
-  async updateShipmentStatus(shipmentId, status) {
-    const { data, error } = await supabase
-      .from('shipments')
-      .update({ 
-        status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', shipmentId)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
   // User operations
   async getUserById(userId) {
     const { data, error } = await supabase
@@ -518,6 +530,187 @@ export const dbHelpers = {
       .single();
     
     if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  // Admin operations
+  async getAllUsers() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getAllPackages() {
+    const { data, error } = await supabase
+      .from('packages')
+      .select(`
+        *,
+        shipments (
+          id,
+          shipment_number,
+          customer
+        ),
+        users (
+          username,
+          email
+        )
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getAdminStats() {
+    try {
+      // Get counts
+      const { count: usersCount } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: packagesCount } = await supabase
+        .from('packages')
+        .select('*', { count: 'exact', head: true });
+
+      // Get payments count from invoices table
+      const { count: paymentsCount } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true });
+
+      // Get recent packages
+      const { data: recentPackages } = await supabase
+        .from('packages')
+        .select(`
+          *,
+          shipments (
+            id,
+            shipment_number,
+            customer
+          ),
+          users (
+            username,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      return {
+        counts: {
+          users: usersCount || 0,
+          packages: packagesCount || 0,
+          payments: paymentsCount || 0
+        },
+        recentActivity: {
+          packages: recentPackages || []
+        }
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Invoice operations
+  async createInvoice(invoiceData) {
+    const { data, error } = await supabase
+      .from('invoices')
+      .insert([{
+        invoice_number: invoiceData.invoice_number,
+        shipment_id: invoiceData.shipment_id,
+        user_id: invoiceData.user_id,
+        amount: invoiceData.amount,
+        currency: invoiceData.currency || 'USD',
+        status: invoiceData.status || 'paid',
+        email_sent: invoiceData.email_sent || false,
+        email_sent_at: invoiceData.email_sent ? new Date().toISOString() : null,
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getInvoicesByUserId(userId) {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select(`
+        *,
+        shipments (
+          id,
+          shipment_number,
+          recipient_name,
+          service_type,
+          payment_status
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async getInvoiceByNumber(invoiceNumber) {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select(`
+        *,
+        shipments (
+          id,
+          shipment_number,
+          recipient_name,
+          service_type,
+          payment_status
+        ),
+        users (
+          id,
+          username,
+          email,
+          phone
+        )
+      `)
+      .eq('invoice_number', invoiceNumber)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async updateInvoiceEmailStatus(invoiceNumber, emailSent = true) {
+    const { data, error } = await supabase
+      .from('invoices')
+      .update({ 
+        email_sent: emailSent,
+        email_sent_at: emailSent ? new Date().toISOString() : null
+      })
+      .eq('invoice_number', invoiceNumber)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async createStatusUpdateEmailLog(packageId, userId, status, emailSent = true) {
+    const { data, error } = await supabase
+      .from('status_update_emails')
+      .insert([{
+        package_id: packageId,
+        user_id: userId,
+        status,
+        email_sent: emailSent,
+        sent_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
     return data;
   }
 };

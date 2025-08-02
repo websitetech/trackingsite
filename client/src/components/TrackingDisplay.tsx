@@ -253,6 +253,18 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {trackingHistory.map((entry, index) => {
+                  // Determine status color based on status
+                  const getStatusColor = (status: string) => {
+                    switch (status) {
+                      case 'delivered': return '#16a34a';
+                      case 'in_transit': return '#3b82f6';
+                      case 'out_for_delivery': return '#f59e0b';
+                      case 'cancelled': return '#dc2626';
+                      case 'pending': return '#6b7280';
+                      default: return '#dc2626';
+                    }
+                  };
+                  
                   return (
                     <div key={entry.id} style={{
                       display: 'flex',
@@ -263,7 +275,7 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
                         <div style={{
                           width: '12px',
                           height: '12px',
-                          backgroundColor: '#dc2626',
+                          backgroundColor: getStatusColor(entry.status),
                           borderRadius: '50%'
                         }}></div>
                         {index < trackingHistory.length - 1 && (
@@ -293,7 +305,10 @@ const TrackingDisplay: React.FC<TrackingDisplayProps> = ({ trackingNumber }) => 
                               <p style={{ fontSize: '14px', color: '#6b7280' }}>{entry.location}</p>
                             )}
                             {entry.description && (
-                              <p style={{ fontSize: '14px', color: '#6b7280' }}>{entry.description}</p>
+                              <p style={{ 
+                                fontSize: '14px', 
+                                color: '#6b7280'
+                              }}>{entry.description}</p>
                             )}
                           </div>
                           <p style={{

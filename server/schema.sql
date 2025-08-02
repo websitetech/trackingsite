@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS shipments (
   origin_postal TEXT,
   destination_postal TEXT,
   weight DECIMAL(10,2),
-  status TEXT DEFAULT 'pending',
   payment_status TEXT DEFAULT 'pending',
   payment_method TEXT,
   payment_transaction_id TEXT,
@@ -305,3 +304,39 @@ INSERT INTO users (
 SELECT id, username, email, role, email_verified 
 FROM users 
 WHERE username = 'admin' OR email = 'admin@noblespeedytrac.com'; 
+
+-- Create invoices table
+CREATE TABLE IF NOT EXISTS invoices (
+  id SERIAL PRIMARY KEY,
+  invoice_number VARCHAR(50) UNIQUE NOT NULL,
+  shipment_id INTEGER REFERENCES shipments(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'USD',
+  status VARCHAR(20) DEFAULT 'paid',
+  email_sent BOOLEAN DEFAULT FALSE,
+  email_sent_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create index on invoice_number for fast lookups
+CREATE INDEX IF NOT EXISTS idx_invoices_invoice_number ON invoices(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_user_id ON invoices(user_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_shipment_id ON invoices(shipment_id);
+
+-- Create status_update_emails table for tracking status update notifications
+CREATE TABLE IF NOT EXISTS status_update_emails (
+  id SERIAL PRIMARY KEY,
+  package_id INTEGER REFERENCES packages(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(50) NOT NULL,
+  email_sent BOOLEAN DEFAULT FALSE,
+  sent_at TIMESTAMP DEFAULT NOW(),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create indexes for status_update_emails table
+CREATE INDEX IF NOT EXISTS idx_status_update_emails_package_id ON status_update_emails(package_id);
+CREATE INDEX IF NOT EXISTS idx_status_update_emails_user_id ON status_update_emails(user_id);
+CREATE INDEX IF NOT EXISTS idx_status_update_emails_sent_at ON status_update_emails(sent_at); 

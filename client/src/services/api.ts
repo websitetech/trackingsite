@@ -1,5 +1,5 @@
 // API Service for handling all backend communication
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from '../config/api';
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
@@ -323,23 +323,6 @@ export const adminAPI = {
     return authenticatedRequest(`/admin/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(userData),
-    });
-  },
-
-  // Get all shipments
-  getAllShipments: async () => {
-    return authenticatedRequest('/admin/shipments');
-  },
-
-  // Update shipment
-  updateShipment: async (shipmentId: number, shipmentData: {
-    status?: string;
-    driver?: string;
-    notes?: string;
-  }) => {
-    return authenticatedRequest(`/admin/shipments/${shipmentId}`, {
-      method: 'PUT',
-      body: JSON.stringify(shipmentData),
     });
   },
 

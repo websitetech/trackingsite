@@ -23,6 +23,99 @@ const PaymentPage: React.FC = () => {
     navigate('/user');
   };
 
+  // Show loading state while cart is being loaded
+  if (fromCart && cartState.loading) {
+    return (
+      <div className="shipment-bg">
+        <div className="shipment-header">
+          <div className="shipment-title-row">
+            <span className="shipment-title">Cart Payment</span>
+            <span className="shipment-title-icon">💳</span>
+          </div>
+          <div className="shipment-subtitle">Loading cart data...</div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+            <div style={{ color: '#666' }}>Loading your cart...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if cart failed to load
+  if (fromCart && cartState.error) {
+    return (
+      <div className="shipment-bg">
+        <div className="shipment-header">
+          <div className="shipment-title-row">
+            <span className="shipment-title">Cart Payment</span>
+            <span className="shipment-title-icon">💳</span>
+          </div>
+          <div className="shipment-subtitle">Error loading cart</div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>❌</div>
+            <div style={{ color: '#dc2626', marginBottom: '1rem' }}>Failed to load cart: {cartState.error}</div>
+            <button
+              onClick={handleBackToCart}
+              style={{
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer'
+              }}
+            >
+              Back to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty cart state if no items
+  if (fromCart && cartState.items.length === 0) {
+    return (
+      <div className="shipment-bg">
+        <div className="shipment-header">
+          <div className="shipment-title-row">
+            <span className="shipment-title">Cart Payment</span>
+            <span className="shipment-title-icon">💳</span>
+          </div>
+          <div className="shipment-subtitle">Your cart is empty</div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🛒</div>
+            <div style={{ color: '#666', marginBottom: '1rem' }}>Your cart is empty. Add some items to continue.</div>
+            <button
+              onClick={handleBackToUser}
+              style={{
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer'
+              }}
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="shipment-bg">
       <div className="shipment-header">

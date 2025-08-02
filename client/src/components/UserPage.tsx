@@ -147,40 +147,17 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
   };
 
   const handleTrackClick = () => {
-    console.log('🚀 Track button clicked!');
-    console.log('📦 Tracking number:', trackingNumber);
-    
-    if (!trackingNumber.trim()) {
-      alert('Please enter a tracking number');
-      return;
+    if (trackingNumber.trim()) {
+      setShowTrackingModal(true);
     }
-
-    console.log('✅ Showing tracking modal');
-    setShowTrackingModal(true);
   };
 
   const handleCloseTrackingModal = () => {
-    console.log('🔒 Closing tracking modal');
     setShowTrackingModal(false);
   };
 
   const renderTrackingContent = () => {
-    console.log('🎨 Rendering tracking content for:', trackingNumber);
-    return (
-      <div style={{ minHeight: '400px' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            fontWeight: 'bold', 
-            color: '#1f2937',
-            marginBottom: '16px'
-          }}>
-            Tracking Information
-          </h3>
-        </div>
-        <TrackingDisplay trackingNumber={trackingNumber} />
-      </div>
-    );
+    return <TrackingDisplay trackingNumber={trackingNumber} />;
   };
 
   if (!user) return null;
@@ -311,7 +288,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
                 <button
                   onClick={() => window.location.href = '/admin?tab=users'}
                   style={{
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '0.75rem',
@@ -330,30 +307,6 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
                 >
                   <span style={{ fontSize: '2rem' }}>👥</span>
                   <span>User Management</span>
-                </button>
-                
-                <button
-                  onClick={() => window.location.href = '/admin?tab=shipments'}
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.75rem',
-                    padding: '1rem',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
-                  <span style={{ fontSize: '2rem' }}>📦</span>
-                  <span>Shipment Management</span>
                 </button>
                 
                 <button
@@ -461,7 +414,6 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
                   placeholder="Enter Tracking Number (e.g., NST1234567)" 
                   value={trackingNumber}
                   onChange={(e) => {
-                    console.log('📝 Tracking number changed:', e.target.value);
                     setTrackingNumber(e.target.value);
                   }}
                   style={{ 

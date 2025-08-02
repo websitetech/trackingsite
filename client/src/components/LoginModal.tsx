@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -14,12 +15,13 @@ interface LoginModalProps {
   onSwitchToRegister: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToRegister }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSwitchToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<'client' | 'admin'>('client');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,24 +37,27 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToR
     try {
       const data = await authAPI.login({ username, password });
       
-      console.log('Login response:', data);
-      console.log('User type selected:', userType);
-      console.log('User role from server:', data.user.role);
-      
-      // Check if user type matches the logged-in user's role
-      if (userType === 'admin' && data.user.role !== 'admin') {
-        setError('Access denied. Admin privileges required.');
-        setLoading(false);
-        return;
+      if (data.user && data.user.role) {
+        // Check if the selected user type matches the role from server
+        if (userType && data.user.role !== userType) {
+          setError(`Selected user type (${userType}) does not match server role (${data.user.role}). Please select the correct user type.`);
+          return;
+        }
+        
+        // Store user data and token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Close modal and redirect based on user type
+        onClose();
+        if (data.user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/user');
+        }
+      } else {
+        setError('Invalid response from server');
       }
-      
-      if (userType === 'client' && data.user.role === 'admin') {
-        setError('Please select "Admin" user type for admin login.');
-        setLoading(false);
-        return;
-      }
-      
-      onSuccess(data.user, data.token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

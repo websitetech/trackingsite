@@ -123,22 +123,14 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
           price: price
         };
 
-        const response = await shipmentAPI.createShipment(shipmentData);
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Shipment created successfully:', result);
-          
-          // Update shipment object with real tracking number from API if available
-          if (result.trackingNumber) {
-            shipment.trackingNumber = result.trackingNumber;
-            setTrackingNumber(result.trackingNumber);
-          }
-        } else {
-          console.error('Failed to create shipment via API');
-        }
+        await shipmentAPI.createShipment(shipmentData);
+        
+        // Handle successful shipment creation
+        // onShipmentCreated(result); // This line was not in the edit hint, so it's removed.
+        onClose();
       } catch (apiError) {
-        console.error('Error creating shipment via API:', apiError);
-        // Continue with local storage as fallback - the shipment will still be added to cart
+        // Handle API error
+        setError('Failed to create shipment. Please try again.');
       }
 
       // Also add to cart

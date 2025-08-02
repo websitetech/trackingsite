@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { shipmentAPI, paymentAPI } from '../services/api';
+import { environment } from '../config/environment';
 
-const stripePromise = loadStripe('pk_test_51RmVWcI6ptZDqevNhSL1cOkv17IoYm5on5h04IjeWMYUAHk7HPf3TOjEJ2iHmPXO8T03xhvyn8VUBl2A8Tc8Etyt008ngbrspU');
+// Load Stripe with environment variable
+const stripePromise = loadStripe(environment.stripePublishableKey);
 
 function StripePaymentElementForm({ 
   estimatedValue = 293, 
   fromCart = false, 
-  singleShipmentData = null
+  singleShipmentData = null,
+  onPaymentComplete
 }: any) {
   const stripe = useStripe();
   const elements = useElements();
@@ -23,16 +26,11 @@ function StripePaymentElementForm({
   const createShipments = async () => {
     if (!fromCart || cartState.items.length === 0) return;
 
-    console.log('🔄 Starting bulk shipment creation...');
-    console.log('📦 Cart items count:', cartState.items.length);
-
     try {
       // Get user ID from localStorage
       const userData = localStorage.getItem('user');
       const user = userData ? JSON.parse(userData) : null;
       const userId = user?.id;
-
-      console.log('👤 User ID:', userId);
 
       if (!userId) {
         setError('User not authenticated');
@@ -54,23 +52,20 @@ function StripePaymentElementForm({
         price: item.price
       }));
 
-      console.log('📋 Shipments data prepared:', shipmentsData);
-
       // Create all shipments in bulk using the new API
       const response = await shipmentAPI.createBulkShipments(shipmentsData);
-      
-      console.log('✅ Shipments created:', response);
       
       // Extract shipments array from response
       const createdShipments = response.shipments || response;
       
       // Clear cart after successful creation
-      console.log('🗑️ Clearing cart...');
       await clearCart();
-      console.log('✅ Cart cleared');
       
-      // Navigate to success page with tracking numbers
-      console.log('🎯 Navigating to success page with tracking numbers...');
+      // Call onPaymentComplete callback to prevent further payment intent creation
+      if (onPaymentComplete) {
+        onPaymentComplete();
+      }
+      
       navigate('/payment-success', { 
         state: { 
           fromCart: true, 
@@ -81,7 +76,6 @@ function StripePaymentElementForm({
         } 
       });
     } catch (err: any) {
-      console.error('❌ Error creating shipments:', err);
       setError(err.message || 'Failed to create shipments');
     }
   };
@@ -109,6 +103,11 @@ function StripePaymentElementForm({
       // Create single shipment using the API
       const shipmentResult = await shipmentAPI.createShipment(shipmentDataWithUserId);
       
+      // Call onPaymentComplete callback to prevent further payment intent creation
+      if (onPaymentComplete) {
+        onPaymentComplete();
+      }
+      
       // Navigate to success page with shipment details
       navigate('/payment-success', { 
         state: { 
@@ -128,17 +127,15 @@ function StripePaymentElementForm({
 
   const handlePay = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    
+    if (loading) return;
+
     if (!stripe || !elements) {
       setLoading(false);
       return;
     }
 
-    console.log('🚀 Starting payment process...');
-    console.log('📦 Cart items:', cartState.items);
-    console.log('💰 Amount:', estimatedValue);
+    setLoading(true);
+    setError('');
 
     try {
       const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
@@ -150,30 +147,34 @@ function StripePaymentElementForm({
       });
 
       if (confirmError) {
-        console.error('❌ Payment error:', confirmError);
         setError(confirmError.message || 'Payment failed');
         setLoading(false);
         return;
       }
 
-      console.log('✅ Payment intent:', paymentIntent);
-
       // Payment was successful
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        console.log('🎉 Payment succeeded! Creating shipments...');
         setSuccess(true);
+        
+        // Call onPaymentComplete callback to prevent further payment intent creation
+        if (onPaymentComplete) {
+          onPaymentComplete();
+        }
         
         // If payment is successful and it's from cart, create shipments
         if (fromCart) {
-          console.log('📦 Creating shipments from cart...');
           await createShipments();
         } else if (singleShipmentData) {
-          console.log('📦 Creating single shipment...');
           // For single shipment, create the shipment
           await createSingleShipment();
         } else {
-          console.log('📦 No shipment data, navigating to success...');
           // For single shipment without data, navigate to success page
+          
+          // Call onPaymentComplete callback to prevent further payment intent creation
+          if (onPaymentComplete) {
+            onPaymentComplete();
+          }
+          
           navigate('/payment-success', { 
             state: { 
               fromCart: false, 
@@ -183,11 +184,9 @@ function StripePaymentElementForm({
           });
         }
       } else {
-        console.error('❌ Payment not successful:', paymentIntent?.status);
         setError('Payment was not successful');
       }
     } catch (err: any) {
-      console.error('❌ Payment exception:', err);
       setError(err.message || 'Payment failed');
     }
     
@@ -268,26 +267,45 @@ export default function PaymentMethod({ estimatedValue = 293, fromCart = false, 
   const [clientSecret, setClientSecret] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const isCreatingPaymentIntent = useRef(false);
 
   useEffect(() => {
     async function fetchClientSecret() {
+      // Don't create payment intent if payment is already completed
+      if (paymentCompleted) {
+        return;
+      }
+
+      // Prevent duplicate API calls
+      if (isCreatingPaymentIntent.current) {
+        return;
+      }
+
+      isCreatingPaymentIntent.current = true;
       setLoading(true);
       setError('');
+      
       try {
-        console.log('🔍 Fetching client secret for amount:', estimatedValue);
         const data = await paymentAPI.createPaymentIntent(estimatedValue, 'cad');
-        console.log('✅ Client secret received:', data.clientSecret ? 'Success' : 'Failed');
         setClientSecret(data.clientSecret);
       } catch (err: any) {
-        console.error('❌ Error fetching client secret:', err);
         setError(err.message || 'Failed to load payment form');
       } finally {
         setLoading(false);
+        isCreatingPaymentIntent.current = false;
       }
     }
 
     fetchClientSecret();
-  }, [estimatedValue]);
+  }, [estimatedValue, paymentCompleted]);
+
+  // Set payment completed when component unmounts or when navigating away
+  useEffect(() => {
+    return () => {
+      setPaymentCompleted(true);
+    };
+  }, []);
 
   if (loading) return <div className="text-center py-8">Loading payment form...</div>;
   if (error) return <div className="error-message mt-2">{error}</div>;
@@ -299,6 +317,7 @@ export default function PaymentMethod({ estimatedValue = 293, fromCart = false, 
         estimatedValue={estimatedValue} 
         fromCart={fromCart} 
         singleShipmentData={singleShipmentData}
+        onPaymentComplete={() => setPaymentCompleted(true)}
       />
     </Elements>
   );

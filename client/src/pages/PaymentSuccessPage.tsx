@@ -12,10 +12,8 @@ const PaymentSuccessPage: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
-      console.log('Tracking number copied to clipboard:', text);
     } catch (err) {
-      console.error('Failed to copy tracking number:', err);
+      // Handle clipboard error silently
     }
   };
 
@@ -162,6 +160,27 @@ const PaymentSuccessPage: React.FC = () => {
             <li>You can track your shipments in your dashboard</li>
             <li>Delivery updates will be sent to your contact number</li>
           </ul>
+        </div>
+
+        <div style={{ 
+          background: '#fef3c7', 
+          border: '1px solid #f59e0b', 
+          borderRadius: '0.75rem', 
+          padding: '1rem', 
+          marginBottom: '2rem',
+          textAlign: 'left'
+        }}>
+          <h3 style={{ color: '#92400e', fontWeight: 600, marginBottom: '0.5rem' }}>
+            📧 Email Confirmation
+          </h3>
+          <p style={{ color: '#92400e', fontSize: '0.9rem', margin: 0 }}>
+            Your order invoice has been automatically generated and sent to your registered email address. 
+            The email includes your tracking numbers, shipment details, and a link to track your packages at{' '}
+            <a href="https://www.noblespeedytrac.com/" target="_blank" rel="noopener noreferrer" 
+               style={{ color: '#dc2626', textDecoration: 'underline' }}>
+              noblespeedytrac.com
+            </a>
+          </p>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
