@@ -1534,7 +1534,7 @@ app.get('/api/admin/packages', authenticateToken, async (req, res) => {
           payment_status,
           created_at
         ),
-        package_tracking_history (
+        package_tracking_history!package_tracking_history_package_id_fkey (
           id,
           status,
           location,
@@ -1585,7 +1585,7 @@ app.get('/api/admin/packages/status/:status', authenticateToken, async (req, res
           payment_status,
           created_at
         ),
-        package_tracking_history (
+        package_tracking_history!package_tracking_history_package_id_fkey (
           id,
           status,
           location,
