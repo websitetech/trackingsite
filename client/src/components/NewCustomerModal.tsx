@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface NewCustomerModalProps {
   onClose: () => void;
@@ -63,7 +64,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setError('');
     const username = (formData.firstName + formData.lastName).replace(/\s+/g, '').toLowerCase();
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/register', {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +95,7 @@ const NewCustomerModal: React.FC<NewCustomerModalProps> = ({ onClose }) => {
     setLoading(true);
     setVerificationError('');
     try {
-      const response = await fetch('https://trackingsite.onrender.com/api/verify-email', {
+      const response = await fetch(`${API_BASE_URL}/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: registeredEmail, code: verificationCode })

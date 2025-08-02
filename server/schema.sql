@@ -184,27 +184,33 @@ ALTER TABLE shipping_estimates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customer_tariffs ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for users table
+DROP POLICY IF EXISTS "Allow all operations on users" ON users;
 CREATE POLICY "Allow all operations on users" ON users
   FOR ALL USING (true) WITH CHECK (true);
 
 -- Create RLS policies for cart table
+DROP POLICY IF EXISTS "Users can manage their own cart" ON cart;
 CREATE POLICY "Users can manage their own cart" ON cart
   FOR ALL USING (user_id = current_setting('app.current_user_id', true)::bigint)
   WITH CHECK (user_id = current_setting('app.current_user_id', true)::bigint);
 
 -- Create RLS policies for shipments table
+DROP POLICY IF EXISTS "Users can manage their own shipments" ON shipments;
 CREATE POLICY "Users can manage their own shipments" ON shipments
   FOR ALL USING (user_id = current_setting('app.current_user_id', true)::bigint)
   WITH CHECK (user_id = current_setting('app.current_user_id', true)::bigint);
 
 -- Create RLS policies for packages table
+DROP POLICY IF EXISTS "Users can view their own packages" ON packages;
 CREATE POLICY "Users can view their own packages" ON packages
   FOR SELECT USING (user_id = current_setting('app.current_user_id', true)::bigint);
 
+DROP POLICY IF EXISTS "Admins can manage all packages" ON packages;
 CREATE POLICY "Admins can manage all packages" ON packages
   FOR ALL USING (true) WITH CHECK (true);
 
 -- Create RLS policies for package_tracking_history table
+DROP POLICY IF EXISTS "Users can view tracking history for their packages" ON package_tracking_history;
 CREATE POLICY "Users can view tracking history for their packages" ON package_tracking_history
   FOR SELECT USING (
     EXISTS (
@@ -214,24 +220,30 @@ CREATE POLICY "Users can view tracking history for their packages" ON package_tr
     )
   );
 
+DROP POLICY IF EXISTS "Admins can manage all tracking history" ON package_tracking_history;
 CREATE POLICY "Admins can manage all tracking history" ON package_tracking_history
   FOR ALL USING (true) WITH CHECK (true);
 
 -- Create RLS policies for payment_transactions table
+DROP POLICY IF EXISTS "Users can view their own payment transactions" ON payment_transactions;
 CREATE POLICY "Users can view their own payment transactions" ON payment_transactions
   FOR SELECT USING (user_id = current_setting('app.current_user_id', true)::bigint);
 
+DROP POLICY IF EXISTS "Admins can manage all payment transactions" ON payment_transactions;
 CREATE POLICY "Admins can manage all payment transactions" ON payment_transactions
   FOR ALL USING (true) WITH CHECK (true);
 
 -- Create RLS policies for shipping_estimates table
+DROP POLICY IF EXISTS "Allow all operations on shipping_estimates" ON shipping_estimates;
 CREATE POLICY "Allow all operations on shipping_estimates" ON shipping_estimates
   FOR ALL USING (true) WITH CHECK (true);
 
 -- Create RLS policies for customer_tariffs table
+DROP POLICY IF EXISTS "Allow read access to customer_tariffs" ON customer_tariffs;
 CREATE POLICY "Allow read access to customer_tariffs" ON customer_tariffs
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage customer_tariffs" ON customer_tariffs;
 CREATE POLICY "Admins can manage customer_tariffs" ON customer_tariffs
   FOR ALL USING (true) WITH CHECK (true);
 
@@ -245,21 +257,27 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers to automatically update updated_at
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_cart_updated_at ON cart;
 CREATE TRIGGER update_cart_updated_at BEFORE UPDATE ON cart
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_shipments_updated_at ON shipments;
 CREATE TRIGGER update_shipments_updated_at BEFORE UPDATE ON shipments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_packages_updated_at ON packages;
 CREATE TRIGGER update_packages_updated_at BEFORE UPDATE ON packages
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_payment_transactions_updated_at ON payment_transactions;
 CREATE TRIGGER update_payment_transactions_updated_at BEFORE UPDATE ON payment_transactions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_customer_tariffs_updated_at ON customer_tariffs;
 CREATE TRIGGER update_customer_tariffs_updated_at BEFORE UPDATE ON customer_tariffs
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -339,4 +357,26 @@ CREATE TABLE IF NOT EXISTS status_update_emails (
 -- Create indexes for status_update_emails table
 CREATE INDEX IF NOT EXISTS idx_status_update_emails_package_id ON status_update_emails(package_id);
 CREATE INDEX IF NOT EXISTS idx_status_update_emails_user_id ON status_update_emails(user_id);
-CREATE INDEX IF NOT EXISTS idx_status_update_emails_sent_at ON status_update_emails(sent_at); 
+CREATE INDEX IF NOT EXISTS idx_status_update_emails_sent_at ON status_update_emails(sent_at);
+
+-- Enable Row Level Security for new tables
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE status_update_emails ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for invoices table
+DROP POLICY IF EXISTS "Users can view their own invoices" ON invoices;
+CREATE POLICY "Users can view their own invoices" ON invoices
+  FOR SELECT USING (user_id = current_setting('app.current_user_id', true)::bigint);
+
+DROP POLICY IF EXISTS "Admins can manage all invoices" ON invoices;
+CREATE POLICY "Admins can manage all invoices" ON invoices
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Create RLS policies for status_update_emails table
+DROP POLICY IF EXISTS "Users can view their own status update emails" ON status_update_emails;
+CREATE POLICY "Users can view their own status update emails" ON status_update_emails
+  FOR SELECT USING (user_id = current_setting('app.current_user_id', true)::bigint);
+
+DROP POLICY IF EXISTS "Admins can manage all status update emails" ON status_update_emails;
+CREATE POLICY "Admins can manage all status update emails" ON status_update_emails
+  FOR ALL USING (true) WITH CHECK (true); 
