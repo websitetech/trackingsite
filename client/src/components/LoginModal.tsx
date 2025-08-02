@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { authAPI } from '../services/api';
-import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -15,13 +14,12 @@ interface LoginModalProps {
   onSwitchToRegister: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSwitchToRegister }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess, onSwitchToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<'client' | 'admin'>('client');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +37,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSwitchToRegister }) 
       
       if (data.user && data.user.role) {
         // Check if the selected user type matches the role from server
-        if (userType && data.user.role !== userType) {
+        const isClientRole = data.user.role === 'client' || data.user.role === 'user';
+        const isAdminRole = data.user.role === 'admin';
+        
+        if (userType === 'client' && !isClientRole) {
+          setError(`Selected user type (${userType}) does not match server role (${data.user.role}). Please select the correct user type.`);
+          return;
+        }
+        
+        if (userType === 'admin' && !isAdminRole) {
           setError(`Selected user type (${userType}) does not match server role (${data.user.role}). Please select the correct user type.`);
           return;
         }
@@ -48,13 +54,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSwitchToRegister }) 
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
-        // Close modal and redirect based on user type
-        onClose();
-        if (data.user.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/user');
-        }
+        // Call the onSuccess callback
+        onSuccess(data.user, data.token);
       } else {
         setError('Invalid response from server');
       }

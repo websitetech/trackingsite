@@ -156,7 +156,14 @@ function AppRoutes() {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     setShowLogin(false);
-    navigate('/user');
+    
+    // Navigate based on user role
+    if (userData.role === 'admin') {
+      navigate('/admin');
+    } else {
+      // For regular users, redirect to user dashboard
+      navigate('/user');
+    }
   };
 
   return (
