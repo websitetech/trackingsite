@@ -1,5 +1,5 @@
 // Render-specific setup for Puppeteer
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 console.log('Setting up Puppeteer for Render deployment...');
 
