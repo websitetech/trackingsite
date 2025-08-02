@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onRegister, onLogout }) 
       <div className="header-top-bar">
         <div className="header-top-content">
           <div className="contact-info">
-            <span className="address">24 Savarin Street, Scarborough, Ontario, M1J1Z8, Canada</span>
+            <span className="address">1570 Midland Ave, Scarborough, Ontario, M1P 3C2, Canada</span>
           </div>
           <div className="contact-email">
             <span>Info@noblespeedytrac.com</span>

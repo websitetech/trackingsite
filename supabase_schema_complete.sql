@@ -342,7 +342,7 @@ CREATE TRIGGER update_customer_tariffs_updated_at BEFORE UPDATE ON customer_tari
 CREATE OR REPLACE FUNCTION generate_tracking_number()
 RETURNS TEXT AS $$
 BEGIN
-  RETURN 'TRK' || to_char(now(), 'YYYYMMDD') || lpad(floor(random() * 10000)::text, 4, '0') || upper(substring(md5(random()::text) from 1 for 4));
+  RETURN 'NST' || lpad(floor(random() * 10000000)::text, 7, '0');
 END;
 $$ LANGUAGE plpgsql;
 

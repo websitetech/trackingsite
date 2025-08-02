@@ -41,7 +41,7 @@ A comprehensive logistics and package tracking web application built with modern
 ### 📦 Package Tracking System
 - **Real-Time Tracking**: Track packages using unique tracking numbers
   - Public tracking without login requirement
-  - Unique tracking number generation (TRK + timestamp + random)
+  - Unique tracking number generation (NST + 7 digits)
   - Real-time status updates
   - Location-based tracking information
 

@@ -82,7 +82,7 @@ const ShipModal: React.FC<ShipModalProps> = ({ onClose, user }) => {
                               serviceType === 'express' ? 'Express (2-3 days)' : 'Overnight (1 day)';
 
       // Generate tracking number
-      const trackingNumber = 'TRK' + Date.now().toString().slice(-9);
+      const trackingNumber = 'NST' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
       
       // Create shipment object
       const shipment = {

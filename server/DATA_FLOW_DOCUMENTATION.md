@@ -84,8 +84,8 @@ packages (1) → (many) package_tracking_history
 #### **Shipment Numbers**: `SHP` + timestamp + random string
 - Example: `SHP12345678ABC1`
 
-#### **Tracking Numbers**: `TRK` + timestamp + random string  
-- Example: `TRK12345678XYZ9`
+#### **Tracking Numbers**: `NST` + 7 digits
+- Example: `NST1234567`
 
 ### 5. Initial Tracking Status
 
@@ -129,7 +129,7 @@ const trackingData = {
   "message": "Shipment and package created successfully",
   "shipment_number": "SHP12345678ABC1",
   "shipment_id": 123,
-  "tracking_number": "TRK12345678XYZ9",
+  "tracking_number": "NST1234567",
   "package_id": 456
 }
 ```
@@ -137,7 +137,7 @@ const trackingData = {
 ### Tracking Response
 ```json
 {
-  "tracking_number": "TRK12345678XYZ9",
+  "tracking_number": "NST1234567",
   "status": "pending",
   "location": "Origin",
   "estimated_delivery": "2024-01-27T10:00:00.000Z",
@@ -146,7 +146,7 @@ const trackingData = {
       "date": "2024-01-24T10:00:00.000Z",
       "status": "Shipment Created",
       "location": "Origin",
-      "description": "Shipment SHP12345678ABC1 created and package TRK12345678XYZ9 assigned"
+      "description": "Shipment SHP12345678ABC1 created and package NST1234567 assigned"
     }
   ]
 }
@@ -231,7 +231,7 @@ curl -X POST http://localhost:5000/api/ship \
 curl -X POST http://localhost:5000/api/track \
   -H "Content-Type: application/json" \
   -d '{
-    "tracking_number": "TRK12345678XYZ9",
+    "tracking_number": "NST1234567",
     "zip_code": "12345"
   }'
 ```

@@ -499,7 +499,7 @@ function AppRoutes() {
           <div className="footer-section">
             <h3>Contact Information</h3>
             <div className="footer-contact">
-              <p>📍 24 Savarin Street, Scarborough, Ontario, M1J1Z8, Canada</p>
+                              <p>📍 1570 Midland Ave, Scarborough, Ontario, M1P 3C2, Canada</p>
               <p>📧 <a href="mailto:info@noblespeedytrac.com">info@noblespeedytrac.com</a></p>
               <p>📞 <a href="tel:+14378702022">+1 (437) 870-2022</a></p>
               <p>🕒 24/7 Customer Support</p>

@@ -458,7 +458,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
               <div style={{ position: 'relative' }}>
                 <input 
                   type="text"
-                  placeholder="Enter Tracking Number (e.g., TRK123456789)" 
+                  placeholder="Enter Tracking Number (e.g., NST1234567)" 
                   value={trackingNumber}
                   onChange={(e) => {
                     console.log('📝 Tracking number changed:', e.target.value);
@@ -586,7 +586,7 @@ const UserPage: React.FC<UserPageProps> = ({ user }) => {
                     fontSize: '0.7rem',
                     fontWeight: 'bold'
                   }}>•</span>
-                  Tracking numbers start with "TRK" followed by 9 digits
+                  Tracking numbers start with "NST" followed by 7 digits
                 </li>
                 <li style={{ 
                   display: 'flex', 

@@ -344,7 +344,7 @@ export const dbHelpers = {
   // Shipment operations
   async createShipment(shipmentData) {
     // Generate unique tracking number for the shipment
-    const trackingNumber = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+    const trackingNumber = 'NST' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
     
     // Create shipment first
     const { data: shipment, error: shipmentError } = await supabase
@@ -409,7 +409,7 @@ export const dbHelpers = {
     
     for (const shipmentData of shipmentsData) {
       // Generate unique tracking number for each shipment
-      const trackingNumber = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+      const trackingNumber = 'NST' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
       
       // Create shipment first with correct field names
       const { data: shipment, error: shipmentError } = await supabase

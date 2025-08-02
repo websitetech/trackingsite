@@ -291,7 +291,7 @@ app.post('/api/ship', authenticateToken, async (req, res) => {
     }
 
     // Generate tracking number
-    const tracking_number = 'TRK' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+    const tracking_number = 'NST' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
 
     const packageData = {
       tracking_number,
