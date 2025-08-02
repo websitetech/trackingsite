@@ -188,7 +188,7 @@ function AppRoutes() {
                     left: 0,
                     width: '100vw',
                     height: '100vh',
-                    backgroundImage: 'url(/toronto-delivery-vehicles-bg.jpg?v=2)',
+                    backgroundImage: 'url(/noble-fleet-bg.jpg)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center center',
                     backgroundAttachment: 'fixed',

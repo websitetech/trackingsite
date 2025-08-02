@@ -1138,7 +1138,7 @@ main,
     rgba(255, 255, 255, 0.95) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  padding: 2rem 0;
+  padding: 1rem 0;
   overflow: hidden;
   z-index: 2;
 }
@@ -1152,14 +1152,14 @@ main,
   gap: 4rem;
   align-items: center;
   position: relative;
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .tracking-content-left {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem;
   height: 100%;
 }
 
@@ -1743,7 +1743,7 @@ main,
 /* Service Cards Section */
 .service-cards-section {
   background: #f8fafc;
-  padding: 2rem 2rem;
+  padding: 1rem 2rem;
   margin: 0;
   width: 100%;
   position: relative;
