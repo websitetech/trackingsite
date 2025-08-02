@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "start": "cd server && npm start",
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev"
+  },
   "devDependencies": {
     "supabase": "^2.31.8"
   },

@@ -303,7 +303,7 @@ export const dbHelpers = {
           payment_status,
           created_at
         ),
-        package_tracking_history (
+        package_tracking_history!package_tracking_history_package_id_fkey (
           id,
           status,
           location,
@@ -332,7 +332,7 @@ export const dbHelpers = {
           payment_status,
           created_at
         ),
-        package_tracking_history (
+        package_tracking_history!package_tracking_history_package_id_fkey (
           id,
           status,
           location,

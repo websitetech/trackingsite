@@ -478,7 +478,16 @@ const sendBulkInvoiceEmail = async (shipments, user) => {
     try {
       const browser = await puppeteer.launch({ 
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process'
+        ],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
       });
       const page = await browser.newPage();
       await page.setContent(invoiceHTML, { waitUntil: 'networkidle0' });
@@ -491,6 +500,7 @@ const sendBulkInvoiceEmail = async (shipments, user) => {
     } catch (pdfError) {
       console.error('PDF generation error:', pdfError);
       // Fallback to HTML attachment if PDF generation fails
+      console.log('Using HTML fallback for invoice attachment');
       pdfBuffer = Buffer.from(invoiceHTML, 'utf-8');
     }
     
